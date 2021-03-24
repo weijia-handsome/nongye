@@ -63,7 +63,7 @@
             <el-button
               type="text"
               size="mini"
-              @click="handleDelete(scope.row.pid)"
+              @click="handleDelete(scope.row.pid, scope.row.name)"
               >删除</el-button
             >
           </template>
@@ -132,12 +132,17 @@ export default {
       this.param.pno = 1;
       this.getList();
     },
-    handleDelete(id) {
-      this.$confirm("确定删除用户？", "删除用户", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
+    handleDelete(id, name) {
+      this.$confirm(
+        `确定删除 <span style="color:red">${name}</span>项目？`,
+        "删除项目",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          dangerouslyUseHTMLString: true,
+        }
+      )
         .then(async () => {
           const response = await reqDelProject({
             username: window.sessionStorage.getItem("username"),

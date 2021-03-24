@@ -18,23 +18,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-content-btn"
-          ><el-form-item
-            label="项目地址"
-            prop="projectAddress"
-            :rules="[{ required: true, message: '请输入' }]"
-          >
-            <el-col :span="22"
-              ><el-input
-                v-model="form.projectAddress"
-                size="mini"
-                id="search"
-              ></el-input
-            ></el-col>
-            <el-col :span="2"
-              ><el-button type="primary" size="mini"
-                >查询</el-button
-              ></el-col
-            >
+          ><el-form-item label="项目地址">
+            <el-input
+              id="tipinput"
+              v-model="form.projectAddress"
+              size="mini"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12"
@@ -95,6 +84,7 @@
 
 <script>
 import MapLoader from "../../../components/common/AMap.js";
+import { reqEditProject } from "@/api/api.js";
 export default {
   name: "Edit",
   components: {
@@ -148,35 +138,58 @@ export default {
           zoom: 15,
           mapStyle: "amap://styles/normal",
         });
-      });
-    },
-    loadInputTipPlaceSearch() {
-      console.log('========');
-      let vm = this;
-      AMap.plugin(["AMap.Autocomplete", "AMap.PlaceSearch"], function () {
+
         var autoOptions = {
-          city: "北京", //城市，默认全国
-          input: "search", //使用联想输入的input的id
+          input: "tipinput",
         };
-        let autocomplete = new AMap.Autocomplete(autoOptions);
-        var placeSearch = new AMap.PlaceSearch({
-          city: "北京",
-          map: vm.map,
-        });
-        AMap.event.addListener(autocomplete, "select", function (e) {
-          //TODO 针对选中的poi实现自己的功能
-          placeSearch.setCity(e.poi.adcode);
-          placeSearch.search(e.poi.name);
+        var auto = new AMap.Autocomplete(autoOptions);
+        this.placeSearch = new AMap.PlaceSearch({
+          map: this.map,
+        }); //构造地点查询类
+        AMap.event.addListener(auto, "select", this.select); //注册监听，当选中某条记录时会触发
+        AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
+          // console.log(e.data.location.lng, e.data.location.lat); // 经纬度
+          // // console.log(e, 654);
+          this.lnt = e.data.location.lng + "," + e.data.location.lat;
+          // this.mapInfo.lnglat = this.lanlat;
+          this.form.projectAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
         });
       });
     },
+    select(e) {
+      this.placeSearch.setCity(e.poi.adcode);
+      this.placeSearch.search(e.poi.name); //关键字查询查询
+      this.form.projectAddress =
+        e.poi.district + "" + e.poi.address + "" + e.poi.name;
+      this.lnt = e.poi.location.lng + "," + e.poi.location.lat;
+    },
+    // loadInputTipPlaceSearch() {
+    //   console.log("========");
+    //   let vm = this;
+    //   AMap.plugin(["AMap.Autocomplete", "AMap.PlaceSearch"], function () {
+    //     var autoOptions = {
+    //       city: "北京", //城市，默认全国
+    //       input: "search", //使用联想输入的input的id
+    //     };
+    //     let autocomplete = new AMap.Autocomplete(autoOptions);
+    //     var placeSearch = new AMap.PlaceSearch({
+    //       city: "北京",
+    //       map: vm.map,
+    //     });
+    //     AMap.event.addListener(autocomplete, "select", function (e) {
+    //       //TODO 针对选中的poi实现自己的功能
+    //       placeSearch.setCity(e.poi.adcode);
+    //       placeSearch.search(e.poi.name);
+    //     });
+    //   });
+    // },
     handleClose() {
       this.dialogVisible = false;
     },
     handleOpen(projectInfo) {
       this.dialogVisible = true;
       this.mapSearchInt();
-      this.loadInputTipPlaceSearch();
+      // this.loadInputTipPlaceSearch();
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
@@ -191,6 +204,7 @@ export default {
         this.form.liable = projectInfo.personname;
         this.form.liablePhone = projectInfo.person;
         this.lnt = projectInfo.lnt;
+        this.pid = projectInfo.pid;
       } else {
         this.projectInfo = null;
         this.id = "";
@@ -206,7 +220,32 @@ export default {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          const username = sessionStorage.getItem("username");
+          const params = {
+            username: username,
+            name: this.form.projectName,
+            adss: this.form.projectAddress,
+            fireman: this.form.nursePhone,
+            person: this.form.liablePhone,
+            firemanname: this.form.nurse,
+            personname: this.form.liable,
+            lnt: this.lnt,
+            marker: this.form.textarea,
+            pid: this.pid,
+          };
+          reqEditProject(params).then(
+            (res) => {
+              if (res.data.code == "200") {
+                this.$message.success("编辑成功");
+              } else {
+                this.$message.error("编辑失败");
+              }
+            },
+            () => {
+              this.$message.error("请稍后重试或联系管理员");
+            }
+          );
+          // alert("成功");
           this.dialogVisible = false;
         } else {
           console.log("失败");

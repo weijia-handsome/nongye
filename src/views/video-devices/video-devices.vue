@@ -17,7 +17,9 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-button type="primary" size="mini" @click="handleSearch">查询</el-button>
+            <el-button type="primary" size="mini" @click="handleSearch"
+              >查询</el-button
+            >
           </el-col>
         </el-row></el-form
       >
@@ -39,9 +41,14 @@
         <el-table-column prop="reg_time" label="创建时间" align="center">
         </el-table-column>
         <el-table-column label="操作" align="center">
-          <el-button type="text" size="mini" @click="handleCheck"
-            >查看</el-button
-          >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleCheck(scope.row.imei)"
+              >查看</el-button
+            >
+          </template>
         </el-table-column>
       </el-table>
       <div class="m-pagination">
@@ -57,7 +64,7 @@
           :total="400"
         />
       </div>
-      <check-video ref="videoRef"></check-video>
+      <check-video ref="videoRef" :imei="imei"></check-video>
     </el-card>
   </div>
 </template>
@@ -73,6 +80,7 @@ export default {
   },
   data() {
     return {
+      imei: "",
       total: 0,
       loading: false,
       form: {
@@ -83,7 +91,7 @@ export default {
       param: {
         pno: 1,
         pageSize: 10,
-        tid:0,
+        tid: 0,
       },
       tableData: [],
     };
@@ -98,7 +106,8 @@ export default {
       this.param.pno = currentPage;
       this.getUserList();
     },
-    handleCheck() {
+    handleCheck(imei) {
+      this.imei = imei;
       this.$refs.videoRef.handleOpen();
     },
     handleSearch() {
@@ -109,22 +118,24 @@ export default {
     //获取视频列表
     async getList() {
       const response = await reqGetVideoDevice({
-        username: window.sessionStorage.getItem('username'),
+        username: window.sessionStorage.getItem("username"),
         tid: this.param.tid,
         pno: this.param.pno,
-        pageSize:this.param.pageSize
-      })
+        pageSize: this.param.pageSize,
+      });
+      //   ).src = `https://open.ys7.com/ezopen/h5/iframe_se?url=ezopen://${yan}@open.ys7.com/${num}/1.live&autoplay=0&accessToken=${accessToken}&templete=2`;
+      // this.modal9 = true;
       if (response.status === 200) {
         this.tableData = response.data.data;
         this.total = response.recordCount;
       } else {
-        this.$message.error(response.statusText || '服务错误！');
+        this.$message.error(response.statusText || "服务错误！");
       }
-    }
+    },
   },
   mounted() {
     this.getList();
-  }
+  },
 };
 </script>
 

@@ -7,13 +7,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="icon" href="<%= BASE_URL %>favicon.ico">
   <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script type="text/javascript"
-    src="https://webapi.amap.com/maps?v=1.4.15&key=24367191b36f016dc568dd9f6a8ea3d3&plugin=AMap.ToolBar,AMap.Geolocation,AMap.Autocomplete,AMap.PlaceSearch,AMap.Geocoder"></script>
+  <!-- <script type="text/javascript"
+    src="https://webapi.amap.com/maps?v=1.4.15&key=24367191b36f016dc568dd9f6a8ea3d3&plugin=AMap.ToolBar,AMap.Geolocation,AMap.Autocomplete,AMap.PlaceSearch,AMap.Geocoder"></script> -->
+
+
+  <script
+    src="https://webapi.amap.com/maps?v=1.4.15&key=eb34eb637f271e0e1d2c36267417dae5&plugin=AMap.MapType,AMap.Autocomplete,AMap.PlaceSearch,AMap.MarkerClusterer"></script>
+
+  <script src="//a.amap.com/jsapi_demos/static/china.js"></script>
+
+
+
+
+
+
   <script src="https://webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
   <!-- <script src="./public/ezuikit.js"></script> -->
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
+  <style>
+    .amap-sug-result {
+      z-index: 999999999999;
+    }
+  </style>
 </head>
 
 <body>

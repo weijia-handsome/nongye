@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "echarts": "^4.9.0",
     "element-ui": "^2.15.1",
+    "ezuikit-js": "^0.2.3",
     "lib-flexible": "^0.3.2",
     "moment": "^2.29.1",
     "postcss-px2rem": "^0.3.0",
