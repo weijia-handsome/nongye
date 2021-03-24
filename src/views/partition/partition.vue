@@ -148,22 +148,63 @@ export default {
   methods: {
     // 初始化
     setMap() {
-      let that = this;
-      MapLoader().then(
-        (AMap) => {
-          console.log("地图加载成功");
-          that.map = new AMap.Map("map", {
-            resizeEnable: true,
-            center: [117.000923, 36.675807],
-            keyboardEnable: false,
-            zoom: 11,
-            // mapStyle: "amap://styles/darkblue",
+      this.$nextTick(() => {
+        this.map = new AMap.Map("map", {
+          resizeEnable: true,
+          center: [110.397428, 25.90923],
+          // keyboardEnable: false,
+          zoom: 4,
+          mapStyle: "amap://styles/blue",
+        });
+
+        const username = sessionStorage.getItem("username");
+        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
+          console.log(res);
+          var cluster,
+            markers = [];
+          let data = res.data.data;
+
+          const points2 = [];
+          for (var i = 0; i < data.length; i++) {
+            var pp = data[i].lnt;
+            if (lat > 54) {
+              var lng = pp.split(",")[1];
+              var lat = pp.split(",")[0];
+              points2.push({ lnglat: [lng, lat] });
+            } else {
+              var lng = pp.split(",")[0];
+              var lat = pp.split(",")[1];
+              points2.push({ lnglat: [lng, lat] });
+            }
+          }
+          var style = [
+            {
+              url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
+              anchor: new AMap.Pixel(6, 6),
+              size: new AMap.Size(30, 30),
+            },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
+            //   anchor: new AMap.Pixel(4, 4),
+            //   size: new AMap.Size(7, 7),
+            // },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
+            //   anchor: new AMap.Pixel(3, 3),
+            //   size: new AMap.Size(5, 5),
+            // },
+          ];
+          var mass = new AMap.MassMarks(points2, {
+            opacity: 0.8,
+            zIndex: 111,
+            cursor: "pointer",
+            style: style[0],
           });
-        },
-        (e) => {
-          console.log("地图加载失败", e);
-        }
-      );
+
+          var marker = new AMap.Marker({ content: " ", map: this.map });
+          mass.setMap(this.map);
+        });
+      });
     },
     handleMap() {
       this.mapVisible = true;
