@@ -58,7 +58,7 @@ export default new Router({
         {
           path: '/alarm-management',
           component: () => import(/* webpackChunkName: "dashboard" */ '../views/alarm-management/alarm-management.vue'),
-          meta: { title: '报警管理' }
+          meta: { title: '通知管理' }
         },
         {
           path: '/device-management',

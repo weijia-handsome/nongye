@@ -108,7 +108,7 @@ export default {
           subs: [
             {
               index: "alarm-management",
-              title: "报警管理",
+              title: "通知管理",
             },
             {
               index: "device-management",

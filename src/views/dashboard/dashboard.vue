@@ -14,19 +14,12 @@
     <div class="m-menu" v-if="menuVisible">
       <p
         class="m-menu__title"
-        @click="handleSelectMenu"
+        @click="handleSelectMenu(index)"
         v-for="(item, index) in projectButton"
         :key="index"
       >
         {{ item }}
       </p>
-      <!-- <p class="m-menu__title" @click="handleSelectMenu">枣林5号井房项目</p>
-      <p class="m-menu__title" @click="handleSelectMenu">
-        315国道自动化灌溉项目
-      </p>
-      <p class="m-menu__title" @click="handleSelectMenu">
-        214国道自动化灌溉项目
-      </p> -->
     </div>
     <!-- 左边图表 -->
     <div class="m-left">
@@ -46,7 +39,7 @@
           class="m-left__round1"
           id="lineChart"
           style="width: 100%; height: 81%"
-          v-loadin="pageLoading"
+          v-loading="pageLoading"
         ></div>
       </div>
       <div class="m-left__third">
@@ -64,32 +57,63 @@
     <div class="m-min">
       <p class="m-min__title">滴灌任务</p>
       <div class="m-min__tit">
-        <div class="m-min__txt" @click="handleLunGuan">轮灌</div>
-        <div class="m-min__txt" @click="handleZhiGuan">直灌</div>
-        <div class="m-min__txt" @click="handleTask">新建任务</div>
-        <div class="m-min__txt" @click="handleManger">管理任务</div>
+        <div
+          class="m-min__txt"
+          @click="handleLunGuan"
+          :class="{ 'm-min__txt--select': color === '0' }"
+        >
+          轮灌
+        </div>
+        <div
+          class="m-min__txt"
+          @click="handleZhiGuan"
+          :class="{ 'm-min__txt--select': color === '1' }"
+        >
+          直灌
+        </div>
+        <div
+          class="m-min__txt"
+          @click="handleTask"
+          :class="{ 'm-min__txt--select': color === '2' }"
+        >
+          新建任务
+        </div>
+        <div
+          class="m-min__txt"
+          @click="handleManger"
+          :class="{ 'm-min__txt--select': color === '3' }"
+        >
+          管理任务
+        </div>
       </div>
 
-      <el-scrollbar class="m-min__content">
-        <el-timeline>
-          <el-timeline-item
-            v-for="(activity, index) in activities"
-            :key="index"
-            size="normal"
-            color="#04E0F9"
-          >
-            任务在{{ activity.start_time }}开始执行滴灌 时长为：{{
-              activity.time
-            }}
-          </el-timeline-item>
-        </el-timeline>
-      </el-scrollbar>
+      <div class="m-min__content" @click="handleiIll">
+        <el-scrollbar class="m-min__line">
+          <el-timeline>
+            <el-timeline-item
+              v-for="(activity, index) in activities"
+              :key="index"
+              size="normal"
+              color="#04E0F9"
+            >
+              <span class="m-min__task">任务名称：{{ activity.name }}</span>
+              <span
+                >任务在{{ activity.start_time }}开始执行滴灌 时长为：{{
+                  activity.time
+                }}
+              </span>
+              <span v-if="activity.state === '1'">已完成</span>
+              <span v-if="activity.state === '2'">未完成</span>
+            </el-timeline-item>
+          </el-timeline>
+        </el-scrollbar>
+      </div>
     </div>
 
     <!-- 右边图表 -->
     <div class="m-right">
-      <div class="m-right__round">
-        <p class="m-right__text">报警信息</p>
+      <div class="m-right__round" @click="hanleAlarm">
+        <p class="m-right__text">通知信息</p>
         <!-- el-scrollbar -->
         <el-scrollbar class="m-right__first">
           <el-timeline>
@@ -139,6 +163,7 @@ import {
   deviceOnlineData,
   pushAlarmData,
   pushGrid,
+  reqGetNetspot,
 } from "@/api/api.js";
 import Task from "./task/task.vue";
 
@@ -152,6 +177,10 @@ export default {
       map: null, //地图实例
       pageLoading: false,
       menuVisible: false,
+      //经纬度
+      lnt: [],
+      color: "",
+      pid: "",
       param: {
         pno: 1,
         pageSize: 10,
@@ -504,13 +533,31 @@ export default {
     handleSelect() {
       this.menuVisible = !this.menuVisible;
     },
-    handleSelectMenu() {
+    handleSelectMenu(index) {
+      this.getPidAndPname(index);
+      this.getAverage();
+      this.getPidAndPname();
+      this.deviceTypeData();
+      this.deviceOnlineData();
+      this.pushAlarmData();
       this.menuVisible = false;
     },
     handleTask() {
+      this.color = "2";
       this.$refs.taskRef.handleOpen();
     },
     handleManger() {
+      this.color = "3";
+      this.$router.push({
+        path: "/irrigation-task",
+      });
+    },
+    hanleAlarm() {
+      this.$router.push({
+        path: "/alarm-management",
+      });
+    },
+    handleiIll() {
       this.$router.push({
         path: "/irrigation-task",
       });
@@ -519,7 +566,7 @@ export default {
     async getAverage() {
       this.getAverageResponse = await getAverage({
         username: window.sessionStorage.getItem("username"),
-        pid: "",
+        pid: this.pid,
       });
       if (this.getAverageResponse.status === 200) {
         this.pageLoading = true;
@@ -542,7 +589,7 @@ export default {
       this.pageLoading = false;
     },
     //大数据页获取项目
-    async getPidAndPname() {
+    async getPidAndPname(index) {
       const response = await getPidAndPname({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
@@ -552,6 +599,24 @@ export default {
         this.projectButton = response.data.data.map((item) => {
           return item.name;
         });
+
+        const pidArr = response.data.data.map((item) => {
+          return item.id;
+        });
+        switch (index) {
+          case 0:
+            return (this.pid = pidArr[0]);
+          case 1:
+            return (this.pid = pidArr[1]);
+          case 2:
+            return (this.pid = pidArr[2]);
+          case 3:
+            return (this.pid = pidArr[3]);
+          case 4:
+            return (this.pid = pidArr[4]);
+          case 5:
+            return (this.pid = pidArr[5]);
+        }
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
@@ -560,7 +625,7 @@ export default {
     async deviceTypeData() {
       this.deviceData = await deviceTypeData({
         username: window.sessionStorage.getItem("username"),
-        pid: "",
+        pid: this.pid,
       });
       if (this.deviceData.status === 200) {
         for (let i of this.deviceData.data.mess) {
@@ -574,7 +639,7 @@ export default {
     async deviceOnlineData() {
       this.deviceOnline = await deviceOnlineData({
         username: window.sessionStorage.getItem("username"),
-        pid: "",
+        pid: this.pid,
       });
       if (this.deviceOnline.status === 200) {
         this.deviceOnlineOnline = this.deviceOnline.data.mess.Online;
@@ -587,7 +652,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        pid: "",
+        pid: this.pid,
       });
       if (response.status === 200) {
         this.pushAlarmArr = response.data.data;
@@ -597,11 +662,12 @@ export default {
     },
     //轮灌任务
     async handleLunGuan() {
+      this.color = "0";
       const response = await pushGrid({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        pid: "",
+        pid: this.pid,
         type: 1,
       });
       if (response.status === 200) {
@@ -612,11 +678,12 @@ export default {
     },
     //直灌
     async handleZhiGuan() {
+      this.color = "1";
       const response = await pushGrid({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        pid: "",
+        pid: this.pid,
         type: 2,
       });
       if (response.status === 200) {
@@ -639,8 +706,8 @@ export default {
   },
   mounted() {
     this.setMap();
-    this.getAverage();
     this.getPidAndPname();
+    this.getAverage();
     this.deviceTypeData();
     this.deviceOnlineData();
     this.pushAlarmData();

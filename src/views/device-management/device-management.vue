@@ -128,7 +128,10 @@
             <el-button @click="handleClick(scope.row)" type="text" size="small"
               >查看</el-button
             >
-            <el-button type="text" size="small" @click="handleThreshold(scope.row.imei)"
+            <el-button
+              type="text"
+              size="small"
+              @click="handleThreshold(scope.row.imei)"
               >阈值设置</el-button
             >
             <el-button
@@ -218,6 +221,7 @@ export default {
         this.$message.success("更新成功");
         return;
       }
+      
       this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
       this.$message.error(response.statusText || "请重试");
     },
