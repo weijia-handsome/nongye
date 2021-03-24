@@ -204,25 +204,50 @@ export default {
               points2.push({ lnglat: [lng, lat] });
             }
           }
-
-          for (var i = 0; i < points2.length; i += 1) {
-            markers.push(
-              new AMap.Marker({
-                position: points2[i]["lnglat"],
-                content:
-                  '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
-                offset: new AMap.Pixel(-15, -15),
-              })
-            );
-          }
-          var count = markers.length;
-
-          if (cluster) {
-            cluster.setMap(null);
-          }
-          cluster = new AMap.MarkerClusterer(this.map, markers, {
-            gridSize: 80,
+          var style = [
+            {
+              url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
+              anchor: new AMap.Pixel(6, 6),
+              size: new AMap.Size(30, 30),
+            },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
+            //   anchor: new AMap.Pixel(4, 4),
+            //   size: new AMap.Size(7, 7),
+            // },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
+            //   anchor: new AMap.Pixel(3, 3),
+            //   size: new AMap.Size(5, 5),
+            // },
+          ];
+          var mass = new AMap.MassMarks(points2, {
+            opacity: 0.8,
+            zIndex: 111,
+            cursor: "pointer",
+            style: style[0],
           });
+
+          var marker = new AMap.Marker({ content: " ", map: this.map });
+          mass.setMap(this.map);
+          // for (var i = 0; i < points2.length; i += 1) {
+          //   markers.push(
+          //     new AMap.Marker({
+          //       position: points2[i]["lnglat"],
+          //       content:
+          //         '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
+          //       offset: new AMap.Pixel(-15, -15),
+          //     })
+          //   );
+          // }
+          // var count = markers.length;
+
+          // if (cluster) {
+          //   cluster.setMap(null);
+          // }
+          // cluster = new AMap.MarkerClusterer(this.map, markers, {
+          //   gridSize: 80,
+          // });
         });
       });
     },
