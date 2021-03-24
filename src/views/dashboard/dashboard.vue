@@ -662,7 +662,6 @@ export default {
         this.projectButton = response.data.data.map((item) => {
           return item.name;
         });
-
         const pidArr = response.data.data.map((item) => {
           return item.id;
         });

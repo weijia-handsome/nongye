@@ -175,8 +175,7 @@
 
 <script>
 import Edit from "./edit/edit.vue";
-import MapLoader from "../../components/common/AMap.js";
-import { getNetwork, delNetwork } from "@/api/api.js";
+import { getNetwork, delNetwork,reqGetNetspot } from "@/api/api.js";
 
 export default {
   name: "DevieManagement",

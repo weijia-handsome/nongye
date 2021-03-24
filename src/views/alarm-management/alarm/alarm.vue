@@ -3,7 +3,7 @@
     class="m-dialog"
     title="设备详情"
     :visible.sync="dialogVisible"
-    width="65%"
+    width="80%"
     :before-close="handleClose"
   >
     <div class="m-box">
@@ -53,7 +53,7 @@
             <div
               class="m-top__item"
               id="lineOne"
-              style="width: 550px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
           <div class="m-top">
@@ -61,7 +61,7 @@
             <div
               class="m-top__item"
               id="lineTwo"
-              style="width: 550px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
           <div class="m-top">
@@ -69,18 +69,18 @@
             <div
               class="m-top__item"
               id="lineThree"
-              style="width: 550px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
         </el-scrollbar>
       </div>
       <div class="m-alarm">
-        <p class="m-alarm__title">解除报警情况</p>
+        <p class="m-alarm__title">通知处理情况</p>
         <div class="m-alarm__wrap">
           <el-form label-position="top" ref="ruleForm" :model="ruleForm">
             <el-form-item
               prop="content"
-              label="解除报警情况说明"
+              label="通知处理情况说明"
               :rules="[{ required: true, message: '请输入' }]"
             >
               <el-input
@@ -101,7 +101,7 @@
             <i class="el-icon-plus"></i>
           </el-upload>
           <!-- <el-dialog :visible.sync="dialogVisible">
-            <img width="100%" :src="dialogImageUrl" alt="" />
+            <img  :src="dialogImageUrl" alt="" />
           </el-dialog> -->
         </div>
         <div class="m-button">
@@ -151,7 +151,6 @@ export default {
   },
   watch: {
     response(val) {
-      console.log(val);
       this.setlineOne();
       this.setlineTwo();
       this.setlineThree();
@@ -185,8 +184,8 @@ export default {
       });
       if (this.response.status === 200) {
         this.loading = true;
+        this.deviceInfo.heartTime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
-          this.deviceInfo.heartTime = i.s_time;
           this.deviceInfo.soilT = i.soilT;
           this.soilTArr.push(i.soilT);
           this.deviceInfo.soilH = i.soilH;
@@ -195,7 +194,7 @@ export default {
         const dataTimeArr = this.response.data.data.map((item) => {
           return item.s_time;
         });
-        this.dataTime = dataTimeArr.slice(0, 4);
+        this.dataTime = dataTimeArr.slice(0, 6);
 
         for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
@@ -269,6 +268,9 @@ export default {
         xAxis: {
           type: "category",
           data: this.dataTime,
+          axisLabel: {
+            interval: 0,
+          },
         },
         yAxis: {
           type: "value",
@@ -450,7 +452,7 @@ export default {
 
     &-right {
       display: flex;
-      width: 500px;
+      width:  800px;
       height: 600px;
       flex-direction: column;
       justify-content: space-between;

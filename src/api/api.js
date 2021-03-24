@@ -499,6 +499,18 @@ export function stopGrid({ username, id }) {
     })
 }
 
+//开启滴灌任务
+export function upState({ username, id }) {
+    return request({
+        url: `${API_NAME}/upState`,
+        method: 'GET',
+        params: {
+            username,
+            id,
+        },
+    })
+}
+
 //删除滴灌任务  delGridTask
 export function delGridTask({ username, id }) {
     return request({
@@ -529,6 +541,19 @@ export function addGridTask({ username, name, time, type, start_time, object, cy
         },
     })
 }
+
+//获取滴灌可用分区
+export function getTypeByGrid({ username, type }) {
+    return request({
+        url: `${API_NAME}/getTypeByGrid`,
+        method: 'GET',
+        params: {
+            username,
+            type,
+        },
+    })
+}
+
 //大数据页获取项目
 export function getPidAndPname({ username, pno, pageSize }) {
     return request({

@@ -40,8 +40,8 @@
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               >
-                <el-option label="执行中" value="0"></el-option>
-                <el-option label="完成" value="1"></el-option>
+                <el-option label="执行中" value="1"></el-option>
+                <el-option label="完成" value="2"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -55,14 +55,14 @@
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               >
-                <el-option label="未启用" value="0"></el-option>
-                <el-option label="已启用" value="1"></el-option>
+                <el-option label="未启用" value="1"></el-option>
+                <el-option label="已启用" value="2"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
 
           <el-col :span="4">
-            <el-button type="primary" size="mini">查询</el-button>
+            <el-button type="primary" size="mini" @click="handleSearch">查询</el-button>
             <el-button type="primary" size="mini" @click="handleCreate"
               >新增</el-button
             >
@@ -107,7 +107,7 @@
         <el-table-column
           prop="start_time"
           label="任务执行时间"
-          width="180"
+          width="200"
           align="center"
         >
         </el-table-column>
@@ -136,8 +136,10 @@
           width="180"
         >
           <template slot-scope="scope">
+            <span v-if="scope.row.state === '0'">未执行</span>
+            <span v-if="scope.row.state === '1'">执行中</span>
             <span v-if="scope.row.state === '2'">完成</span>
-            <span v-else>执行中</span>
+            <span v-if="scope.row.state === '3'">待执行</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -158,11 +160,14 @@
           prop="address"
           label="操作"
           align="center"
-          width="180"
+          width="300"
           fixed="right"
         >
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="handleStop(scope.row.id)"
+            <el-button type="text" size="mini" @click="handleBegin(scope.row.id)"
+              >启动</el-button
+            >
+            <el-button type="text" size="mini" @click="handleStop(scope.row.id)" v-if="scope.row.state === '1'"
               >停止</el-button
             >
             <el-button type="text" size="mini" @click="handleEdit"
@@ -170,6 +175,9 @@
             >
             <el-button type="text" size="mini" @click="handleDelete"
               >删除</el-button
+            >
+            <el-button type="text" size="mini"
+              >查看现场</el-button
             >
           </template>
         </el-table-column>
@@ -188,13 +196,13 @@
         />
       </div>
     </el-card>
-    <edit ref="editRef"></edit>
+    <edit ref="editRef" @refresh="getList"></edit>
   </div>
 </template>
 
 <script>
 import Edit from "./edit/edit.vue";
-import { getGridTask, stopGrid, delGridTask } from "@/api/api.js";
+import { getGridTask, stopGrid, delGridTask,upState } from "@/api/api.js";
 
 export default {
   components: { Edit },
@@ -248,9 +256,9 @@ export default {
         pno: this.param.pno,
         pageSize: this.param.pageSize,
         object:
-          this.param.taskName ||
-          this.param.irrType ||
-          this.param.taskType ||
+          this.form.taskName ||
+          this.form.irrType ||
+          this.form.taskType ||
           this.form.userType ||
           "",
       });
@@ -272,6 +280,19 @@ export default {
         this.$message.success(response.data.mess);
       } else {
         this.$message.error(response.data.mess);
+      }
+    },
+    //开启滴灌任务
+    async handleBegin(id) {
+      const response = await upState({
+        username: window.sessionStorage.getItem('username'),
+        id: id
+      })
+      console.log(response, '========');
+      if (response.data.code === '200') {
+        this.$message.success(response.data.mess);
+      } else {
+        this.$message.error(response.data.mess || '请重试');
       }
     },
     //删除滴灌任务

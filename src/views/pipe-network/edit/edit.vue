@@ -89,7 +89,7 @@
         </el-row>
       </el-form>
     </el-row>
-    <div class="m-map" id="map">地图呢</div>
+    <div class="m-map" id="map"></div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleComfirm">确 定</el-button>
@@ -124,7 +124,6 @@ export default {
       },
     };
   },
-  mounted() {},
   methods: {
     // // 初始化
     setMap() {
@@ -195,7 +194,7 @@ export default {
     &-map {
       width: 700px;
       height: 215px;
-      margin: 0 auto;
+      margin: 20px 0 0 30px;
     }
 
     &-box {
