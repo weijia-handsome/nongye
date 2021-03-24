@@ -142,7 +142,7 @@ export function reqDelProject({ username, pid }) {
 }
 
 //编辑项目 editProject
-export function reqEditProject({ username, name, adss, fireman, person, firemanname, personname, lnt, marker }) {
+export function reqEditProject({ username, name, adss, fireman, person, firemanname, personname, lnt, marker, pid }) {
     return request({
         url: `${API_NAME}/editProject`,
         method: 'GET',
@@ -154,8 +154,9 @@ export function reqEditProject({ username, name, adss, fireman, person, firemann
             person,
             firemanname,
             personname,
-            Int,
+            lnt,
             marker,
+            pid
         },
     })
 }
