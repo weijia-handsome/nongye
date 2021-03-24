@@ -1,0 +1,237 @@
+<template>
+  <el-dialog
+    class="m-dialog"
+    :title="id ? '编辑管点' : '新增管点'"
+    :visible.sync="dialogVisible"
+    width="50%"
+    :before-close="handleClose"
+  >
+    <el-row :gutter="24">
+      <el-form label-position="top" ref="formData" :model="form">
+        <el-col :span="12"
+          ><el-form-item
+            label="项目名称"
+            prop="projectName"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.projectName" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12" class="m-content-btn"
+          ><el-form-item
+            label="项目地址"
+            prop="projectAddress"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-col :span="22"
+              ><el-input v-model="form.projectAddress" size="mini"></el-input
+            ></el-col>
+            <el-col :span="2"
+              ><el-button type="primary" size="mini">查询</el-button></el-col
+            >
+          </el-form-item>
+        </el-col>
+        <el-col :span="12"
+          ><el-form-item
+            label="护理人"
+            prop="nurse"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.nurse" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12"
+          ><el-form-item
+            label="护理人手机号码"
+            prop="nursePhone"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.nursePhone" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12"
+          ><el-form-item
+            label="责任人"
+            prop="liable"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.liable" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12"
+          ><el-form-item
+            label="责任人手机号码"
+            prop="liablePhone"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.liablePhone" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <p style="margin-bottom: 10px">项目描述</p>
+          <el-input
+            type="textarea"
+            :rows="2"
+            placeholder="请输入内容"
+            v-model="textarea"
+          >
+          </el-input>
+        </el-col>
+        <el-col :span="24" class="m-map" id="map"></el-col>
+      </el-form>
+    </el-row>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="handleComfirm">确 定</el-button>
+    </span>
+  </el-dialog>
+</template>
+
+<script>
+import MapLoader from "../../../components/common/AMap.js";
+import { editNetspot ,adNetspot } from "@/api/api.js";
+
+export default {
+  name: "Edit",
+  components: {
+    MapLoader,
+  },
+  data() {
+    return {
+      map: null, //地图实例
+      textarea: "",
+      dialogVisible: false,
+      id: "",
+      form: {
+        projectName: "",
+        projectAddress: "",
+        nurse: "",
+        nursePhone: "",
+        liable: "",
+        liablePhone: "",
+      },
+    };
+  },
+  methods: {
+    // // 初始化
+    setMap() {
+      let that = this;
+      MapLoader().then(
+        (AMap) => {
+          console.log("地图加载成功");
+          that.map = new AMap.Map("map", {
+            resizeEnable: true,
+            center: [117.000923, 36.675807],
+            keyboardEnable: false,
+            zoom: 11,
+            mapStyle: "amap://styles/normal",
+          });
+        },
+        (e) => {
+          console.log("地图加载失败", e);
+        }
+      );
+    },
+    handleClose() {
+      this.dialogVisible = false;
+    },
+    handleOpen(pointInfo) {
+      console.log(pointInfo);
+      this.dialogVisible = true;
+      this.$nextTick(() => {
+        this.$refs.formData.clearValidate();
+        this.setMap();
+      });
+
+      if (pointInfo) {
+        this.id = pointInfo.spid;
+        this.form.projectName = pointInfo.name;
+        this.form.projectAddress = pointInfo.adss;
+        this.form.nurse = pointInfo.personname;
+        this.form.nursePhone = pointInfo.person;
+        this.form.liable = pointInfo.firemanname;
+        this.form.liablePhone = pointInfo.fireman;
+      } else {
+        this.id = "";
+        this.form.projectName = "";
+        this.form.projectAddress = "";
+        this.form.nurse = "";
+        this.form.nursePhone = "";
+        this.form.liable = "";
+        this.form.liablePhone = "";
+      }
+    },
+    handleComfirm() {
+      this.$refs.formData.validate((valid) => {
+        if (valid) {
+          alert("成功");
+          this.dialogVisible = false;
+        } else {
+          console.log("失败");
+          return false;
+        }
+      });
+    },
+    //编辑
+    async editPoint() {
+      const response = await editNetspot({
+        username: window.sessionStorage.getItem("username"),
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        fireman: this.form.liablePhone,
+        person: this.form.nursePhone,
+        firemanname: this.form.liable,
+        personname: this.form.nurse,
+        tube,
+        marker,
+        nid,
+        spid,
+        lnt,
+      });
+      console.log(response);
+    },
+    //新增
+    async creatPoint() {
+      const response = await adNetspot({
+        username: window.sessionStorage.getItem("username"),
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        fireman: this.form.liablePhone,
+        person: this.form.nursePhone,
+        firemanname: this.form.liable,
+        personname: this.form.nurse,
+        tube,
+        marker,
+        nid,
+        lnt,
+      })
+      console.log(response);
+    }
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.m-dialog {
+  .m {
+    &-content-btn {
+      display: flex;
+    }
+
+    &-map {
+      width: 700px;
+      height: 215px;
+      margin: 20px 0 0 30px;
+    }
+  }
+
+  /deep/ {
+    & .el-dialog__header {
+      border-bottom: 1px solid #f0f1ef;
+    }
+    & .el-form-item__label {
+      padding-bottom: 0;
+    }
+  }
+}
+</style>

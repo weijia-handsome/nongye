@@ -1,0 +1,663 @@
+<template>
+  <div
+    class="m-dashboard"
+    v-loading="pageLoading"
+    element-loading-text="初始化中..."
+    element-loading-background="rgba(0, 0, 0, 0.3)"
+  >
+    <div class="m-map" id="map"></div>
+    <!-- 按钮 -->
+    <div class="m-button" @click="handleSelect">
+      <span>全部项目</span>
+      <i class="el-icon-arrow-down el-icon--right"></i>
+    </div>
+    <div class="m-menu" v-if="menuVisible">
+      <p
+        class="m-menu__title"
+        @click="handleSelectMenu"
+        v-for="(item, index) in projectButton"
+        :key="index"
+      >
+        {{ item }}
+      </p>
+      <!-- <p class="m-menu__title" @click="handleSelectMenu">枣林5号井房项目</p>
+      <p class="m-menu__title" @click="handleSelectMenu">
+        315国道自动化灌溉项目
+      </p>
+      <p class="m-menu__title" @click="handleSelectMenu">
+        214国道自动化灌溉项目
+      </p> -->
+    </div>
+    <!-- 左边图表 -->
+    <div class="m-left">
+      <!-- <div class="m-left__background"></div> -->
+      <div class="m-left__first">
+        <p class="m-left__title">灌溉占比</p>
+        <div
+          class="m-left__round"
+          id="roundChart"
+          style="width: 100%; height: 87%"
+        ></div>
+      </div>
+      <div class="m-left__second">
+        <!-- <div class="m-left__background"></div> -->
+        <p class="m-left__title1">温湿度传感器</p>
+        <div
+          class="m-left__round1"
+          id="lineChart"
+          style="width: 100%; height: 81%"
+          v-loadin="pageLoading"
+        ></div>
+      </div>
+      <div class="m-left__third">
+        <!-- <div class="m-left__background"></div> -->
+        <p class="m-left__title">物联设备</p>
+        <div
+          class="m-left__round2"
+          id="thingsChart"
+          style="width: 100%; height: 88.5%"
+        ></div>
+      </div>
+    </div>
+
+    <!-- 中间图表 -->
+    <div class="m-min">
+      <p class="m-min__title">滴灌任务</p>
+      <div class="m-min__tit">
+        <div class="m-min__txt" @click="handleLunGuan">轮灌</div>
+        <div class="m-min__txt" @click="handleZhiGuan">直灌</div>
+        <div class="m-min__txt" @click="handleTask">新建任务</div>
+        <div class="m-min__txt" @click="handleManger">管理任务</div>
+      </div>
+
+      <el-scrollbar class="m-min__content">
+        <el-timeline>
+          <el-timeline-item
+            v-for="(activity, index) in activities"
+            :key="index"
+            size="normal"
+            color="#04E0F9"
+          >
+            任务在{{ activity.start_time }}开始执行滴灌 时长为：{{
+              activity.time
+            }}
+          </el-timeline-item>
+        </el-timeline>
+      </el-scrollbar>
+    </div>
+
+    <!-- 右边图表 -->
+    <div class="m-right">
+      <div class="m-right__round">
+        <p class="m-right__text">报警信息</p>
+        <!-- el-scrollbar -->
+        <el-scrollbar class="m-right__first">
+          <el-timeline>
+            <el-timeline-item
+              v-for="(item, index) in pushAlarmArr"
+              :key="index"
+              icon="el-icon-time"
+              size="primary"
+            >
+              <p class="m-right__time">{{ item.alarmtime }}</p>
+              <p class="m-right__txt">设备id:{{ item.imei }}</p>
+              <p class="m-right__txt">设备名称:{{ item.dname }}</p>
+              <p class="m-right__txt">设备类型:{{ item.deviceType }}</p>
+              <p class="m-right__txt">报警类型:{{ item.alarmType }}</p>
+              <p class="m-right__txt">报警值:{{ item.value }}</p>
+            </el-timeline-item>
+          </el-timeline>
+        </el-scrollbar>
+      </div>
+      <div class="m-right__roun">
+        <p class="m-right__title">设备状态对比</p>
+        <div
+          class="m-right__first"
+          id="roundTwo"
+          style="width: 99.5%; height: 80%"
+        ></div>
+      </div>
+      <div class="m-right__rou">
+        <p class="m-right__title">农作物占比</p>
+        <div
+          class="m-right__box"
+          id="cropsCharts"
+          style="width: 100%; height: 90%"
+        ></div>
+      </div>
+    </div>
+    <task ref="taskRef"></task>
+  </div>
+</template>
+
+<script>
+import echarts from "echarts/lib/echarts";
+import {
+  getAverage,
+  getPidAndPname,
+  deviceTypeData,
+  deviceOnlineData,
+  pushAlarmData,
+  pushGrid,
+} from "@/api/api.js";
+import Task from "./task/task.vue";
+
+export default {
+  name: "bigData",
+  components: {
+    Task,
+  },
+  data() {
+    return {
+      map: null, //地图实例
+      pageLoading: false,
+      menuVisible: false,
+      param: {
+        pno: 1,
+        pageSize: 10,
+      },
+      projectButton: [],
+      deviceType: [],
+      deviceData: "",
+      deviceOnline: "",
+      deviceOnlineOnline: "",
+      deviceOnlineOffline: "",
+      pushAlarm: "",
+      pushAlarmArr: "",
+      activities: [],
+      getAverageResponse: "",
+      getAverageArrT: [],
+      getAverageArrH: [],
+      getAverageTime: [],
+    };
+  },
+  methods: {
+    // // 初始化
+    setMap() {
+      this.$nextTick(() => {
+        this.map = new AMap.Map("map", {
+          resizeEnable: true,
+          center: [116.39, 39.9],
+          keyboardEnable: false,
+          zoom: 11,
+          mapStyle: "amap://styles/blue",
+        });
+        let marker = new AMap.Marker({
+          position: [116.39, 39.9], //位置
+        });
+        this.map.add(marker);
+      });
+    },
+    //灌溉占比环形图
+    setRoundChart() {
+      let roundChart = echarts.init(document.getElementById("roundChart"));
+      let option = {
+        //提示框组件
+        tooltip: {
+          trigger: "item",
+        },
+        //图例
+        legend: {
+          orient: "vertical",
+          top: "5%",
+          left: "right",
+          textStyle: {
+            fontSize: 12,
+            color: "#04E0F9",
+          },
+        },
+        //系列列表
+        series: [
+          {
+            type: "pie",
+            radius: ["40%", "70%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: "center",
+            },
+            labelLine: {
+              show: false,
+            },
+            data: [
+              { value: 1048, name: "已灌溉" },
+              { value: 735, name: "未灌溉", itemStyle: { color: "#04E0F9" } },
+            ],
+          },
+        ],
+      };
+      roundChart.setOption(option);
+    },
+    //温湿度折线图
+    setlineChart() {
+      let lineChart = echarts.init(document.getElementById("lineChart"));
+      let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            crossStyle: {
+              color: "#999",
+            },
+          },
+        },
+        legend: {
+          data: ["温度", "湿度", "平均温度"],
+          textStyle: {
+            fontSize: 12,
+            color: "#04E0F9",
+          },
+        },
+        grid: {
+          top: 40,
+          x: 60,
+          x2: 60,
+          y2: 40,
+        },
+        xAxis: [
+          {
+            type: "category",
+            data: this.getAverageTime,
+            axisPointer: {
+              type: "shadow",
+            },
+            axisLabel: {
+              textStyle: {
+                color: "#04E0F9", //坐标值得具体的颜色
+              },
+              interval: 0,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            type: "value",
+            name: "温度",
+            nameTextStyle: {
+              color: "#C8742D",
+            },
+            min: 0,
+            max: 250,
+            interval: 50,
+            axisLabel: {
+              formatter: "{value} ml",
+              textStyle: {
+                color: "#04E0F9", //坐标值得具体的颜色
+              },
+            },
+          },
+          {
+            type: "value",
+            name: "湿度",
+            nameTextStyle: {
+              color: "#C8742D",
+            },
+            min: 0,
+            max: 25,
+            interval: 5,
+            axisLabel: {
+              formatter: "{value} °C",
+              textStyle: {
+                color: "#04E0F9", //坐标值得具体的颜色
+              },
+              itemStyle: {
+                color: "#C8742D",
+              },
+            },
+          },
+        ],
+        series: [
+          {
+            name: "温度",
+            type: "bar",
+            data: this.getAverageArrT,
+            itemStyle: {
+              normal: {
+                color: "#04E0F9",
+                lineStyle: {
+                  color: "#04E0F9",
+                },
+              },
+            },
+          },
+          {
+            name: "湿度",
+            type: "bar",
+            data: this.getAverageArrH,
+            itemStyle: {
+              normal: {
+                color: "#C8742D",
+                lineStyle: {
+                  color: "#C8742D",
+                },
+              },
+            },
+          },
+          {
+            name: "平均温度",
+            type: "line",
+            yAxisIndex: 1,
+            data: this.getAverageArrT,
+            itemStyle: {
+              normal: {
+                color: "#04E0F9",
+                lineStyle: {
+                  color: "#04E0F9",
+                },
+              },
+            },
+          },
+        ],
+      };
+      lineChart.setOption(option);
+    },
+    //物联设备
+    setThingsChart() {
+      let thingsChart = echarts.init(document.getElementById("thingsChart"));
+      let option = {
+        tooltip: {
+          trigger: "item",
+        },
+        legend: {
+          top: "5%",
+          left: "right",
+          orient: "vertical",
+          textStyle: {
+            fontSize: 12,
+            color: "#04E0F9",
+          },
+        },
+        series: [
+          {
+            type: "pie",
+            radius: ["40%", "70%"],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: "#fff",
+              borderWidth: 2,
+            },
+            label: {
+              show: false,
+              position: "center",
+            },
+            labelLine: {
+              show: false,
+            },
+            data: this.deviceType,
+          },
+        ],
+      };
+      thingsChart.setOption(option);
+    },
+    //设备状态占比
+    setRoundTwo() {
+      let roundTwo = echarts.init(document.getElementById("roundTwo"));
+      let option = {
+        //提示框组件
+        tooltip: {
+          trigger: "item",
+        },
+        //图例
+        legend: {
+          orient: "vertical",
+          top: "5%",
+          left: "right",
+          textStyle: {
+            fontSize: 12,
+            color: "#04E0F9",
+          },
+        },
+        //系列列表
+        series: [
+          {
+            type: "pie",
+            radius: ["40%", "70%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: "center",
+            },
+            labelLine: {
+              show: false,
+            },
+            data: [
+              {
+                value: this.deviceOnlineOnline,
+                name: "在线",
+                itemStyle: { color: "#047DF9" },
+              },
+              {
+                value: this.deviceOnlineOffline,
+                name: "离线",
+                itemStyle: { color: "#DB7E2F" },
+              },
+            ],
+          },
+        ],
+      };
+      roundTwo.setOption(option);
+    },
+    //农作物占比
+    setCrops() {
+      let crops = echarts.init(document.getElementById("cropsCharts"));
+      let option = {
+        tooltip: {
+          trigger: "item",
+        },
+        //图例
+        legend: {
+          orient: "vertical",
+          top: "5%",
+          left: "right",
+          textStyle: {
+            fontSize: 12,
+            color: "#04E0F9",
+          },
+        },
+
+        visualMap: {
+          show: false,
+          min: 80,
+          max: 600,
+          inRange: {
+            colorLightness: [0, 1],
+          },
+        },
+        series: [
+          {
+            name: "访问来源",
+            type: "pie",
+            radius: "55%",
+            center: ["50%", "50%"],
+            data: [
+              { value: 335, name: "枣树", itemStyle: { color: "#64B7EC" } },
+              { value: 300, name: "黑枸杞", itemStyle: { color: "#DEE565" } },
+              { value: 274, name: "棉花", itemStyle: { color: "#E68639" } },
+              { value: 200, name: "打瓜", itemStyle: { color: "#27BA81" } },
+              { value: 400, name: "桃", itemStyle: { color: "#27B8BA" } },
+              { value: 210, name: "甜瓜", itemStyle: { color: "#04E0F9" } },
+            ].sort(function (a, b) {
+              return a.value - b.value;
+            }),
+            roseType: "radius",
+            labelLine: {
+              smooth: 0.2,
+              length: 10,
+              length2: 20,
+            },
+            itemStyle: {
+              color: "#c23531",
+              shadowBlur: 200,
+              shadowColor: "rgba(0, 0, 0, 0.5)",
+            },
+            animationType: "scale",
+            animationEasing: "elasticOut",
+            animationDelay: function (idx) {
+              return Math.random() * 200;
+            },
+          },
+        ],
+      };
+      crops.setOption(option);
+    },
+    handleSelect() {
+      this.menuVisible = !this.menuVisible;
+    },
+    handleSelectMenu() {
+      this.menuVisible = false;
+    },
+    handleTask() {
+      this.$refs.taskRef.handleOpen();
+    },
+    handleManger() {
+      this.$router.push({
+        path: "/irrigation-task",
+      });
+    },
+    //温湿度传感器
+    async getAverage() {
+      this.getAverageResponse = await getAverage({
+        username: window.sessionStorage.getItem("username"),
+        pid: "",
+      });
+      if (this.getAverageResponse.status === 200) {
+        this.pageLoading = true;
+        const arrT = this.getAverageResponse.data.mess.map((item) => {
+          return item.soilT;
+        });
+        this.getAverageArrT = arrT.slice(0, 4);
+        const arrH = this.getAverageResponse.data.mess.map((item) => {
+          return item.soilH;
+        });
+        this.getAverageArrH = arrH.slice(0, 4);
+
+        const arrTime = this.getAverageResponse.data.mess.map((item) => {
+          return item.time;
+        });
+        this.getAverageTime = arrTime.slice(0, 4);
+      } else {
+        this.$message.error(this.getAverageResponse.statusText || "服务错误!");
+      }
+      this.pageLoading = false;
+    },
+    //大数据页获取项目
+    async getPidAndPname() {
+      const response = await getPidAndPname({
+        username: window.sessionStorage.getItem("username"),
+        pno: this.param.pno,
+        pageSize: this.param.pageSize,
+      });
+      if (response.status === 200) {
+        this.projectButton = response.data.data.map((item) => {
+          return item.name;
+        });
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
+    },
+    //物联设备
+    async deviceTypeData() {
+      this.deviceData = await deviceTypeData({
+        username: window.sessionStorage.getItem("username"),
+        pid: "",
+      });
+      if (this.deviceData.status === 200) {
+        for (let i of this.deviceData.data.mess) {
+          this.deviceType.push({ value: i.num, name: i.name, index: [] });
+        }
+      } else {
+        this.$message.error(this.deviceData.statusText || "服务错误！");
+      }
+    },
+    //设备状态对比
+    async deviceOnlineData() {
+      this.deviceOnline = await deviceOnlineData({
+        username: window.sessionStorage.getItem("username"),
+        pid: "",
+      });
+      if (this.deviceOnline.status === 200) {
+        this.deviceOnlineOnline = this.deviceOnline.data.mess.Online;
+        this.deviceOnlineOffline = this.deviceOnline.data.mess.Offline;
+      }
+    },
+    //报警信息
+    async pushAlarmData() {
+      const response = await pushAlarmData({
+        username: window.sessionStorage.getItem("username"),
+        pno: this.param.pno,
+        pageSize: this.param.pageSize,
+        pid: "",
+      });
+      if (response.status === 200) {
+        this.pushAlarmArr = response.data.data;
+      } else {
+        this.$message.error(response.statusText || "服务错误");
+      }
+    },
+    //轮灌任务
+    async handleLunGuan() {
+      const response = await pushGrid({
+        username: window.sessionStorage.getItem("username"),
+        pno: this.param.pno,
+        pageSize: this.param.pageSize,
+        pid: "",
+        type: 1,
+      });
+      if (response.status === 200) {
+        this.activities = response.data.data;
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
+    },
+    //直灌
+    async handleZhiGuan() {
+      const response = await pushGrid({
+        username: window.sessionStorage.getItem("username"),
+        pno: this.param.pno,
+        pageSize: this.param.pageSize,
+        pid: "",
+        type: 2,
+      });
+      if (response.status === 200) {
+        this.activities = response.data.data;
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
+    },
+  },
+  watch: {
+    deviceData() {
+      this.setThingsChart();
+    },
+    deviceOnline() {
+      this.setRoundTwo();
+    },
+    getAverageResponse() {
+      this.setlineChart();
+    },
+  },
+  mounted() {
+    this.setMap();
+    this.getAverage();
+    this.getPidAndPname();
+    this.deviceTypeData();
+    this.deviceOnlineData();
+    this.pushAlarmData();
+    this.handleLunGuan();
+  },
+
+  created() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.setRoundChart();
+        this.setCrops();
+      });
+    });
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+@import "./index.scss";
+</style>
