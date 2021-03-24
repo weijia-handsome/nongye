@@ -347,6 +347,7 @@ export function reqGetNetspot({ username, pno, pageSize, nid, object }) {
     })
 }
 
+
 //新增设备 adDevice
 export function reqadDevice({ username, nid, device_name, imei, tid, lant_lat, adss }) {
     return request({
