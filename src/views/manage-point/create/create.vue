@@ -18,11 +18,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-content-btn"
-          ><el-form-item
-            label="项目地址"
-            prop="projectAddress"
-            :rules="[{ required: true, message: '请输入' }]"
-          >
+          ><el-form-item label="项目地址" prop="projectAddress">
             <el-col :span="22"
               ><el-input
                 id="tipinput"
@@ -113,23 +109,46 @@ export default {
       },
     };
   },
+  watch: {
+    "form.projectAddress"(val) {
+      console.log(val);
+      let newVal = val.split(",");
+      // 经度
+      const longreg = /^(\-|\+)?(((\d|[1-9]\d|1[0-7]\d|0{1,3})\.\d{0,6})|(\d|[1-9]\d|1[0-7]\d|0{1,3})|180\.0{0,6}|180)$/;
+      //纬度
+      var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
+      if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
+        console.log(111);
+        let marker = new AMap.Marker({
+          position: [newVal[0], newVal[1]],
+          offset: new AMap.Pixel(-13, -30),
+        });
+        this.map.clearMap();
+        marker.setMap(this.map);
+      }
+    },
+  },
   methods: {
     // // 初始化
     setMap() {
       this.$nextTick(() => {
-        this.map = new AMap.Map("map2", {
-          resizeEnable: true,
-          keyboardEnable: false,
-          zoom: 15,
-          mapStyle: "amap://styles/normal",
-        });
+        var clickListener,
+          map = new AMap.Map("map2", {
+            resizeEnable: true,
+            keyboardEnable: false,
+            zoom: 15,
+            mapStyle: "amap://styles/normal",
+          });
 
+        this.map = map;
+
+        // this.map2 = this.map;
         var autoOptions = {
           input: "tipinput",
         };
         var auto = new AMap.Autocomplete(autoOptions);
         this.placeSearch = new AMap.PlaceSearch({
-          map: this.map,
+          map: map,
         }); //构造地点查询类
         AMap.event.addListener(auto, "select", this.select); //注册监听，当选中某条记录时会触发
         AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
@@ -138,6 +157,20 @@ export default {
           this.lnt = e.data.location.lng + "," + e.data.location.lat;
           // this.mapInfo.lnglat = this.lanlat;
           this.form.projectAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+        });
+        let _that = this;
+        clickListener = AMap.event.addListener(map, "click", function (e) {
+          _that.form.projectAddress = e.lnglat.toString();
+          // console.log(e.count);
+          _that.lnt = e.lnglat.toString();
+          // markers
+          map.clearMap();
+          var markers = new AMap.Marker({
+            position: e.lnglat,
+            map: map,
+          });
+          // if()
+          console.log(markers);
         });
       });
     },
@@ -180,7 +213,8 @@ export default {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          // alert("成功");
+          this.creatPoint();
           this.dialogVisible = false;
         } else {
           console.log("失败");
@@ -202,7 +236,7 @@ export default {
         marker,
         nid,
         spid,
-        lnt,
+        lnt: this.lnt,
       });
       console.log(response);
     },
@@ -219,7 +253,7 @@ export default {
         tube,
         marker,
         nid,
-        lnt,
+        lnt: this.lnt,
       });
       console.log(response);
     },

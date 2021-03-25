@@ -25,9 +25,7 @@
                 size="mini"
               ></el-input
             ></el-col>
-            <el-col :span="2"
-              ><el-button type="primary" size="mini">查询</el-button></el-col
-            >
+            <el-col :span="2"></el-col>
           </el-form-item>
         </el-col>
         <el-col :span="12"
@@ -66,30 +64,30 @@
             <el-input v-model="form.nursePhone" size="mini"></el-input>
           </el-form-item>
         </el-col>
-        <el-row :gutter="24" class="m-wrap">
-          <el-col :span="24">
-            <el-form label-position="top">
-              <el-form-item label="分区">
-                <el-select v-model="formData.area" placeholder="请选择活动区域">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="管点">
-                <el-checkbox-group v-model="formData.type">
-                  <el-checkbox
-                    label="美食/餐厅线上活动"
-                    name="type"
-                  ></el-checkbox>
-                  <el-checkbox label="地推活动" name="type"></el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-form>
-          </el-col>
-        </el-row>
+        <!-- <el-row :gutter="24" class="m-wrap"> -->
+        <el-col :span="24">
+          <el-form label-position="top">
+            <el-form-item label="分区">
+              <el-select v-model="formData.area" placeholder="请选择活动区域">
+                <el-option label="区域一" value="shanghai"></el-option>
+                <el-option label="区域二" value="beijing"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="管点">
+              <el-checkbox-group v-model="formData.type">
+                <el-checkbox
+                  label="美食/餐厅线上活动"
+                  name="type"
+                ></el-checkbox>
+                <el-checkbox label="地推活动" name="type"></el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-form>
+        </el-col>
+        <!-- </el-row> -->
       </el-form>
     </el-row>
-    <div class="m-map" id="map"></div>
+    <div class="m-map" id="map2"></div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleComfirm">确 定</el-button>
@@ -99,7 +97,7 @@
 
 <script>
 import MapLoader from "../../../components/common/AMap.js";
-// import { reqadDevice } from "@/api/api.js";
+import { adNetspot } from "@/api/api.js";
 export default {
   name: "Edit",
   components: {
@@ -124,23 +122,47 @@ export default {
       },
     };
   },
+  watch: {
+    "form.projectAddress"(val) {
+      console.log(val);
+      let newVal = val.split(",");
+      // 经度
+      const longreg = /^(\-|\+)?(((\d|[1-9]\d|1[0-7]\d|0{1,3})\.\d{0,6})|(\d|[1-9]\d|1[0-7]\d|0{1,3})|180\.0{0,6}|180)$/;
+      //纬度
+      var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
+      if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
+        console.log(111);
+        let marker = new AMap.Marker({
+          position: [newVal[0], newVal[1]],
+          offset: new AMap.Pixel(-13, -30),
+        });
+        this.map.clearMap();
+        marker.setMap(this.map);
+      }
+    },
+  },
+
   methods: {
     // // 初始化
     setMap() {
       this.$nextTick(() => {
-        this.map = new AMap.Map("map", {
-          resizeEnable: true,
-          keyboardEnable: false,
-          zoom: 15,
-          mapStyle: "amap://styles/normal",
-        });
+        var clickListener,
+          map = new AMap.Map("map2", {
+            resizeEnable: true,
+            keyboardEnable: false,
+            zoom: 15,
+            mapStyle: "amap://styles/normal",
+          });
 
+        this.map = map;
+
+        // this.map2 = this.map;
         var autoOptions = {
           input: "tipinput",
         };
         var auto = new AMap.Autocomplete(autoOptions);
         this.placeSearch = new AMap.PlaceSearch({
-          map: this.map,
+          map: map,
         }); //构造地点查询类
         AMap.event.addListener(auto, "select", this.select); //注册监听，当选中某条记录时会触发
         AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
@@ -148,14 +170,28 @@ export default {
           // // console.log(e, 654);
           this.lnt = e.data.location.lng + "," + e.data.location.lat;
           // this.mapInfo.lnglat = this.lanlat;
-          this.form.deviceAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+          this.form.projectAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+        });
+        let _that = this;
+        clickListener = AMap.event.addListener(map, "click", function (e) {
+          _that.form.projectAddress = e.lnglat.toString();
+          // console.log(e.count);
+          _that.lnt = e.lnglat.toString();
+          // markers
+          map.clearMap();
+          var markers = new AMap.Marker({
+            position: e.lnglat,
+            map: map,
+          });
+          // if()
+          console.log(markers);
         });
       });
     },
     select(e) {
       this.placeSearch.setCity(e.poi.adcode);
       this.placeSearch.search(e.poi.name); //关键字查询查询
-      this.form.deviceAddress =
+      this.form.projectAddress =
         e.poi.district + "" + e.poi.address + "" + e.poi.name;
       this.lnt = e.poi.location.lng + "," + e.poi.location.lat;
     },
@@ -172,10 +208,25 @@ export default {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          // alert("成功");
+          adNetspot({
+            username: window.sessionStorage.getItem("username"),
+            name: this.form.projectName,
+            adss: this.form.projectAddress,
+            fireman: this.form.liablePhone,
+            person: this.form.nursePhone,
+            firemanname: this.form.liable,
+            personname: this.form.nurse,
+            tube,
+            marker,
+            nid,
+            lnt: this.lnt,
+          }).then((res) => {
+            console.log(res);
+          });
           this.dialogVisible = false;
         } else {
-          console.log("失败");
+          // console.log("失败");
           return false;
         }
       });
