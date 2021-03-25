@@ -23,13 +23,11 @@
             prop="projectAddress"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-col :span="22"
-              ><el-input
-                id="tipinput"
-                v-model="form.projectAddress"
-                size="mini"
-              ></el-input
-            ></el-col>
+            <el-input
+              id="tipinput"
+              v-model="form.projectAddress"
+              size="mini"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12"
@@ -110,6 +108,11 @@ export default {
         nursePhone: "",
         liable: "",
         liablePhone: "",
+        tube: "",
+        marker: "",
+        nid: "",
+        spid: "",
+        lnt: "",
       },
     };
   },
@@ -136,6 +139,7 @@ export default {
           // console.log(e.data.location.lng, e.data.location.lat); // 经纬度
           // // console.log(e, 654);
           this.lnt = e.data.location.lng + "," + e.data.location.lat;
+
           // this.mapInfo.lnglat = this.lanlat;
           this.form.projectAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
         });
@@ -167,6 +171,11 @@ export default {
         this.form.nursePhone = pointInfo.person;
         this.form.liable = pointInfo.firemanname;
         this.form.liablePhone = pointInfo.fireman;
+        this.form.tube = pointInfo.tube;
+        this.form.marker = pointInfo.marker;
+        this.form.nid = pointInfo.nid;
+        this.form.spid = pointInfo.spid;
+        this.form.lnt = pointInfo.lnt;
       } else {
         this.id = "";
         this.form.projectName = "";
@@ -175,12 +184,20 @@ export default {
         this.form.nursePhone = "";
         this.form.liable = "";
         this.form.liablePhone = "";
+        this.form.tube = "";
+        this.form.marker = "";
+        this.form.nid = "";
+        this.form.spid = "";
       }
     },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          if (this.id) {
+            this.editPoint();
+          } else {
+            this.creatPoint();
+          }
           this.dialogVisible = false;
         } else {
           console.log("失败");
@@ -190,6 +207,9 @@ export default {
     },
     //编辑
     async editPoint() {
+      if (this.lnt === "undefined,undefined") {
+        return this.$message.error("请选择准确的位置");
+      }
       const response = await editNetspot({
         username: window.sessionStorage.getItem("username"),
         name: this.form.projectName,
@@ -198,16 +218,24 @@ export default {
         person: this.form.nursePhone,
         firemanname: this.form.liable,
         personname: this.form.nurse,
-        tube,
-        marker,
-        nid,
-        spid,
-        lnt,
+        tube: this.form.tube,
+        marker: this.form.marker,
+        nid: this.form.nid,
+        spid: this.form.spid,
+        lnt: this.lnt === undefined ? this.form.lnt : this.lnt,
       });
-      console.log(response);
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
     },
     //新增
     async creatPoint() {
+      if (this.lnt === "undefined,undefined") {
+        return this.$message.error("请选择准确的位置");
+      }
       const response = await adNetspot({
         username: window.sessionStorage.getItem("username"),
         name: this.form.projectName,
@@ -216,12 +244,18 @@ export default {
         person: this.form.nursePhone,
         firemanname: this.form.liable,
         personname: this.form.nurse,
-        tube,
-        marker,
-        nid,
-        lnt,
+        tube: this.form.tube,
+        marker: this.form.marker,
+        nid: this.form.nid,
+        spid: this.form.spid,
+        lnt: this.lnt,
       });
-      console.log(response);
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
     },
   },
 };

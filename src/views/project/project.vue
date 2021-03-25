@@ -43,7 +43,7 @@
         </el-table-column>
         <el-table-column prop="name" label="项目名称" width="180">
         </el-table-column>
-        <el-table-column prop="adss" label="项目地址" align="center">
+        <el-table-column prop="adss" label="项目地址" align="center" width="450">
         </el-table-column>
         <el-table-column prop="firemanname" label="护理人" align="center">
         </el-table-column>
@@ -82,7 +82,7 @@
           :total="total"
         />
       </div>
-      <edit ref="editRef"></edit>
+      <edit ref="editRef" @refresh="getList"></edit>
     </el-card>
   </div>
 </template>

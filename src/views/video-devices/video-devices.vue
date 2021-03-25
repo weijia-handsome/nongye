@@ -8,12 +8,24 @@
         ><el-row :gutter="24">
           <el-col :span="6">
             <el-form-item label="管网名称">
-              <el-input v-model="form.name" size="mini"></el-input>
+              <el-input
+                v-model="form.name"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="设备编号">
-              <el-input v-model="form.phone" size="mini"></el-input>
+              <el-input
+                v-model="form.phone"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -32,7 +44,7 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="管网名称" width="180">
+        <el-table-column prop="network_name" label="管网名称" width="180" align="center">
         </el-table-column>
         <el-table-column prop="imei" label="设备编号" align="center">
         </el-table-column>
@@ -57,11 +69,11 @@
           background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="param.pageSize"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :current-page="param.pno"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="param.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="400"
+          :total="total"
         />
       </div>
       <check-video ref="videoRef" :imei="imei"></check-video>
@@ -100,11 +112,11 @@ export default {
     handleSizeChange(pageSize) {
       this.param.pno = 1;
       this.param.pageSize = pageSize;
-      this.getUserList();
+      this.getList();
     },
     handleCurrentChange(currentPage) {
       this.param.pno = currentPage;
-      this.getUserList();
+      this.getList();
     },
     handleCheck(imei) {
       this.imei = imei;
@@ -122,9 +134,8 @@ export default {
         tid: this.param.tid,
         pno: this.param.pno,
         pageSize: this.param.pageSize,
+        object: this.form.name || this.form.phone || "",
       });
-      //   ).src = `https://open.ys7.com/ezopen/h5/iframe_se?url=ezopen://${yan}@open.ys7.com/${num}/1.live&autoplay=0&accessToken=${accessToken}&templete=2`;
-      // this.modal9 = true;
       if (response.status === 200) {
         this.tableData = response.data.data;
         this.total = response.recordCount;

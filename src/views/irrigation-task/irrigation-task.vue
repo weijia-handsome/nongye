@@ -170,13 +170,13 @@
             <el-button type="text" size="mini" @click="handleStop(scope.row.id)" v-if="scope.row.state === '1'"
               >停止</el-button
             >
-            <el-button type="text" size="mini" @click="handleEdit"
+            <el-button type="text" size="mini" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
             <el-button type="text" size="mini" @click="handleDelete"
               >删除</el-button
             >
-            <el-button type="text" size="mini"
+            <el-button type="text" size="mini" @click="handleCheckVideo(scope.row.imei)"
               >查看现场</el-button
             >
           </template>
@@ -197,15 +197,17 @@
       </div>
     </el-card>
     <edit ref="editRef" @refresh="getList"></edit>
+    <check-video ref="videoRef"></check-video>
   </div>
 </template>
 
 <script>
 import Edit from "./edit/edit.vue";
+import CheckVideo from "./check/check.vue";
 import { getGridTask, stopGrid, delGridTask,upState } from "@/api/api.js";
 
 export default {
-  components: { Edit },
+  components: { Edit,CheckVideo },
   name: "WellRoom",
   data() {
     return {
@@ -243,8 +245,12 @@ export default {
       this.param.pno = 1;
       this.getList();
     },
-    handleEdit() {
-      this.$refs.editRef.handleOpen();
+    handleCheckVideo(imei) {
+      console.log(imei, '=============');
+      this.$refs.videoRef.handleOpen();
+    },
+    handleEdit(irrInfo) {
+      this.$refs.editRef.handleOpen(irrInfo);
     },
     handleCreate() {
       this.$refs.editRef.handleOpen();
@@ -265,6 +271,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, '///////////');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText);

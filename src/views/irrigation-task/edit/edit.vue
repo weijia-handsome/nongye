@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="m-dialog"
-    title="新增滴灌任务"
+    :title="id ? '编辑滴灌任务' : '新增滴灌任务'"
     :visible.sync="dialogVisible"
     width="50%"
     :before-close="handleClose"
@@ -38,6 +38,7 @@
               type="datetime"
               placeholder="选择日期时间"
               size="mini"
+              :rules="[{ required: true, message: '请选择' }]"
             >
             </el-date-picker>
           </el-form-item>
@@ -121,7 +122,7 @@
 </template>
 
 <script>
-import { getTypeByGrid, addGridTask } from "@/api/api.js";
+import { getTypeByGrid, addGridTask, editGridTask } from "@/api/api.js";
 
 export default {
   name: "Edit",
@@ -129,6 +130,7 @@ export default {
     return {
       dialogVisible: false,
       netId: "",
+      id: "",
       form: {
         name: "",
         time: "",
@@ -146,11 +148,26 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleOpen(irrInfo) {
       this.dialogVisible = true;
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
+
+      if (irrInfo) {
+        this.form.name = irrInfo.name;
+        this.form.time = irrInfo.time;
+        this.form.startTime = irrInfo.start_time;
+        this.form.endTime = irrInfo.end_time;
+        this.form.irrType = irrInfo.type;
+        this.id = irrInfo.id;
+      } else {
+        this.form.name = "";
+        this.form.time = "";
+        this.form.startTime = "";
+        this.form.endTime = "";
+        this.form.irrType = "";
+      }
     },
     //新增滴灌任务
     async addGridTask() {
@@ -186,10 +203,22 @@ export default {
         this.$message.error(response.statusText || "服务异常!");
       }
     },
+    //编辑
+    async editGridTask() {
+      const response = await editGridTask({
+        username: window.sessionStorage.getItem("username"),
+        start_time: this.form.startTime,
+      });
+      console.log(response, "================");
+    },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          this.addGridTask();
+          if (this.id) {
+            this.editGridTask();
+          } else {
+            this.addGridTask();
+          }
           this.dialogVisible = false;
         } else {
           console.log("失败");

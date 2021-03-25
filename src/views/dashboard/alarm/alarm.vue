@@ -3,9 +3,8 @@
     class="m-dialog"
     title="设备详情"
     :visible.sync="dialogVisible"
-    width="70%"
+    width="80%"
     :before-close="handleClose"
-    v-loading="loading"
   >
     <div class="m-box">
       <div class="m-left">
@@ -47,7 +46,7 @@
           </ul>
         </div>
       </div>
-      <div class="m-right" v-loading="loading">
+      <div class="m-right">
         <el-scrollbar>
           <div class="m-top">
             <p class="m-top__text">温度统计图</p>
@@ -75,25 +74,66 @@
           </div>
         </el-scrollbar>
       </div>
+      <div class="m-alarm">
+        <p class="m-alarm__title">通知处理情况</p>
+        <div class="m-alarm__wrap">
+          <el-form label-position="top" ref="ruleForm" :model="ruleForm">
+            <el-form-item
+              prop="content"
+              label="通知处理情况说明"
+              :rules="[{ required: true, message: '请输入' }]"
+            >
+              <el-input
+                type="textarea"
+                placeholder="请输入"
+                v-model="ruleForm.content"
+              ></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="m-image">
+          <el-upload
+            action="https://jsonplaceholder.typicode.com/posts/"
+            list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+          >
+            <i class="el-icon-plus"></i>
+          </el-upload>
+          <!-- <el-dialog :visible.sync="dialogVisible">
+            <img  :src="dialogImageUrl" alt="" />
+          </el-dialog> -->
+        </div>
+        <div class="m-button">
+          <el-button type="danger" size="mini" @click="handleCancel">取消</el-button>
+          <el-button type="primary" size="mini" @click="handleConfirm"
+            >确定</el-button
+          >
+        </div>
+      </div>
     </div>
   </el-dialog>
 </template>
 
 <script>
 import echarts from "echarts/lib/echarts";
-import { reqGetTuRangDeviceInfo } from "@/api/api.js";
+import { reqHisAlarm, reqGetTuRangDeviceInfo, reqDelAlarm } from "@/api/api.js";
 
 export default {
-  name: "Check",
+  name: "Alarm",
   data() {
     return {
       dialogVisible: false,
-      loading: false,
+      dialogImageUrl: "",
+      ruleForm: {
+        content: "",
+      },
       dataTime: [],
       soilTArr: [],
       soilHArr: [],
       alarms: [],
-      alarmsValue: '',
+      alarmsValue: "",
+      alarmsId: "",
       response: "",
       deviceInfo: {
         imei: "",
@@ -111,34 +151,32 @@ export default {
   },
   watch: {
     response(val) {
-      console.log(val);
       this.setlineOne();
       this.setlineTwo();
-      this.setlineThree();    
+      this.setlineThree();
     },
   },
   methods: {
     handleClose() {
       this.dialogVisible = false;
     },
-    createParam(deviceInfo) {
-      this.deviceInfo.imei = deviceInfo.imei;
-      this.deviceInfo.name = deviceInfo.device_name;
-      this.deviceInfo.address = deviceInfo.adss;
-      this.deviceInfo.status = deviceInfo.state;
-      this.deviceInfo.type = deviceInfo.state;
-      this.deviceInfo.createTime = deviceInfo.reg_time;
+    createParam(alarmInfo) {
+      this.deviceInfo.imei = alarmInfo.imei;
+      this.deviceInfo.name = alarmInfo.dname;
+      this.deviceInfo.address = alarmInfo.d_adss;
+      this.deviceInfo.status = alarmInfo.state;
+      this.deviceInfo.type = alarmInfo.state;
+      this.deviceInfo.createTime = alarmInfo.alarmtime;
     },
-    handleOpen(deviceInfo) {
+    handleOpen(alarmInfo) {
       this.dialogVisible = true;
-      this.createParam(deviceInfo);
+      this.createParam(alarmInfo);
       this.$nextTick(() => {
         setTimeout(() => {
           this.getDeviceInfo();
         });
       });
     },
-    //获取设备信息
     async getDeviceInfo() {
       this.response = await reqGetTuRangDeviceInfo({
         username: window.sessionStorage.getItem("username"),
@@ -146,8 +184,8 @@ export default {
       });
       if (this.response.status === 200) {
         this.loading = true;
+        this.deviceInfo.heartTime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
-          this.deviceInfo.heartTime = i.s_time;
           this.deviceInfo.soilT = i.soilT;
           this.soilTArr.push(i.soilT);
           this.deviceInfo.soilH = i.soilH;
@@ -158,18 +196,39 @@ export default {
         });
         this.dataTime = dataTimeArr.slice(0, 6);
 
-        for(let j of this.response.data.alarms) {
+        for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
+          this.alarmsId = j.id;
         }
-       this.alarms = this.response.data.alarms.map(item => {
+        this.alarms = this.response.data.alarms.map((item) => {
           return item.alarmtime;
-        })     
+        });
       } else {
         this.$message.error(this.response.statusText || "获取设备信息失败!");
       }
       this.loading = false;
     },
-    //温度统计图
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    //解除设备报警
+    async delDelAlarm() {
+      const response = await reqDelAlarm({
+        username: window.sessionStorage.getItem("username"),
+        imei: this.deviceInfo.imei,
+        aid: this.alarmsId,
+      });
+      console.log(response, "==========");
+      if (response.status === 200) {
+        this.$message.success(response.data.mess);
+      } else {
+        this.$message.error(response.data.mess || '服务错误！')
+      }
+    },
     setlineOne() {
       let lineFirst = echarts.init(document.getElementById("lineOne"));
       let option = {
@@ -203,7 +262,6 @@ export default {
       };
       lineFirst.setOption(option);
     },
-    //湿度统计图
     setlineTwo() {
       let lineSecond = echarts.init(document.getElementById("lineTwo"));
       let option = {
@@ -237,7 +295,6 @@ export default {
       };
       lineSecond.setOption(option);
     },
-    //历史报警统计图
     setlineThree() {
       let lineThird = echarts.init(document.getElementById("lineThree"));
       let option = {
@@ -268,6 +325,20 @@ export default {
       };
       lineThird.setOption(option);
     },
+    handleConfirm() {
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          this.delDelAlarm();
+          this.dialogVisible = false;
+        } else {
+          console.log("失败");
+          return false;
+        }
+      });
+    },
+    handleCancel() {
+      this.dialogVisible = false;
+    }
   },
 };
 </script>
@@ -296,6 +367,7 @@ export default {
       display: flex;
       flex-direction: column;
       margin-right: 10px;
+      overflow: hidden;
 
       &__title {
         width: 200px;
@@ -383,11 +455,10 @@ export default {
 
     &-right {
       display: flex;
-      width: 1000px;
+      width:  800px;
       height: 600px;
       flex-direction: column;
       justify-content: space-between;
-      align-items: center;
       padding: 5px;
 
       /deep/ {
@@ -408,6 +479,59 @@ export default {
         padding-left: 10px;
         border-bottom: 1px solid #f0f1ef;
       }
+    }
+
+    &-alarm {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #f7f7f7;
+
+      &__wrap {
+        width: 100%;
+
+        /deep/ {
+          & .el-form-item__label {
+            font-size: 14px;
+            padding: 0;
+          }
+
+          & .el-form-item {
+            padding: 5px;
+          }
+        }
+      }
+
+      &__title {
+        width: 200px;
+        font-size: 12px;
+        line-height: 30px;
+        padding-left: 5px;
+        background: #f7f7f7;
+      }
+    }
+
+    &-image {
+      padding-left: 10px;
+      margin-bottom: 20px;
+      /deep/ {
+        & .el-upload--picture-card {
+          width: 60px;
+          height: 60px;
+          line-height: 60px;
+        }
+
+        & .el-icon-plus {
+          font-size: 14px;
+        }
+      }
+    }
+
+    &-button {
+      height: 30px;
+      line-height: 30px;
+      text-align: right;
+      padding: 10px;
+      background-color: #f7f7f7;
     }
   }
 }

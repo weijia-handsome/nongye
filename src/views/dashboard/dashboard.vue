@@ -87,7 +87,7 @@
         </div>
       </div>
 
-      <div class="m-min__content" @click="handleiIll">
+      <div class="m-min__content">
         <el-scrollbar class="m-min__line">
           <el-timeline>
             <el-timeline-item
@@ -96,14 +96,31 @@
               size="normal"
               color="#04E0F9"
             >
-              <span class="m-min__task">任务名称：{{ activity.name }}</span>
-              <span
-                >任务在{{ activity.start_time }}开始执行滴灌 时长为：{{
-                  activity.time
-                }}
-              </span>
-              <span v-if="activity.state === '1'">已完成</span>
-              <span v-if="activity.state === '2'">未完成</span>
+              <div class="m-min__mask" @click="handleiIll(activity)">
+                <span class="m-min__task">任务名称：{{ activity.name }}</span>
+                <span v-if="activity.state === '0'"
+                  >任务在{{ activity.start_time }}未执行 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '1'"
+                  >任务在{{ activity.start_time }}执行中 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '2'"
+                  >任务在{{ activity.start_time }}完成 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '3'"
+                  >任务在{{ activity.start_time }}待执行 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '1'">已完成</span>
+                <span v-if="activity.state === '2'">未完成</span>
+              </div>
             </el-timeline-item>
           </el-timeline>
         </el-scrollbar>
@@ -112,7 +129,7 @@
 
     <!-- 右边图表 -->
     <div class="m-right">
-      <div class="m-right__round" @click="hanleAlarm">
+      <div class="m-right__round" >
         <p class="m-right__text">通知信息</p>
         <!-- el-scrollbar -->
         <el-scrollbar class="m-right__first">
@@ -123,12 +140,14 @@
               icon="el-icon-time"
               size="primary"
             >
-              <p class="m-right__time">{{ item.alarmtime }}</p>
-              <p class="m-right__txt">设备id:{{ item.imei }}</p>
-              <p class="m-right__txt">设备名称:{{ item.dname }}</p>
-              <p class="m-right__txt">设备类型:{{ item.deviceType }}</p>
-              <p class="m-right__txt">报警类型:{{ item.alarmType }}</p>
-              <p class="m-right__txt">报警值:{{ item.value }}</p>
+              <div class="m-right__alarm" @click="hanleAlarm(item)">
+                <p class="m-right__time">{{ item.alarmtime }}</p>
+                <p class="m-right__txt">设备id:{{ item.imei }}</p>
+                <p class="m-right__txt">设备名称:{{ item.dname }}</p>
+                <p class="m-right__txt">设备类型:{{ item.deviceType }}</p>
+                <p class="m-right__txt">报警类型:{{ item.alarmType }}</p>
+                <p class="m-right__txt">报警值:{{ item.value }}</p>
+              </div>
             </el-timeline-item>
           </el-timeline>
         </el-scrollbar>
@@ -151,6 +170,7 @@
       </div>
     </div>
     <task ref="taskRef"></task>
+    <alarm ref="alarmRef"></alarm>
   </div>
 </template>
 
@@ -166,11 +186,13 @@ import {
   reqGetNetspot,
 } from "@/api/api.js";
 import Task from "./task/task.vue";
+import Alarm from './alarm/alarm.vue';
 
 export default {
   name: "bigData",
   components: {
     Task,
+    Alarm,
   },
   data() {
     return {
@@ -214,7 +236,6 @@ export default {
 
         const username = sessionStorage.getItem("username");
         reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
-          console.log(res);
           var cluster,
             markers = [];
           let data = res.data.data;
@@ -615,15 +636,11 @@ export default {
         path: "/irrigation-task",
       });
     },
-    hanleAlarm() {
-      this.$router.push({
-        path: "/alarm-management",
-      });
+    hanleAlarm(alarmInfo) {
+      this.$refs.alarmRef.handleOpen(alarmInfo);
     },
-    handleiIll() {
-      this.$router.push({
-        path: "/irrigation-task",
-      });
+    handleiIll(irrInfo) {
+      this.$refs.taskRef.handleOpen(irrInfo);
     },
     //温湿度传感器
     async getAverage() {
@@ -718,6 +735,7 @@ export default {
       });
       if (response.status === 200) {
         this.pushAlarmArr = response.data.data;
+        console.log(response, "============");
       } else {
         this.$message.error(response.statusText || "服务错误");
       }
@@ -734,6 +752,7 @@ export default {
       });
       if (response.status === 200) {
         this.activities = response.data.data;
+        console.log(response, "轮灌");
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }

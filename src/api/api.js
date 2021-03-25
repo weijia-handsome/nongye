@@ -105,6 +105,21 @@ export function reqCreateRole({ username, p_id, role_name, region }) {
     })
 }
 
+//编辑角色
+export function editRole({ username, p_id, role_name, r_id, region }) {
+    return request({
+        url: `${API_NAME}/editRole`,
+        method: 'GET',
+        params: {
+            username,
+            r_id,
+            role_name,
+            p_id,
+            region
+        },
+    })
+}
+
 //获取权限
 export function reqGetPower({ username }) {
     return request({
@@ -161,8 +176,27 @@ export function reqEditProject({ username, name, adss, fireman, person, firemann
     })
 }
 
+// 新增项目 savaProject
+export function reqSavaProject({ username, name, adss, fireman, person, firemanname, personname, lnt, marker}) {
+    return request({
+        url: `${API_NAME}/savaProject`,
+        method: 'GET',
+        params: {
+            username,
+            name,
+            adss,
+            fireman,
+            person,
+            firemanname,
+            personname,
+            lnt,
+            marker,
+        },
+    })
+}
+
 //获取视频列表
-export function reqGetVideoDevice({ username, tid, pno, pageSize }) {
+export function reqGetVideoDevice({ username, tid, pno, pageSize,object }) {
     return request({
         url: `${API_NAME}/getDevice`,
         method: 'GET',
@@ -170,7 +204,8 @@ export function reqGetVideoDevice({ username, tid, pno, pageSize }) {
             username,
             tid,
             pno,
-            pageSize
+            pageSize,
+            object,
         },
     })
 }
@@ -187,7 +222,7 @@ export function reqGetVideo({ username }) {
 }
 
 // 土壤温湿度
-export function reqGetTuRangDevice({ username, tid, pno, pageSize, object }) {
+export function reqGetTuRangDevice({ username, tid, pno, pageSize, object, nid }) {
     return request({
         url: `${API_NAME}/getDevice`,
         method: 'GET',
@@ -197,6 +232,7 @@ export function reqGetTuRangDevice({ username, tid, pno, pageSize, object }) {
             pno,
             pageSize,
             object,
+            nid,
         },
     })
 }
@@ -541,6 +577,19 @@ export function addGridTask({ username, name, time, type, start_time, object, cy
         },
     })
 }
+//编辑滴灌任务
+export function editGridTask({ username, start_time }) {
+    return request({
+        url: `${API_NAME}/editGridTask`,
+        method: 'GET',
+        params: {
+            username,
+            start_time,
+        },
+    })
+}
+
+
 
 //获取滴灌可用分区
 export function getTypeByGrid({ username, type }) {

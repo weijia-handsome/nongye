@@ -64,7 +64,7 @@
       <!-- 地图模式 -->
       <div class="m-map" id="map" v-if="mapVisible"></div>
       <div v-else>
-        <el-table :data="tableData" border style="width: 100%">
+        <el-table :data="tableData" border style="width: 100%" height="600">
           <el-table-column
             fixed
             label="序号"
@@ -130,7 +130,7 @@
       </div>
 
       <create-device ref="deviceRef"></create-device>
-      <create ref="createRef"></create>
+      <create ref="createRef" @refresh="getList"></create>
     </el-card>
   </div>
 </template>
@@ -268,6 +268,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, '===========');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

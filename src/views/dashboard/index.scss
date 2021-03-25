@@ -144,7 +144,6 @@
       &__content {
         height: 78%;
         background-color: #173155;
-        cursor: pointer;
 
         /deep/ {
           & .el-timeline-item__timestamp {
@@ -180,6 +179,10 @@
 
           & .el-timeline-item__tail {
             color: #04E0F9;
+          }
+
+          & .el-timeline-item {
+            cursor: pointer;
           }
         }
       }
@@ -247,6 +250,7 @@
       height: 97%;
       width: 24%;
       justify-content: space-between;
+      cursor: pointer;
 
       &__title {
         width: 100%;

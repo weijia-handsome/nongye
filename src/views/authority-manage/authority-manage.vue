@@ -68,7 +68,7 @@
           :total="total"
         />
       </div>
-      <edit ref="editRef"></edit>
+      <edit ref="editRef" @refresh="getRoleList"></edit>
     </el-card>
   </div>
 </template>
@@ -128,6 +128,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData ,'======');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.data.mess || "服务错误！");

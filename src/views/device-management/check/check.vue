@@ -3,7 +3,7 @@
     class="m-dialog"
     title="设备详情"
     :visible.sync="dialogVisible"
-    width="60%"
+    width="80%"
     :before-close="handleClose"
   >
     <div class="m-box">
@@ -50,7 +50,7 @@
             <div
               class="m-top__item"
               id="lineOne"
-              style="width: 700px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
           <div class="m-top">
@@ -58,7 +58,7 @@
             <div
               class="m-top__item"
               id="lineTwo"
-              style="width: 700px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
           <div class="m-top">
@@ -66,7 +66,7 @@
             <div
               class="m-top__item"
               id="lineThree"
-              style="width: 700px; height: 290px"
+              style="width: 1000px; height: 290px"
             ></div>
           </div>
         </el-scrollbar>
@@ -150,7 +150,7 @@ export default {
         const dataTimeArr = this.response.data.data.map((item) => {
           return item.s_time;
         });
-        this.dataTime = dataTimeArr.slice(0, 4);
+        this.dataTime = dataTimeArr.slice(0, 6);
 
         for(let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
@@ -375,7 +375,7 @@ export default {
 
     &-right {
       display: flex;
-      width: 700px;
+      width: 1000px;
       height: 600px;
       flex-direction: column;
       justify-content: space-between;
