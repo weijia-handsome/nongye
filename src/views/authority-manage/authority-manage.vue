@@ -8,12 +8,20 @@
         <el-row :gutter="24">
           <el-col :span="6">
             <el-form-item label="角色名称">
-              <el-input v-model="form.name" size="mini"></el-input>
+              <el-input
+                v-model="form.name"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item>
-              <el-button type="primary" size="mini">查询</el-button>
+              <el-button type="primary" size="mini" @click="handleSearch"
+                >查询</el-button
+              >
               <el-button type="primary" size="mini" @click="handleCreate"
                 >新增</el-button
               >
@@ -35,7 +43,12 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="角色名称" width="180">
+        <el-table-column
+          prop="name"
+          label="角色名称"
+          width="180"
+          align="center"
+        >
         </el-table-column>
         <el-table-column prop="region_name" label="区域范围" align="center">
         </el-table-column>
@@ -105,7 +118,7 @@ export default {
     },
     handleCurrentChange(currentPage) {
       this.param.pno = currentPage;
-      this.getUserList();
+      this.getRoleList();
     },
     handleEdit(roleInfo) {
       this.$refs.editRef.handleOpen(roleInfo);
@@ -116,7 +129,7 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getUserList();
+      this.getRoleList();
     },
     //获取列表
     async getRoleList() {
@@ -124,6 +137,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
+        object: this.form.name,
       });
       if (response.status === 200) {
         this.loading = true;

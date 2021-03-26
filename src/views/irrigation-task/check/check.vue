@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { reqGetVideo } from "@/api/api.js";
+import { reqGetVideo, getScene } from "@/api/api.js";
 import "../../../../public/ezuikit.js";
 import EZUIKit from "ezuikit-js";
 export default {
@@ -30,6 +30,8 @@ export default {
     return {
       dialogVisible: false,
       video: "",
+      cut: "",
+      object: "",
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -61,9 +63,20 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleOpen(irrInfo) {
       this.dialogVisible = true;
+      this.cut = irrInfo.cut;
+      this.object = irrInfo.object;
       this.getVideo();
+      this.getScene();
+    },
+    async getScene() {
+      const response = await getScene({
+        username: window.sessionStorage.getItem('username'),
+        cut: this.cut,
+        object: this.object,
+      });
+      console.log(response, '视频');
     },
     //获取视频设备
     async getVideo() {

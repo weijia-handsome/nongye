@@ -12,6 +12,7 @@ import VideoPlayer from 'vue-video-player';
 import 'video.js/dist/video-js.css';
 import 'lib-flexible';
 import axios from 'axios';
+import './assets/iconfont/iconfont.css';
 
 Vue.prototype.axios = axios;
 Vue.config.productionTip = false;

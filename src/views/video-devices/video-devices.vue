@@ -44,7 +44,12 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="network_name" label="管网名称" width="180" align="center">
+        <el-table-column
+          prop="network_name"
+          label="管网名称"
+          width="180"
+          align="center"
+        >
         </el-table-column>
         <el-table-column prop="imei" label="设备编号" align="center">
         </el-table-column>
@@ -125,16 +130,26 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (this.form.name !== "" && this.form.phone !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.phone !== "") {
+        object = this.form.phone;
+      } else if (this.form.phone == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.phone == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
     //获取视频列表
-    async getList() {
+    async getList(object) {
       const response = await reqGetVideoDevice({
         username: window.sessionStorage.getItem("username"),
         tid: this.param.tid,
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object: this.form.name || this.form.phone || "",
+        object: object,
       });
       if (response.status === 200) {
         this.tableData = response.data.data;

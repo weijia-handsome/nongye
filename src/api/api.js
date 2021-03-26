@@ -13,7 +13,7 @@ export function reqLogin({ username, password }) {
     })
 }
 //获取用户管理列表
-export function reqUserList({ username, pno, pageSize, object }) {
+export function reqUserList({ username, pno, pageSize, phone,name }) {
     return request({
         url: `${API_NAME}/getUser_info`,
         method: 'GET',
@@ -21,7 +21,8 @@ export function reqUserList({ username, pno, pageSize, object }) {
             username,
             pno,
             pageSize,
-            object
+            phone,
+            name
         },
     })
 }
@@ -68,14 +69,15 @@ export function reqSaveUser({ username, name, pass, phone, role }) {
 }
 
 //获取角色
-export function reqGetRole({ username, pno, pageSize }) {
+export function reqGetRole({ username, pno, pageSize,object }) {
     return request({
         url: `${API_NAME}/getrole`,
         method: 'GET',
         params: {
             username,
             pno,
-            pageSize
+            pageSize,
+            object
         },
     })
 }
@@ -132,14 +134,15 @@ export function reqGetPower({ username }) {
 }
 
 //获取项目 getProject
-export function reqGetProject({ username, pno, pageSize }) {
+export function reqGetProject({ username, pno, pageSize,object }) {
     return request({
         url: `${API_NAME}/getProject`,
         method: 'GET',
         params: {
             username,
             pno,
-            pageSize
+            pageSize,
+            object
         },
     })
 }
@@ -286,7 +289,9 @@ export function reqAlarmList({ username, pno, pageSize, object }) {
         method: 'GET',
         params: {
             username,
-            pno, pageSize, object
+            pno, 
+            pageSize, 
+            object
         },
     })
 }
@@ -775,6 +780,19 @@ export function getFlowDevice({ username }) {
         method: 'GET',
         params: {
             username,
+        },
+    })
+}
+
+//滴灌任务查看现场
+export function getScene({ username, object, cut }) {
+    return request({
+        url: `${API_NAME}/getScene`,
+        method: 'GET',
+        params: {
+            username,
+            object,
+            cut,
         },
     })
 }

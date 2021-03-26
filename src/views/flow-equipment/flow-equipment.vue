@@ -17,7 +17,9 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-button type="primary" size="mini">查询</el-button>
+            <el-button type="primary" size="mini" @click="handleSearch"
+              >查询</el-button
+            >
           </el-col>
         </el-row>
       </el-form>
@@ -92,22 +94,40 @@ export default {
     };
   },
   methods: {
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+    handleSizeChange(pageSize) {
+      this.param.pno = 1;
+      this.param.pageSize = pageSize;
+      this.getList();
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+    handleCurrentChange(currentPage) {
+      this.param.pno = currentPage;
+      this.getList();
     },
     handleCheck(listInfo) {
       this.$refs.flowRef.handleOpen(listInfo);
     },
-    async getList() {
+    handleSearch() {
+      this.total = 0;
+      this.param.pno = 1;
+      let object;
+      if (this.form.name !== "" && this.form.number !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number !== "") {
+        object = this.form.number;
+      } else if (this.form.number == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
+    },
+    async getList(object) {
       const response = await reqcontorlDeviceInfo({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
         tid: this.param.tid,
-        object: this.form.name || this.form.number,
+        object: object,
       });
       if (response.status === 200) {
         this.tableData = response.data.data;

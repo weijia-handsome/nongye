@@ -725,7 +725,7 @@ export default {
         for (let i of this.deviceData.data.mess) {
           this.deviceType.push({ value: i.num, name: i.name, index: [] });
         }
-        console.log(this.deviceType);
+        console.log(this.deviceType,'物联设备');
       } else {
         this.$message.error(this.deviceData.statusText || "服务错误！");
       }
