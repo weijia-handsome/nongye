@@ -64,7 +64,7 @@
       <!-- 地图模式 -->
       <div class="m-map" id="map" v-if="mapVisible"></div>
       <div v-else>
-        <el-table :data="tableData" border style="width: 100%">
+        <el-table :data="tableData" border style="width: 100%" height="600px">
           <el-table-column
             fixed
             label="序号"
