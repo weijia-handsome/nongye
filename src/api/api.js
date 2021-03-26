@@ -177,7 +177,7 @@ export function reqEditProject({ username, name, adss, fireman, person, firemann
 }
 
 // 新增项目 savaProject
-export function reqSavaProject({ username, name, adss, fireman, person, firemanname, personname, lnt, marker}) {
+export function reqSavaProject({ username, name, adss, fireman, person, firemanname, personname, lnt, marker }) {
     return request({
         url: `${API_NAME}/savaProject`,
         method: 'GET',
@@ -196,7 +196,7 @@ export function reqSavaProject({ username, name, adss, fireman, person, firemann
 }
 
 //获取视频列表
-export function reqGetVideoDevice({ username, tid, pno, pageSize,object }) {
+export function reqGetVideoDevice({ username, tid, pno, pageSize, object }) {
     return request({
         url: `${API_NAME}/getDevice`,
         method: 'GET',
@@ -483,6 +483,28 @@ export function delNetwork({ username, nid }) {
         },
     })
 }
+//获取管点
+export function usNetspot({ username }) {
+    return request({
+        url: `${API_NAME}/usNetspot`,
+        method: 'GET',
+        params: {
+            username,
+        },
+    })
+}
+
+//获取管网分区 usFeiqu
+export function usFeiqu({ username }) {
+    return request({
+        url: `${API_NAME}/usFeiqu`,
+        method: 'GET',
+        params: {
+            username,
+        },
+    })
+}
+
 //获取分区列表 getPartitionList
 export function getPartitionList({ username, pno, pageSize, object }) {
     return request({
@@ -493,6 +515,71 @@ export function getPartitionList({ username, pno, pageSize, object }) {
             pno,
             pageSize,
             object
+        },
+    })
+}
+
+//删除分区 delFeiqu
+export function delFeiqu({ username, id }) {
+    return request({
+        url: `${API_NAME}/delFeiqu`,
+        method: 'GET',
+        params: {
+            username,
+            id
+        },
+    })
+}
+
+//新增井房设备 saveReclosing
+export function saveReclosing({ username, tid, position, imei, fid, name }) {
+    return request({
+        url: `${API_NAME}/saveReclosing`,
+        method: 'GET',
+        params: {
+            username,
+            tid,
+            position,
+            imei,
+            fid,
+            name
+        },
+    })
+}
+
+//删除井房设备 delReclosing
+export function delReclosing({ username, id }) {
+    return request({
+        url: `${API_NAME}/delReclosing`,
+        method: 'GET',
+        params: {
+            username,
+            id
+        },
+    })
+}
+
+
+//编辑管网
+export function upNetwork({ username, name, adss, lant_lat, fireman, person, firemanname, personname, spid, marker, pid, nid }) {
+    return request({
+        url: `${API_NAME}/upNetwork`,
+        method: 'GET',
+        params: {
+            username,
+            name, adss, lant_lat, fireman, person, firemanname, personname, marker, pid, spid, nid
+        },
+    })
+}
+
+//新增管网 adNetwork
+export function adNetwork({ username, name, adss, fireman, person, firemanname, personname, spid, marker, pid }) {
+    return request({
+        url: `${API_NAME}/adNetwork`,
+        method: 'GET',
+        params: {
+            username,
+            name, adss, fireman, person, firemanname, personname, marker, pid, spid
         },
     })
 }
@@ -677,6 +764,17 @@ export function pushGrid({ username, pid, pno, pageSize, type }) {
             pno,
             pageSize,
             type
+        },
+    })
+}
+
+//流量计
+export function getFlowDevice({ username }) {
+    return request({
+        url: `${API_NAME}/getFlowDevice`,
+        method: 'GET',
+        params: {
+            username,
         },
     })
 }

@@ -25,7 +25,7 @@
     <div class="m-left">
       <!-- <div class="m-left__background"></div> -->
       <div class="m-left__first">
-        <p class="m-left__title">灌溉占比</p>
+        <p class="m-left__title">流量数据</p>
         <div
           class="m-left__round"
           id="roundChart"
@@ -129,7 +129,7 @@
 
     <!-- 右边图表 -->
     <div class="m-right">
-      <div class="m-right__round" >
+      <div class="m-right__round">
         <p class="m-right__text">通知信息</p>
         <!-- el-scrollbar -->
         <el-scrollbar class="m-right__first">
@@ -169,7 +169,7 @@
         ></div>
       </div>
     </div>
-    <task ref="taskRef"></task>
+    <task ref="taskRef" @refresh="handleLunGuan"></task>
     <alarm ref="alarmRef"></alarm>
   </div>
 </template>
@@ -184,9 +184,10 @@ import {
   pushAlarmData,
   pushGrid,
   reqGetNetspot,
+  getFlowDevice,
 } from "@/api/api.js";
 import Task from "./task/task.vue";
-import Alarm from './alarm/alarm.vue';
+import Alarm from "./alarm/alarm.vue";
 
 export default {
   name: "bigData",
@@ -301,41 +302,48 @@ export default {
       });
     },
 
-    //灌溉占比环形图
+    //流量柱状图
     setRoundChart() {
       let roundChart = echarts.init(document.getElementById("roundChart"));
       let option = {
-        //提示框组件
-        tooltip: {
-          trigger: "item",
-        },
-        //图例
-        legend: {
-          orient: "vertical",
-          top: "5%",
-          left: "right",
-          textStyle: {
-            fontSize: 12,
-            color: "#04E0F9",
+        xAxis: {
+          type: "category",
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          axisLabel: {
+            textStyle: {
+              color: "#04E0F9", //坐标值得具体的颜色
+            },
+            interval: 0,
           },
         },
-        //系列列表
+        yAxis: {
+          type: "value",
+          axisLabel: {
+            formatter: "{value} ml",
+            textStyle: {
+              color: "#04E0F9", //坐标值得具体的颜色
+            },
+          },
+        },
+        grid: {
+          top: 40,
+          x: 60,
+          x2: 60,
+          y2: 40,
+        },
         series: [
           {
-            type: "pie",
-            radius: ["40%", "70%"],
-            avoidLabelOverlap: false,
-            label: {
-              show: false,
-              position: "center",
+            data: [120, 200, 150, 80, 70, 110, 130],
+            type: "bar",
+            barWidth: 15,
+            itemStyle: {
+              normal: {
+                color: "#04E0F9",
+                lineStyle: {
+                  color: "#04E0F9",
+                },
+              },
             },
-            labelLine: {
-              show: false,
-            },
-            data: [
-              { value: 1048, name: "已灌溉" },
-              { value: 735, name: "未灌溉", itemStyle: { color: "#04E0F9" } },
-            ],
           },
         ],
       };
@@ -642,6 +650,13 @@ export default {
     handleiIll(irrInfo) {
       this.$refs.taskRef.handleOpen(irrInfo);
     },
+    //流量计
+    async getFlowDevice() {
+      const response = await getFlowDevice({
+        username: window.sessionStorage.getItem("username"),
+      });
+      console.log(response, "流量计");
+    },
     //温湿度传感器
     async getAverage() {
       this.getAverageResponse = await getAverage({
@@ -710,6 +725,7 @@ export default {
         for (let i of this.deviceData.data.mess) {
           this.deviceType.push({ value: i.num, name: i.name, index: [] });
         }
+        console.log(this.deviceType);
       } else {
         this.$message.error(this.deviceData.statusText || "服务错误！");
       }
@@ -735,7 +751,7 @@ export default {
       });
       if (response.status === 200) {
         this.pushAlarmArr = response.data.data;
-        console.log(response, "============");
+        console.log(response, "报警信息");
       } else {
         this.$message.error(response.statusText || "服务错误");
       }
@@ -793,6 +809,7 @@ export default {
     this.deviceOnlineData();
     this.pushAlarmData();
     this.handleLunGuan();
+    this.getFlowDevice();
   },
 
   created() {

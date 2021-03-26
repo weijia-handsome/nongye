@@ -98,7 +98,7 @@
           </el-table-column>
           <el-table-column fixed="right" label="操作" width="180">
             <template slot-scope="scope">
-              <el-button @click="handleClick" type="text" size="small"
+              <el-button @click="handleClick(scope.row.nid,scope.row.lnt)" type="text" size="small"
                 >新增设备</el-button
               >
               <el-button type="text" size="small" @click="handleEdit(scope.row)"
@@ -248,8 +248,8 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    handleClick() {
-      this.$refs.deviceRef.handleOpen();
+    handleClick(nid, lnt) {
+      this.$refs.deviceRef.handleOpen(nid ,lnt);
     },
     handleCreate() {
       this.$refs.createRef.handleOpen();
@@ -275,7 +275,7 @@ export default {
       }
     },
     handleDelete(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将删除该条数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",

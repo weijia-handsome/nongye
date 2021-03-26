@@ -96,7 +96,6 @@ export default {
             username: this.ruleForm.userName,
             password: this.ruleForm.password,
           });
-          console.log(response)
           if (response.data.list[0].status) {
             this.$router.push({ path: "/dashboard" });
             window.sessionStorage.setItem("username", this.ruleForm.userName);

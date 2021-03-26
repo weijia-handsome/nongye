@@ -173,6 +173,7 @@ export default {
       this.createParam(alarmInfo);
       this.$nextTick(() => {
         setTimeout(() => {
+         this.$refs.ruleForm.clearValidate();
           this.getDeviceInfo();
         });
       });
@@ -222,7 +223,6 @@ export default {
         imei: this.deviceInfo.imei,
         aid: this.alarmsId,
       });
-      console.log(response, "==========");
       if (response.status === 200) {
         this.$message.success(response.data.mess);
       } else {

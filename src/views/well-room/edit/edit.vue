@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="m-dialog"
-    title="编辑"
+    title="新增井房设备"
     :visible.sync="dialogVisible"
     width="50%"
     :before-close="handleClose"
@@ -11,44 +11,47 @@
         <el-col :span="12">
           <el-form-item
             label="设备名称"
-            prop="userName"
+            prop="name"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.userName"></el-input>
+            <el-input v-model="form.name"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item
             label="设备imei号"
-            prop="passward"
+            prop="imei"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.passward"></el-input>
+            <el-input v-model="form.imei"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-txt">
           <el-form-item
             class="m-box__text"
             label="设备类型"
-            prop="phone"
+            prop="deviceType"
             :rules="[{ required: true, message: '请选择' }]"
           >
-            <el-select placeholder="请选择" v-model="form.region" size="mini">
-              <el-option label="管理员" value="0"></el-option>
-              <el-option label="超级管理员" value="1"></el-option>
+            <el-select
+              placeholder="请选择"
+              v-model="form.deviceType"
+              size="mini"
+            >
+              <el-option label="重合闸断路器" value="6"></el-option>
+              <el-option label="重合闸漏电保护器" value="7"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-txt">
           <el-form-item
             label="设备部件"
-            prop="region"
+            prop="other"
             class="m-txt__text"
             :rules="[{ required: true, message: '请选择' }]"
           >
-            <el-select placeholder="请选择" v-model="form.region">
-              <el-option label="管理员" value="0"></el-option>
-              <el-option label="超级管理员" value="1"></el-option>
+            <el-select placeholder="请选择" v-model="form.other">
+              <el-option label="总电源" value="0"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -62,17 +65,19 @@
 </template>
 
 <script>
+import { saveReclosing } from "@/api/api.js";
 export default {
   name: "Edit",
   data() {
     return {
       dialogVisible: false,
       value: "0",
+      fid: "",
       form: {
-        region: "",
-        userName: "",
-        passward: "",
-        phone: "",
+        name: "",
+        imei: "",
+        deviceType: "",
+        other: "",
       },
     };
   },
@@ -80,16 +85,34 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleOpen(fid) {
       this.dialogVisible = true;
+      this.fid = fid;
       this.$nextTick(() => {
         this.$refs.formData.resetFields();
       });
     },
+    //新增
+    async saveReclosing() {
+      const response = await saveReclosing({
+        username: window.sessionStorage.getItem("username"),
+        tid: this.form.deviceType,
+        position: this.form.other,
+        imei: this.form.imei,
+        name: this.form.name,
+        fid: this.fid,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          this.saveReclosing();
           this.dialogVisible = false;
         } else {
           console.log("失败");

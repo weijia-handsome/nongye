@@ -246,7 +246,6 @@ export default {
       this.getList();
     },
     handleCheckVideo(imei) {
-      console.log(imei, '=============');
       this.$refs.videoRef.handleOpen();
     },
     handleEdit(irrInfo) {
@@ -271,7 +270,6 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
-        console.log(this.tableData, '///////////');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText);
@@ -295,7 +293,6 @@ export default {
         username: window.sessionStorage.getItem('username'),
         id: id
       })
-      console.log(response, '========');
       if (response.data.code === '200') {
         this.$message.success(response.data.mess);
       } else {

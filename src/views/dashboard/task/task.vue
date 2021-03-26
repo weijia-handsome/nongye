@@ -159,7 +159,8 @@ export default {
         this.form.time = irrInfo.time;
         this.form.startTime = irrInfo.start_time;
         this.form.endTime = irrInfo.end_time;
-        this.form.irrType = irrInfo.type;
+        this.form.irrType = irrInfo.cut;
+        this.form.taskType = irrInfo.type;
         this.id = irrInfo.id;
       } else {
         this.form.name = "";
@@ -169,27 +170,7 @@ export default {
         this.form.irrType = "";
       }
     },
-    //新增滴灌任务
-    async addGridTask() {
-      const response = await addGridTask({
-        username: window.sessionStorage.getItem("username"),
-        name: this.form.name,
-        time: this.form.time,
-        start_time: this.form.startTime,
-        type: this.form.taskType,
-        cut: this.form.irrType,
-        cycle: this.form.num,
-        end_time: this.form.endTime,
-        object: this.netId,
-      });
-      if (response.data.code === "200") {
-        this.$message.success(response.data.mess);
-        this.$emit("refresh");
-      } else {
-        this.$message.error(response.data.mess || "服务错误!");
-      }
-    },
-    async handleSelect() {
+     async handleSelect() {
       const response = await getTypeByGrid({
         username: window.sessionStorage.getItem("username"),
         type: this.form.irrType,
@@ -203,25 +184,44 @@ export default {
         this.$message.error(response.statusText || "服务异常!");
       }
     },
+    //新增滴灌任务
+    // async addGridTask() {
+    //   const response = await addGridTask({
+    //     username: window.sessionStorage.getItem("username"),
+    //     name: this.form.name,
+    //     time: this.form.time,
+    //     start_time: this.form.startTime,
+    //     type: this.form.taskType,
+    //     cut: this.form.irrType,
+    //     cycle: this.form.num,
+    //     end_time: this.form.endTime,
+    //     object: this.netId,
+    //   });
+    //   if (response.data.code === "200") {
+    //     this.$message.success(response.data.mess);
+    //     this.$emit("refresh");
+    //   } else {
+    //     this.$message.error(response.data.mess || "服务错误!");
+    //   }
+    // },
     //编辑
-    async editGridTask() {
-      const response = await editGridTask({
-        username: window.sessionStorage.getItem("username"),
-        start_time: this.form.startTime,
-      });
-      console.log(response, "================");
-    },
+    // async editGridTask() {
+    //   const response = await editGridTask({
+    //     username: window.sessionStorage.getItem("username"),
+    //     start_time: this.form.startTime,
+    //   });
+    //   console.log(response, "================");
+    // },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          if (this.id) {
-            this.editGridTask();
-          } else {
-            this.addGridTask();
-          }
+          // if (this.id) {
+          //   this.editGridTask();
+          // } else {
+          //   this.addGridTask();
+          // }
           this.dialogVisible = false;
         } else {
-          console.log("失败");
           return false;
         }
       });

@@ -193,7 +193,6 @@ export default {
       this.dialogVisible = false;
     },
     handleOpen(pointInfo) {
-      console.log(pointInfo);
       this.dialogVisible = true;
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();

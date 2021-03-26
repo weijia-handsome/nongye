@@ -19,7 +19,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="分区地址">
-              <el-input v-model="form.phone" size="mini"></el-input>
+              <el-input v-model="form.adress" size="mini"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -63,23 +63,69 @@
               }}</span>
             </template>
           </el-table-column>
-          <el-table-column fixed prop="name" label="分区名称" width="200">
+          <el-table-column
+            fixed
+            prop="name"
+            label="分区名称"
+            width="200"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="adss" label="分区地址" width="450">
+          <el-table-column
+            prop="adss"
+            label="分区地址"
+            width="450"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="pname" label="项目名称" width="200">
+          <el-table-column
+            prop="pname"
+            label="项目名称"
+            width="200"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="firemanname" label="护理人" width="120">
+          <el-table-column
+            prop="firemanname"
+            label="护理人"
+            width="120"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="fireman" label="护理人手机号码" width="200">
+          <el-table-column
+            prop="fireman"
+            label="护理人手机号码"
+            width="200"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="personname" label="责任人" width="120">
+          <el-table-column
+            prop="personname"
+            label="责任人"
+            width="120"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="person" label="责任人手机号码" width="200">
+          <el-table-column
+            prop="person"
+            label="责任人手机号码"
+            width="200"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column prop="marker" label="描述" width="450">
+          <el-table-column
+            prop="marker"
+            label="描述"
+            width="450"
+            align="center"
+          >
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="250">
+          <el-table-column
+            fixed="right"
+            label="操作"
+            width="250"
+            align="center"
+          >
             <template slot-scope="scope">
               <el-button
                 @click="handleClick(scope.row.id)"
@@ -90,7 +136,10 @@
               <el-button type="text" size="small" @click="handleEdit"
                 >编辑</el-button
               >
-              <el-button type="text" size="small" @click="handleDelete"
+              <el-button
+                type="text"
+                size="small"
+                @click="handleDelete(scope.row.id)"
                 >删除</el-button
               >
             </template>
@@ -118,8 +167,7 @@
 
 <script>
 import Edit from "./edit/edit.vue";
-import MapLoader from "../../components/common/AMap.js";
-import { getPartitionList } from "@/api/api.js";
+import { getPartitionList, delFeiqu } from "@/api/api.js";
 
 export default {
   name: "DevieManagement",
@@ -135,7 +183,7 @@ export default {
       form: {
         name: "",
         phone: "",
-        region: "",
+        adress: "",
       },
       param: {
         pno: 1,
@@ -250,18 +298,29 @@ export default {
       }
       this.loading = false;
     },
+    //新增
+    
 
-    handleDelete() {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+    //删除
+    async delFeiqu() {
+      const response = await delFeiqu({
+        username: window.sessionStorage.getItem("username"),
+        id: id,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
+    handleDelete(id) {
+      this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
+          this.delFeiqu(id);
         })
         .catch(() => {
           this.$message({

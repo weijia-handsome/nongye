@@ -69,6 +69,7 @@
           border
           style="width: 100%"
           v-loading="loading"
+          height="600"
         >
           <el-table-column
             fixed
@@ -140,7 +141,7 @@
             align="center"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="handleEdit"
+              <el-button type="text" size="small" @click="handleEdit(scope.row)"
                 >编辑</el-button
               >
               <el-button
@@ -168,7 +169,7 @@
         </div>
       </div>
 
-      <edit ref="editRef"></edit>
+      <edit ref="editRef" @refresh="getList"></edit>
     </el-card>
   </div>
 </template>
@@ -216,7 +217,6 @@ export default {
 
         const username = sessionStorage.getItem("username");
         reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
-          console.log(res);
           var cluster,
             markers = [];
           let data = res.data.data;
@@ -287,8 +287,8 @@ export default {
     handleCreate() {
       this.$refs.editRef.handleOpen();
     },
-    handleEdit() {
-      this.$refs.editRef.handleOpen();
+    handleEdit(pipeInfo) {
+      this.$refs.editRef.handleOpen(pipeInfo);
     },
     //获取列表
     async getList() {
@@ -309,7 +309,7 @@ export default {
       this.loading = false;
     },
     handleDelete(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将删除该条数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
@@ -330,7 +330,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         nid: id,
       });
-      if (response.status) {
+      if (response.status === 200) {
         this.$message({
           type: "success",
           message: "删除成功!",

@@ -154,7 +154,6 @@ export default {
         object:
           this.form.projectName || this.form.deviceName || this.form.deviceNum,
       });
-      console.log(response);
       if (response.status === 200) {
         this.tableData = response.data.data;
         this.total = response.data.recordCount;

@@ -111,7 +111,6 @@ export default {
   },
   watch: {
     response(val) {
-      console.log(val);
       this.setlineOne();
       this.setlineTwo();
       this.setlineThree();    
