@@ -10,16 +10,17 @@
           <el-col :span="5">
             <el-form-item label="设备类型">
               <el-select v-model="form.name" placeholder="请选择" size="mini">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+                <el-option label="重合闸断路器" value="6"></el-option>
+                <el-option label="重合闸漏电保护器" value="7"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="5">
             <el-form-item label="设备部件">
               <el-select v-model="form.name" placeholder="请选择" size="mini">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+                <el-option label="0" value="总电源"></el-option>
+                <el-option label="1" value="除沙电磁阀"></el-option>
+                <el-option label="2" value="灌溉电磁阀"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -43,7 +44,7 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" size="mini">查询</el-button>
-            <el-button type="primary" size="mini" @click="handleCreate"
+            <el-button type="primary" size="mini" @click="handleCreate(fid)"
               >新增</el-button
             >
           </el-col>
@@ -63,16 +64,34 @@
         <el-table-column prop="imei" label="设备imei" align="center">
         </el-table-column>
         <el-table-column prop="tid" label="设备类型" align="center">
+          <template slot-scope="scope">
+            <span v-if="scope.row.tid === '0'">视频设备</span>
+            <span v-if="scope.row.tid === '2'">四路智能控制器</span>
+            <span v-if="scope.row.tid === '4'">土壤温湿度传感器</span>
+            <span v-if="scope.row.tid === '5'">流量计</span>
+            <span v-if="scope.row.tid === '6'">重合闸断路器</span>
+            <span v-if="scope.row.tid === '7'">重合闸漏电保护器</span>
+          </template>
         </el-table-column>
-        <el-table-column prop="address" label="设备部件" align="center">
+        <el-table-column prop="position" label="设备部件" align="center">
+          <template slot-scope="scope">
+            <span v-if="scope.row.position === '0'">总电源</span>
+            <span v-if="scope.row.position === '1'">除沙电磁阀</span>
+            <span v-if="scope.row.position === '2'">灌溉电磁阀</span>
+          </template>
         </el-table-column>
-        <el-table-column prop="address" label="操作" align="center">
-          <el-button type="text" size="mini" @click="handleEdit"
-            >编辑</el-button
-          >
-          <el-button type="text" size="mini" @click="handleDelete"
-            >删除</el-button
-          >
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-button type="text" size="mini" @click="handleEdit(scope.row)" disabled
+              >编辑</el-button
+            >
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleDelete(scope.row.id)"
+              >删除</el-button
+            >
+          </template>
         </el-table-column>
       </el-table>
       <div class="m-pagination">
@@ -89,13 +108,13 @@
         />
       </div>
     </el-card>
-    <edit ref="editRef"></edit>
+    <edit ref="editRef" @refresh="getList"></edit>
   </div>
 </template>
 
 <script>
 import Edit from "./edit/edit.vue";
-import { getReclosing } from "@/api/api.js";
+import { getReclosing, delReclosing } from "@/api/api.js";
 
 export default {
   components: { Edit },
@@ -104,6 +123,7 @@ export default {
     return {
       total: 0,
       loading: false,
+      fid: "",
       form: {
         name: "",
         phone: "",
@@ -129,8 +149,8 @@ export default {
     handleEdit() {
       this.$refs.editRef.handleOpen();
     },
-    handleCreate() {
-      this.$refs.editRef.handleOpen();
+    handleCreate(fid) {
+      this.$refs.editRef.handleOpen(fid);
     },
     //获取列表
     async getList() {
@@ -138,19 +158,37 @@ export default {
         username: window.sessionStorage.getItem("username"),
         fid: this.$route.query.id,
       });
-      console.log(response, "==========");
+      if (response.data.code === "200") {
+        this.tableData = response.data.data;
+        this.fid = response.data.data[0].fid;
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
     },
-    handleDelete() {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+    //删除井房设备
+    async delReclosing(id) {
+      const response = await delReclosing({
+        username: window.sessionStorage.getItem("username"),
+        id: id,
+      });
+      if (response.data.code === "200") {
+        this.$message({
+          type: "success",
+          message: "删除成功!",
+        });
+        this.getList();
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
+    },
+    handleDelete(id) {
+      this.$confirm("此操作将永久删除该条数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
+          this.delReclosing(id);
         })
         .catch(() => {
           this.$message({
@@ -174,7 +212,7 @@ export default {
     }
 
     & .el-page-header__left {
-      color: #fff;
+      color: #333;
     }
   }
 
@@ -197,6 +235,7 @@ export default {
 
         & .el-form-item__content {
           margin-left: 0;
+          line-height: 0;
         }
 
         & .el-form-item__label {

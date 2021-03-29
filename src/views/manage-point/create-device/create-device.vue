@@ -89,6 +89,8 @@ export default {
         deviceAddress: "",
         deviceNumber: "",
         deviceType: "",
+        nid: "",
+        lant_lat: "",
       },
     };
   },
@@ -168,8 +170,10 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleOpen(nid, lnt) {
       this.dialogVisible = true;
+      this.form.nid = nid;
+      this.form.lant_lat = lnt;
       this.$nextTick(() => {
         this.$refs.formData.resetFields();
         this.setMap();
@@ -178,7 +182,7 @@ export default {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          this.creatDevice();
           this.dialogVisible = false;
         } else {
           console.log("失败");
@@ -193,14 +197,14 @@ export default {
         device_name: this.form.deviceName,
         imei: this.form.deviceNumber,
         tid: this.form.deviceType,
-        add: this.form.deviceAddress,
-        nid,
-        lant_lat,
+        adss: this.form.deviceAddress,
+        nid: this.form.nid,
+        lant_lat: this.form.lant_lat,
       });
-      if (response.status === 200) {
-        this.$message.success(response.statusText);
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
       } else {
-        this.$message.error(response.statusText);
+        this.$message.error(response.data.mess || "服务错误!");
       }
     },
   },

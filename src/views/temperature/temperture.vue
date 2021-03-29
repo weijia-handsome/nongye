@@ -164,16 +164,16 @@ export default {
       const response = await reqGetTuRangDevice({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
-        tio: this.param.tid,
+        tid: this.param.tid,
         pageSize: this.param.pageSize,
-        object: this.form.name || this.form.number,
+        object: this.form.name || this.form.number || '',
       });
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
         this.total = response.data.recordCount;
       } else {
-        this.$message.error(response.statusText || "服务错误！");
+        this.$message.error(response.data.mess || "服务错误！");
       }
       this.loading = false;
     },

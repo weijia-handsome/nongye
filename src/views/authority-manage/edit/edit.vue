@@ -11,10 +11,10 @@
         <el-col :span="6">
           <el-form-item
             label="角色名称"
-            prop="userName"
+            prop="name"
             :rules="[{ required: true, message: '角色名称不能为空' }]"
           >
-            <el-input size="mini" v-model="form.userName"></el-input>
+            <el-input size="mini" v-model="form.name"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -29,6 +29,7 @@
               node-key="id"
               :props="props"
               :default-expand-all="true"
+              @check="handleTreeNode"
             >
             </el-tree>
           </el-form-item>
@@ -43,7 +44,8 @@
 </template>
 
 <script>
-import { reqCreateRole, reqGetPower } from "@/api/api.js";
+import { reqCreateRole, reqGetPower, editRole } from "@/api/api.js";
+
 export default {
   name: "Edit",
   data() {
@@ -53,23 +55,28 @@ export default {
       id: "",
       //默认展开树
       defaultShowTree: [],
-      roleInfo: {},
       form: {
-        userName: "",
+        name: "",
         powerList: [],
+        region: "",
       },
       props: {
         label: "name",
         children: "children",
       },
-      count: 1,
+      nodeId: [],
+      pid: "",
     };
   },
   methods: {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          alert("成功");
+          if (this.id) {
+            this.editRole();
+          } else {
+            this.reqCreateRole();
+          }
           this.dialogVisible = false;
         } else {
           return false;
@@ -78,6 +85,10 @@ export default {
     },
     handleClose() {
       this.dialogVisible = false;
+    },
+    handleTreeNode(node) {
+      this.nodeId.push(node.id);
+      this.pid = this.nodeId.toString();
     },
     //获取权限
     async getRolePower() {
@@ -91,24 +102,50 @@ export default {
         });
       }
     },
-    //新增权限
-    // async createPower() {
-    //   const response = await reqCreateRole({
-    //     username: window.sessionStorage.getItem('username'),
-    //     p_id:this.id,
-    //   })
-    // },
+    //新增角色
+    async reqCreateRole() {
+      const response = await reqCreateRole({
+        username: window.sessionStorage.getItem("username"),
+        p_id: this.pid,
+        role_name: this.form.name,
+        refion: this.form.region,
+      })
+      if (response.data.code === '200') {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || '服务错误!');
+      }
+    },
+    //编辑角色
+    async editRole() {
+      const response = await editRole({
+        username: window.sessionStorage.getItem("username"),
+        r_id: this.id,
+        role_name: this.form.name,
+        region: this.form.region,
+        p_id: this.pid,
+      });
+      if (response.data.code === '200') {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || '服务错误!');
+      }
+    },
     handleOpen(roleInfo) {
       this.dialogVisible = true;
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
       if (roleInfo) {
-        this.roleInfo = roleInfo;
-        this.form.userName = roleInfo.name;
+        this.id = roleInfo.id;
+        this.form.name = roleInfo.name;
+        this.form.region = roleInfo.region;
       } else {
-        this.form.userName = "";
-        this.roleInfo = null;
+        this.id = "";
+        this.form.name = "";
+        this.form.region = "";
       }
       this.getRolePower();
     },

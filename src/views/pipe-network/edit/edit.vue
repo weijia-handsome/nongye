@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="m-dialog"
-    title="新增管网"
+    :title="form.projectName ? '编辑管网' : '新增管网'"
     :visible.sync="dialogVisible"
     width="50%"
   >
@@ -18,14 +18,12 @@
         </el-col>
         <el-col :span="12" class="m-content-btn"
           ><el-form-item label="管网地址">
-            <el-col :span="22">
-              <el-input
-                id="tipinput"
-                v-model="form.projectAddress"
-                size="mini"
-              ></el-input
-            ></el-col>
-            <el-col :span="2"></el-col>
+            <el-input
+              id="tipinput"
+              v-model="form.projectAddress"
+              size="mini"
+              :rules="[{ required: true, message: '请输入' }]"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12"
@@ -52,7 +50,7 @@
             prop="nursePhone"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.nursePhone" size="mini"></el-input>
+            <el-input v-model="form.liable" size="mini"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12"
@@ -61,30 +59,42 @@
             prop="nursePhone"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.nursePhone" size="mini"></el-input>
+            <el-input v-model="form.liablePhone" size="mini"></el-input>
           </el-form-item>
         </el-col>
-        <!-- <el-row :gutter="24" class="m-wrap"> -->
         <el-col :span="24">
-          <el-form label-position="top">
-            <el-form-item label="分区">
-              <el-select v-model="formData.area" placeholder="请选择活动区域">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="管点">
-              <el-checkbox-group v-model="formData.type">
-                <el-checkbox
-                  label="美食/餐厅线上活动"
-                  name="type"
-                ></el-checkbox>
-                <el-checkbox label="地推活动" name="type"></el-checkbox>
-              </el-checkbox-group>
-            </el-form-item>
-          </el-form>
+          <el-form-item label="分区">
+            <el-select
+              v-model="form.area"
+              placeholder="请选择活动区域"
+              size="mini"
+              clearable
+              :rules="[{ required: true, message: '请选择' }]"
+            >
+              <el-option
+                v-for="(fenqv, fenqvIndex) in form.fenqv"
+                :key="fenqvIndex"
+                :label="fenqv.name"
+                :value="fenqv.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="管点">
+            <el-checkbox-group
+              v-model="form.type"
+              :rules="[{ required: true, message: '请选择' }]"
+            >
+              <el-checkbox
+                v-for="(type, typeIndex) in form.type"
+                :key="typeIndex"
+                :label="type.name"
+                name="type"
+                :value="type.id"
+                @change="handleCheckbox(type.id)"
+              ></el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
         </el-col>
-        <!-- </el-row> -->
       </el-form>
     </el-row>
     <div class="m-map" id="map2"></div>
@@ -97,7 +107,7 @@
 
 <script>
 import MapLoader from "../../../components/common/AMap.js";
-import { adNetspot } from "@/api/api.js";
+import { adNetspot, usNetspot, usFeiqu, upNetwork } from "@/api/api.js";
 export default {
   name: "Edit",
   components: {
@@ -108,6 +118,10 @@ export default {
       map: null, //地图实例
       textarea: "",
       dialogVisible: false,
+      lnt: "",
+      spid: "",
+      pid: "",
+      nid: "",
       form: {
         projectName: "",
         projectAddress: "",
@@ -115,23 +129,20 @@ export default {
         nursePhone: "",
         liable: "",
         liablePhone: "",
-      },
-      formData: {
         area: "",
         type: [],
+        fenqv: [],
       },
     };
   },
   watch: {
     "form.projectAddress"(val) {
-      console.log(val);
       let newVal = val.split(",");
       // 经度
       const longreg = /^(\-|\+)?(((\d|[1-9]\d|1[0-7]\d|0{1,3})\.\d{0,6})|(\d|[1-9]\d|1[0-7]\d|0{1,3})|180\.0{0,6}|180)$/;
       //纬度
       var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
       if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
-        console.log(111);
         let marker = new AMap.Marker({
           position: [newVal[0], newVal[1]],
           offset: new AMap.Pixel(-13, -30),
@@ -183,8 +194,6 @@ export default {
             position: e.lnglat,
             map: map,
           });
-          // if()
-          console.log(markers);
         });
       });
     },
@@ -198,35 +207,112 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleCheckbox(id) {
+      this.spid = id;
+    },
+    async usNetspot() {
+      const response = await usNetspot({
+        username: window.sessionStorage.getItem("username"),
+      });
+      if (response.status === 200) {
+        this.form.type = response.data.mess;
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
+    async usFeiqu() {
+      const response = await usFeiqu({
+        username: window.sessionStorage.getItem("username"),
+      });
+      if (response.status === 200) {
+        this.form.fenqv = response.data.mess;
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
+    handleOpen(pipeInfo) {
       this.dialogVisible = true;
       this.setMap();
       this.$nextTick(() => {
-        this.$refs.formData.resetFields();
+        this.$refs.formData.clearValidate();
       });
+      this.usNetspot();
+      this.usFeiqu();
+
+      if (pipeInfo) {
+        this.form.projectName = pipeInfo.name;
+        this.form.projectAddress = pipeInfo.adss;
+        this.form.nurse = pipeInfo.firemanname;
+        this.form.nursePhone = pipeInfo.fireman;
+        this.form.liable = pipeInfo.personname;
+        this.form.liablePhone = pipeInfo.person;
+        this.lnt = pipeInfo.lant_lat;
+        this.pid = pipeInfo.pid;
+        this.nid = pipeInfo.nid;
+      } else {
+        this.form.projectName = "";
+        this.form.projectAddress = "";
+        this.form.nurse = "";
+        this.form.nursePhone = "";
+        this.form.liable = "";
+        this.form.liablePhone = "";
+      }
+    },
+    //编辑
+    async upNetwork() {
+      const response = await upNetwork({
+        username: window.sessionStorage.getItem("username"),
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        lant_lat: this.lnt,
+        fireman: this.form.nursePhone,
+        person: this.form.liablePhone,
+        firemanname: this.form.nurse,
+        personname: this.form.liable,
+        marker: "",
+        pid: this.pid,
+        spid: this.spid,
+        nid: this.nid,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || "服务错误！");
+      }
+    },
+    //新增
+    async adNetspot() {
+      const response = await adNetspot({
+        username: window.sessionStorage.getItem("username"),
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        fireman: this.form.nursePhone,
+        person: this.form.liablePhone,
+        firemanname: this.form.nurse,
+        personname: this.form.liable,
+        marker: "",
+        pid: this.pid,
+        spid: this.spid,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || "服务错误！");
+      }
     },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          // alert("成功");
-          adNetspot({
-            username: window.sessionStorage.getItem("username"),
-            name: this.form.projectName,
-            adss: this.form.projectAddress,
-            fireman: this.form.liablePhone,
-            person: this.form.nursePhone,
-            firemanname: this.form.liable,
-            personname: this.form.nurse,
-            tube,
-            marker,
-            nid,
-            lnt: this.lnt,
-          }).then((res) => {
-            console.log(res);
-          });
+          if (this.nid) {
+            this.upNetwork();
+          } else {
+            this.adNetspot();
+          }
+
           this.dialogVisible = false;
         } else {
-          // console.log("失败");
           return false;
         }
       });

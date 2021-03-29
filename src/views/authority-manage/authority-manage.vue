@@ -68,7 +68,7 @@
           :total="total"
         />
       </div>
-      <edit ref="editRef"></edit>
+      <edit ref="editRef" @refresh="getRoleList"></edit>
     </el-card>
   </div>
 </template>

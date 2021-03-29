@@ -18,7 +18,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-content-btn"
-          ><el-form-item label="项目地址">
+          ><el-form-item
+            label="项目地址"
+            prop="projectAddress"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
             <el-input
               id="tipinput"
               v-model="form.projectAddress"
@@ -84,7 +88,7 @@
 
 <script>
 import MapLoader from "../../../components/common/AMap.js";
-import { reqEditProject } from "@/api/api.js";
+import { reqEditProject, reqSavaProject } from "@/api/api.js";
 export default {
   name: "Edit",
   components: {
@@ -130,24 +134,6 @@ export default {
     },
   },
   methods: {
-    //初始化
-    // setMap() {
-    //   let that = this;
-    //   MapLoader().then(
-    //     (AMap) => {
-    //       that.map = new AMap.Map("map", {
-    //         resizeEnable: true,
-    //         center: ["88.153388", "39.03167"],
-    //         keyboardEnable: false,
-    //         zoom: 15,
-    //         mapStyle: "amap://styles/normal",
-    //       });
-    //     },
-    //     (e) => {
-    //       console.log("地图加载失败", e);
-    //     }
-    //   );
-    // },
     //初始化搜索
     mapSearchInt() {
       this.$nextTick(() => {
@@ -200,33 +186,12 @@ export default {
         e.poi.district + "" + e.poi.address + "" + e.poi.name;
       this.lnt = e.poi.location.lng + "," + e.poi.location.lat;
     },
-    // loadInputTipPlaceSearch() {
-    //   console.log("========");
-    //   let vm = this;
-    //   AMap.plugin(["AMap.Autocomplete", "AMap.PlaceSearch"], function () {
-    //     var autoOptions = {
-    //       city: "北京", //城市，默认全国
-    //       input: "search", //使用联想输入的input的id
-    //     };
-    //     let autocomplete = new AMap.Autocomplete(autoOptions);
-    //     var placeSearch = new AMap.PlaceSearch({
-    //       city: "北京",
-    //       map: vm.map,
-    //     });
-    //     AMap.event.addListener(autocomplete, "select", function (e) {
-    //       //TODO 针对选中的poi实现自己的功能
-    //       placeSearch.setCity(e.poi.adcode);
-    //       placeSearch.search(e.poi.name);
-    //     });
-    //   });
-    // },
     handleClose() {
       this.dialogVisible = false;
     },
     handleOpen(projectInfo) {
       this.dialogVisible = true;
       this.mapSearchInt();
-      // this.loadInputTipPlaceSearch();
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
@@ -254,36 +219,68 @@ export default {
         this.lnt = "";
       }
     },
+    //新增
+    async reqSavaProject() {
+      const username = sessionStorage.getItem("username");
+      const params = {
+        username: username,
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        fireman: this.form.nursePhone,
+        person: this.form.liablePhone,
+        firemanname: this.form.nurse,
+        personname: this.form.liable,
+        lnt: this.lnt,
+        marker: this.form.textarea,
+        pdi: this.pid,
+      };
+      const response = await reqSavaProject(params, username);
+      if (response.data.code === '200') {
+        this.$message.success(response.data.mess);
+        this.$emit("refresh");
+      } else {
+        this.$message.error(response.data.mess || '服务错误!');
+      }
+    },
+    //编辑
+    reqEditProject() {
+      const username = sessionStorage.getItem("username");
+      const params = {
+        username: username,
+        name: this.form.projectName,
+        adss: this.form.projectAddress,
+        fireman: this.form.nursePhone,
+        person: this.form.liablePhone,
+        firemanname: this.form.nurse,
+        personname: this.form.liable,
+        lnt: this.lnt,
+        marker: this.form.textarea,
+        pid: this.pid,
+      };
+      reqEditProject(params).then(
+        (res) => {
+          if (res.data.code == "200") {
+            this.$message.success("编辑成功");
+            this.$emit("refresh");
+          } else {
+            this.$message.error("编辑失败");
+          }
+        },
+        () => {
+          this.$message.error("请稍后重试或联系管理员");
+        }
+      );
+    },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          const username = sessionStorage.getItem("username");
-          const params = {
-            username: username,
-            name: this.form.projectName,
-            adss: this.form.projectAddress,
-            fireman: this.form.nursePhone,
-            person: this.form.liablePhone,
-            firemanname: this.form.nurse,
-            personname: this.form.liable,
-            lnt: this.lnt,
-            marker: this.form.textarea,
-            pid: this.pid,
-          };
-          reqEditProject(params).then(
-            (res) => {
-              if (res.data.code == "200") {
-                this.$message.success("编辑成功");
-              } else {
-                this.$message.error("编辑失败");
-              }
-            },
-            () => {
-              this.$message.error("请稍后重试或联系管理员");
-            }
-          );
-          // alert("成功");
-          this.dialogVisible = false;
+          if (this.id) {
+            this.reqEditProject();
+            this.dialogVisible = false;
+          } else {
+            this.reqSavaProject();
+            this.dialogVisible = false;
+          }
         } else {
           console.log("失败");
           return false;
@@ -298,10 +295,6 @@ export default {
 <style lang="scss" scoped>
 .m-dialog {
   .m {
-    &-content-btn {
-      display: flex;
-    }
-
     &-map {
       width: 700px;
       height: 215px;

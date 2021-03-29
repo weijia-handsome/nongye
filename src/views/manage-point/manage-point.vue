@@ -64,7 +64,7 @@
       <!-- 地图模式 -->
       <div class="m-map" id="map" v-if="mapVisible"></div>
       <div v-else>
-        <el-table :data="tableData" border style="width: 100%" height="600px">
+        <el-table :data="tableData" border style="width: 100%" height="600">
           <el-table-column
             fixed
             label="序号"
@@ -98,7 +98,10 @@
           </el-table-column>
           <el-table-column fixed="right" label="操作" width="180">
             <template slot-scope="scope">
-              <el-button @click="handleClick" type="text" size="small"
+              <el-button
+                @click="handleClick(scope.row.nid, scope.row.lnt)"
+                type="text"
+                size="small"
                 >新增设备</el-button
               >
               <el-button type="text" size="small" @click="handleEdit(scope.row)"
@@ -130,7 +133,7 @@
       </div>
 
       <create-device ref="deviceRef"></create-device>
-      <create ref="createRef"></create>
+      <create ref="createRef" @refresh="getList"></create>
     </el-card>
   </div>
 </template>
@@ -179,7 +182,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
           console.log(res);
           var cluster,
             markers = [];
@@ -248,8 +251,8 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    handleClick() {
-      this.$refs.deviceRef.handleOpen();
+    handleClick(nid, lnt) {
+      this.$refs.deviceRef.handleOpen(nid, lnt);
     },
     handleCreate() {
       this.$refs.createRef.handleOpen();
@@ -268,13 +271,14 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, "===========");
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
     },
     handleDelete(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将删除该条数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",

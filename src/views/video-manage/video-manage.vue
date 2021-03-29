@@ -56,8 +56,10 @@
         <el-table-column prop="reg_time" label="创建时间" align="center">
         </el-table-column>
         <el-table-column label="操作" align="center">
-          <el-button type="text" size="mini" @click="handleCheck"
-            >查看</el-button
+          <template slot-scope="scope"
+            ><el-button type="text" size="mini" @click="handleCheck(scope.row.imei)"
+              >查看</el-button
+            ></template
           >
         </el-table-column>
       </el-table>
@@ -67,9 +69,9 @@
           background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="param.pageSize"
+          :current-page="param.pno"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size="100"
+          :page-size="param.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
         />
@@ -112,8 +114,8 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    handleCheck() {
-      this.$refs.editRef.handleOpen();
+    handleCheck(imei) {
+      this.$refs.editRef.handleOpen(imei);
     },
     handleSearch() {
       this.total = 0;
@@ -128,7 +130,6 @@ export default {
         tid: this.param.tid,
         object: this.form.name || this.form.number,
       });
-      console.log(response, "===========");
       if (response.status === 200) {
         this.tableData = response.data.data;
         this.total = response.data.recordCount;

@@ -25,12 +25,11 @@ import { reqGetVideo } from "@/api/api.js";
 import "../../../../public/ezuikit.js";
 import EZUIKit from "ezuikit-js";
 export default {
-  name: "Edit",
+  name: "CheckVideo",
   data() {
     return {
       dialogVisible: false,
       video: "",
-      imei: '',
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -62,10 +61,8 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen(imei) {
-      console.log(imei);
+    handleOpen() {
       this.dialogVisible = true;
-      this.imei = imei;
       this.getVideo();
     },
     //获取视频设备

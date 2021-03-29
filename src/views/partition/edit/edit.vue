@@ -155,7 +155,6 @@ export default {
       //纬度
       var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
       if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
-        console.log(111);
         let marker = new AMap.Marker({
           position: [newVal[0], newVal[1]],
           offset: new AMap.Pixel(-13, -30),

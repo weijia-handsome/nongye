@@ -6,6 +6,17 @@
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <div class="m-map" id="map"></div>
+    <!-- <iframe
+      ref="myIframe"
+      src="http://www.thingjs.com/pp/cbef708871808028b76394fe"
+      style="
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        z-index: 999;
+        display: none;
+      "
+    ></iframe> -->
     <!-- 按钮 -->
     <div class="m-button" @click="handleSelect">
       <span>全部项目</span>
@@ -25,7 +36,7 @@
     <div class="m-left">
       <!-- <div class="m-left__background"></div> -->
       <div class="m-left__first">
-        <p class="m-left__title">灌溉占比</p>
+        <p class="m-left__title">流量数据</p>
         <div
           class="m-left__round"
           id="roundChart"
@@ -87,7 +98,7 @@
         </div>
       </div>
 
-      <div class="m-min__content" @click="handleiIll">
+      <div class="m-min__content">
         <el-scrollbar class="m-min__line">
           <el-timeline>
             <el-timeline-item
@@ -96,14 +107,31 @@
               size="normal"
               color="#04E0F9"
             >
-              <span class="m-min__task">任务名称：{{ activity.name }}</span>
-              <span
-                >任务在{{ activity.start_time }}开始执行滴灌 时长为：{{
-                  activity.time
-                }}
-              </span>
-              <span v-if="activity.state === '1'">已完成</span>
-              <span v-if="activity.state === '2'">未完成</span>
+              <div class="m-min__mask" @click="handleiIll(activity)">
+                <span class="m-min__task">任务名称：{{ activity.name }}</span>
+                <span v-if="activity.state === '0'"
+                  >任务在{{ activity.start_time }}未执行 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '1'"
+                  >任务在{{ activity.start_time }}执行中 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '2'"
+                  >任务在{{ activity.start_time }}完成 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '3'"
+                  >任务在{{ activity.start_time }}待执行 时长为：{{
+                    activity.time
+                  }}
+                </span>
+                <span v-if="activity.state === '1'">已完成</span>
+                <span v-if="activity.state === '2'">未完成</span>
+              </div>
             </el-timeline-item>
           </el-timeline>
         </el-scrollbar>
@@ -112,7 +140,7 @@
 
     <!-- 右边图表 -->
     <div class="m-right">
-      <div class="m-right__round" @click="hanleAlarm">
+      <div class="m-right__round">
         <p class="m-right__text">通知信息</p>
         <!-- el-scrollbar -->
         <el-scrollbar class="m-right__first">
@@ -123,12 +151,14 @@
               icon="el-icon-time"
               size="primary"
             >
-              <p class="m-right__time">{{ item.alarmtime }}</p>
-              <p class="m-right__txt">设备id:{{ item.imei }}</p>
-              <p class="m-right__txt">设备名称:{{ item.dname }}</p>
-              <p class="m-right__txt">设备类型:{{ item.deviceType }}</p>
-              <p class="m-right__txt">报警类型:{{ item.alarmType }}</p>
-              <p class="m-right__txt">报警值:{{ item.value }}</p>
+              <div class="m-right__alarm" @click="hanleAlarm(item)">
+                <p class="m-right__time">{{ item.alarmtime }}</p>
+                <p class="m-right__txt">设备id:{{ item.imei }}</p>
+                <p class="m-right__txt">设备名称:{{ item.dname }}</p>
+                <p class="m-right__txt">设备类型:{{ item.deviceType }}</p>
+                <p class="m-right__txt">报警类型:{{ item.alarmType }}</p>
+                <p class="m-right__txt">报警值:{{ item.value }}</p>
+              </div>
             </el-timeline-item>
           </el-timeline>
         </el-scrollbar>
@@ -150,7 +180,8 @@
         ></div>
       </div>
     </div>
-    <task ref="taskRef"></task>
+    <task ref="taskRef" @refresh="handleLunGuan"></task>
+    <alarm ref="alarmRef"></alarm>
   </div>
 </template>
 
@@ -164,13 +195,16 @@ import {
   pushAlarmData,
   pushGrid,
   reqGetNetspot,
+  getFlowDevice,
 } from "@/api/api.js";
 import Task from "./task/task.vue";
+import Alarm from "./alarm/alarm.vue";
 
 export default {
   name: "bigData",
   components: {
     Task,
+    Alarm,
   },
   data() {
     return {
@@ -213,8 +247,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
-          console.log(res);
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
           var cluster,
             markers = [];
           let data = res.data.data;
@@ -269,7 +302,12 @@ export default {
           //   );
           // }
           // var count = markers.length;
-
+          // const _that = this;
+          // mass.on("click", (e) => {
+          //   console.log(123);
+          //   _that.$refs.myIframe.style.display = "block";
+          //   _that.callFuncInThingJS("changeLevel", 1);
+          // });
           // if (cluster) {
           //   cluster.setMap(null);
           // }
@@ -279,42 +317,57 @@ export default {
         });
       });
     },
+    // callFuncInThingJS(funcName, data) {
+    //   // var iframe = $("#myIframe")[0];
 
-    //灌溉占比环形图
+    //   var message = {
+    //     funcName: funcName, // 所要调用ThingJS页面里的函数名
+    //     param: data,
+    //   };
+    //   this.$refs.myIframe.contentWindow.postMessage(message, "*");
+    // },
+    //流量柱状图
     setRoundChart() {
       let roundChart = echarts.init(document.getElementById("roundChart"));
       let option = {
-        //提示框组件
-        tooltip: {
-          trigger: "item",
-        },
-        //图例
-        legend: {
-          orient: "vertical",
-          top: "5%",
-          left: "right",
-          textStyle: {
-            fontSize: 12,
-            color: "#04E0F9",
+        xAxis: {
+          type: "category",
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          axisLabel: {
+            textStyle: {
+              color: "#04E0F9", //坐标值得具体的颜色
+            },
+            interval: 0,
           },
         },
-        //系列列表
+        yAxis: {
+          type: "value",
+          axisLabel: {
+            formatter: "{value} ml",
+            textStyle: {
+              color: "#04E0F9", //坐标值得具体的颜色
+            },
+          },
+        },
+        grid: {
+          top: 40,
+          x: 60,
+          x2: 60,
+          y2: 40,
+        },
         series: [
           {
-            type: "pie",
-            radius: ["40%", "70%"],
-            avoidLabelOverlap: false,
-            label: {
-              show: false,
-              position: "center",
+            data: [120, 200, 150, 80, 70, 110, 130],
+            type: "bar",
+            barWidth: 15,
+            itemStyle: {
+              normal: {
+                color: "#04E0F9",
+                lineStyle: {
+                  color: "#04E0F9",
+                },
+              },
             },
-            labelLine: {
-              show: false,
-            },
-            data: [
-              { value: 1048, name: "已灌溉" },
-              { value: 735, name: "未灌溉", itemStyle: { color: "#04E0F9" } },
-            ],
           },
         ],
       };
@@ -615,15 +668,18 @@ export default {
         path: "/irrigation-task",
       });
     },
-    hanleAlarm() {
-      this.$router.push({
-        path: "/alarm-management",
-      });
+    hanleAlarm(alarmInfo) {
+      this.$refs.alarmRef.handleOpen(alarmInfo);
     },
-    handleiIll() {
-      this.$router.push({
-        path: "/irrigation-task",
+    handleiIll(irrInfo) {
+      this.$refs.taskRef.handleOpen(irrInfo);
+    },
+    //流量计
+    async getFlowDevice() {
+      const response = await getFlowDevice({
+        username: window.sessionStorage.getItem("username"),
       });
+      console.log(response, "流量计");
     },
     //温湿度传感器
     async getAverage() {
@@ -693,6 +749,7 @@ export default {
         for (let i of this.deviceData.data.mess) {
           this.deviceType.push({ value: i.num, name: i.name, index: [] });
         }
+        console.log(this.deviceType);
       } else {
         this.$message.error(this.deviceData.statusText || "服务错误！");
       }
@@ -718,6 +775,7 @@ export default {
       });
       if (response.status === 200) {
         this.pushAlarmArr = response.data.data;
+        console.log(response, "报警信息");
       } else {
         this.$message.error(response.statusText || "服务错误");
       }
@@ -734,6 +792,7 @@ export default {
       });
       if (response.status === 200) {
         this.activities = response.data.data;
+        console.log(response, "轮灌");
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
@@ -774,6 +833,7 @@ export default {
     this.deviceOnlineData();
     this.pushAlarmData();
     this.handleLunGuan();
+    this.getFlowDevice();
   },
 
   created() {
