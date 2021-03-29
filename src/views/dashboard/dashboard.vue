@@ -6,17 +6,17 @@
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <div class="m-map" id="map"></div>
-    <!-- <iframe
+    <iframe
       ref="myIframe"
-      src="http://www.thingjs.com/pp/cbef708871808028b76394fe"
+      src="http://www.thingjs.com/pp/12b7cc044faa9639451d4132"
       style="
-        width: 100px;
-        height: 100px;
+        width: 100%;
+        height: 100%;
         position: absolute;
         z-index: 999;
         display: none;
       "
-    ></iframe> -->
+    ></iframe>
     <!-- 按钮 -->
     <div class="m-button" @click="handleSelect">
       <span>全部项目</span>
@@ -292,41 +292,29 @@ export default {
 
           var marker = new AMap.Marker({ content: " ", map: this.map });
           mass.setMap(this.map);
-          // for (var i = 0; i < points2.length; i += 1) {
-          //   markers.push(
-          //     new AMap.Marker({
-          //       position: points2[i]["lnglat"],
-          //       content:
-          //         '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
-          //       offset: new AMap.Pixel(-15, -15),
-          //     })
-          //   );
-          // }
-          // var count = markers.length;
-          // const _that = this;
-          // mass.on("click", (e) => {
-          //   console.log(123);
-          //   _that.$refs.myIframe.style.display = "block";
-          //   _that.callFuncInThingJS("changeLevel", 1);
-          // });
-          // if (cluster) {
-          //   cluster.setMap(null);
-          // }
-          // cluster = new AMap.MarkerClusterer(this.map, markers, {
-          //   gridSize: 80,
-          // });
+
+          const _that = this;
+          mass.on("click", (e) => {
+            console.log(123);
+            _that.$refs.myIframe.style.display = "block";
+            _that.callFuncInThingJS("changeLevel", 1);
+          });
         });
       });
     },
-    // callFuncInThingJS(funcName, data) {
-    //   // var iframe = $("#myIframe")[0];
 
-    //   var message = {
-    //     funcName: funcName, // 所要调用ThingJS页面里的函数名
-    //     param: data,
-    //   };
-    //   this.$refs.myIframe.contentWindow.postMessage(message, "*");
-    // },
+    callFuncInThingJS(funcName, data) {
+      // var iframe = $("#myIframe")[0];
+
+      var message = {
+        funcName: funcName, // 所要调用ThingJS页面里的函数名
+        param: data,
+      };
+      this.$refs.myIframe.contentWindow.postMessage(message, "*");
+    },
+    upDataInfo(e) {
+      console.log(e);
+    },
     //流量柱状图
     setRoundChart() {
       let roundChart = echarts.init(document.getElementById("roundChart"));
@@ -849,6 +837,19 @@ export default {
     this.pushAlarmData();
     this.handleLunGuan();
     this.getFlowDevice();
+
+    // 接收ThingJS页面传送的数据
+    let _that = this;
+    window.addEventListener("message", function (e) {
+      // console.log(e, 999);
+      // this.$nextTick(() => {
+      _that.$refs.myIframe.style.display = "none";
+      // });
+      // var data = e.data;
+      // var funcName = data.funcName;
+      // var param = data.param;
+      // if (window[funcName]) window[funcName](param);
+    });
   },
 
   created() {
