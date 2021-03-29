@@ -105,7 +105,9 @@
           </el-dialog> -->
         </div>
         <div class="m-button">
-          <el-button type="danger" size="mini" @click="handleCancel">取消</el-button>
+          <el-button type="danger" size="mini" @click="handleCancel"
+            >取消</el-button
+          >
           <el-button type="primary" size="mini" @click="handleConfirm"
             >确定</el-button
           >
@@ -174,7 +176,7 @@ export default {
       this.createParam(alarmInfo);
       this.$nextTick(() => {
         setTimeout(() => {
-         this.$refs.ruleForm.clearValidate();
+          this.$refs.ruleForm.clearValidate();
           this.getDeviceInfo();
         });
       });
@@ -184,13 +186,13 @@ export default {
         username: window.sessionStorage.getItem("username"),
         imei: this.deviceInfo.imei,
       });
-      console.log(this.response, '//////////');
+      console.log(this.response, "//////////");
       if (this.response.status === 200) {
         this.loading = true;
         this.deviceInfo.heartTime = this.response.data.device.h_ime;
-         this.deviceInfo.soilT = this.response.data.device.soilT;
-         this.deviceInfo.soilH = this.response.data.device.soilH;
-         this.deviceInfo.h_ime = this.response.data.device.h_ime
+        this.deviceInfo.soilT = this.response.data.device.soilT;
+        this.deviceInfo.soilH = this.response.data.device.soilH;
+        this.deviceInfo.h_ime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
           this.deviceInfo.heartTime = i.s_time;
           // this.deviceInfo.soilT = i.soilT;
@@ -232,12 +234,21 @@ export default {
       if (response.status === 200) {
         this.$message.success(response.data.mess);
       } else {
-        this.$message.error(response.data.mess || '服务错误！')
+        this.$message.error(response.data.mess || "服务错误！");
       }
     },
     setlineOne() {
       let lineFirst = echarts.init(document.getElementById("lineOne"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.dataTime,
@@ -271,6 +282,15 @@ export default {
     setlineTwo() {
       let lineSecond = echarts.init(document.getElementById("lineTwo"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.dataTime,
@@ -304,6 +324,15 @@ export default {
     setlineThree() {
       let lineThird = echarts.init(document.getElementById("lineThree"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.alarms,
@@ -344,7 +373,7 @@ export default {
     },
     handleCancel() {
       this.dialogVisible = false;
-    }
+    },
   },
 };
 </script>
@@ -461,7 +490,7 @@ export default {
 
     &-right {
       display: flex;
-      width:  800px;
+      width: 800px;
       height: 600px;
       flex-direction: column;
       justify-content: space-between;

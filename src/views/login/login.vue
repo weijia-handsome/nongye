@@ -84,8 +84,8 @@ export default {
       //  userName: "15679193873",
       //   password: "admin",
       ruleForm: {
-        userName: "",
-        password: "",
+        userName: "15679193873",
+        password: "admin",
       },
     };
   },

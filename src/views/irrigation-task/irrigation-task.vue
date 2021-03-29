@@ -141,13 +141,13 @@
           width="180"
         >
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           prop="address"
           label="启用状态"
           align="center"
           width="180"
         >
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column
           prop="address"
           label="操作"
