@@ -53,28 +53,37 @@
 
 <script>
 import bus from "../common/bus";
+
 export default {
   data() {
     return {
       collapse: false,
+      // icon: require({
+      //   user: "../../assets/icon/user.png",
+      // }),
       items: [
         {
           icon: "el-icon-s-home",
           index: "dashboard",
           title: "主界面",
         },
+        // {
+        //   icon: "el-icon-user",
+        //   index: "user",
+        //   title: "用户管理",
+        // },
         {
-          icon: "el-icon-user",
+          icon: "iconfont iconuser",
           index: "user",
           title: "用户管理",
         },
         {
-          icon: "el-icon-s-goods",
+          icon: "iconfont iconquanxian",
           index: "authority-manage",
           title: "权限管理",
         },
         {
-          icon: "el-icon-s-grid",
+          icon: "el-icon-document-copy",
           index: "project",
           title: "项目模块",
         },
@@ -102,7 +111,7 @@ export default {
           ],
         },
         {
-          icon: "el-icon-setting",
+          icon: "iconfont iconpeizhi",
           index: "5",
           title: "设备配置",
           subs: [
@@ -121,7 +130,7 @@ export default {
           ],
         },
         {
-          icon: "el-icon-pie-chart",
+          icon: "iconfont iconicon-",
           index: "charts",
           title: "管点/分区管理",
           subs: [
@@ -144,7 +153,7 @@ export default {
           ],
         },
         {
-          icon: "el-icon-rank",
+          icon: "iconfont iconpie-chart_icon",
           index: "diary",
           title: "统计日记",
         },
@@ -191,6 +200,7 @@ export default {
 .sidebar-el-menu .m-icon {
   font-size: 14px;
   margin-right: 10px;
+  color: #fff;
 }
 ::v-deep .el-menu-item {
   height: 50px;
@@ -199,7 +209,7 @@ export default {
 }
 
 ::v-deep .el-menu-item:hover {
-  background-color: #047CF7;
+  background-color: #047cf7;
 }
 
 ::v-deep .el-submenu__title {

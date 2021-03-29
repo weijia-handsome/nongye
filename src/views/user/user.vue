@@ -165,7 +165,8 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object: this.form.name || this.form.phone || '',
+        phone: this.form.phone || '',
+        name: this.form.name || ''
       });
       if (response.status === 200) {
         this.loading = true;

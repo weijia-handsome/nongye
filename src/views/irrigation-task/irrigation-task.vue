@@ -173,10 +173,10 @@
             <el-button type="text" size="mini" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
-            <el-button type="text" size="mini" @click="handleDelete"
+            <el-button type="text" size="mini" @click="handleDelete(scope.row.id)"
               >删除</el-button
             >
-            <el-button type="text" size="mini" @click="handleCheckVideo(scope.row.imei)"
+            <el-button type="text" size="mini" @click="handleCheckVideo(scope.row)"
               >查看现场</el-button
             >
           </template>
@@ -245,8 +245,8 @@ export default {
       this.param.pno = 1;
       this.getList();
     },
-    handleCheckVideo(imei) {
-      this.$refs.videoRef.handleOpen();
+    handleCheckVideo(irrInfo) {
+      this.$refs.videoRef.handleOpen(irrInfo);
     },
     handleEdit(irrInfo) {
       this.$refs.editRef.handleOpen(irrInfo);
@@ -270,6 +270,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, '/////');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText);
@@ -307,12 +308,13 @@ export default {
       })
       if (response.status === 200) {
         this.$message.success('删除成功');
+        this.getList();
       } else {
         this.$message.error(response.data.mess);
       }
     },
     handleDelete(id) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将删除该条数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",

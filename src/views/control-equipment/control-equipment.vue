@@ -127,19 +127,29 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (this.form.name !== "" && this.form.number !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number !== "") {
+        object = this.form.number;
+      } else if (this.form.number == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
     handleControl(info) {
       this.$refs.controlRef.handleOpen(info);
     },
     //获取列表
-    async getList() {
+    async getList(object) {
       const response = await reqcontorlDeviceInfo({
         username: window.sessionStorage.getItem("username"),
         tid: this.param.tid,
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object: this.form.name || this.form.number,
+        object: object,
       });
       if (response.status === 200) {
         this.tableData = response.data.data;

@@ -11,6 +11,7 @@
               <el-input
                 v-model="form.name"
                 size="mini"
+                clearable
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               ></el-input>
@@ -21,6 +22,7 @@
               <el-input
                 v-model="form.number"
                 size="mini"
+                clearable
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               ></el-input>
@@ -57,7 +59,10 @@
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope"
-            ><el-button type="text" size="mini" @click="handleCheck(scope.row.imei)"
+            ><el-button
+              type="text"
+              size="mini"
+              @click="handleCheck(scope.row.imei)"
               >查看</el-button
             ></template
           >
@@ -120,15 +125,25 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (this.form.name !== "" && this.form.number !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number !== "") {
+        object = this.form.number;
+      } else if (this.form.number == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
-    async getList() {
+    async getList(object) {
       const response = await reqcontorlDeviceInfo({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
         tid: this.param.tid,
-        object: this.form.name || this.form.number,
+        object: object,
       });
       if (response.status === 200) {
         this.tableData = response.data.data;

@@ -32,7 +32,7 @@
           <el-col :span="6">
             <el-form-item label="管点地址">
               <el-input
-                v-model="form.phone"
+                v-model="form.address"
                 size="mini"
                 clearable
                 @clear="handleSearch"
@@ -141,7 +141,6 @@
 <script>
 import CreateDevice from "./create-device/create-device.vue";
 import Create from "./create/create.vue";
-import MapLoader from "../../components/common/AMap.js";
 import { reqGetNetspot, delNetspot } from "@/api/api.js";
 
 export default {
@@ -159,7 +158,7 @@ export default {
       form: {
         doiName: "",
         intName: "",
-        region: "",
+        address: "",
       },
       param: {
         pno: 1,
@@ -240,7 +239,57 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (
+        this.form.doiName !== "" &&
+        this.form.address !== "" &&
+        this.form.intName !== ""
+      ) {
+        object = this.form.doiName;
+      } else if (
+        this.form.doiName !== "" &&
+        this.form.address !== "" &&
+        this.form.intName == ""
+      ) {
+        object = this.form.doiName;
+      } else if (
+        this.form.doiName !== "" &&
+        this.form.address == "" &&
+        this.form.intName !== ""
+      ) {
+        object = this.form.doiName;
+      } else if (
+        this.form.doiName == "" &&
+        this.form.address !== "" &&
+        this.form.intName !== ""
+      ) {
+        object = this.form.intName;
+      } else if (
+        this.form.doiName == "" &&
+        this.form.address !== "" &&
+        this.form.intName !== ""
+      ) {
+        return this.getList(object);
+      } else if (
+        this.form.doiName !== "" &&
+        this.form.address == "" &&
+        this.form.intName == ""
+      ) {
+        object = this.form.doiName;
+      } else if (
+        this.form.doiName == "" &&
+        this.form.address !== "" &&
+        this.form.intName == ""
+      ) {
+        object = this.form.address;
+      } else if (
+        this.form.doiName == "" &&
+        this.form.address == "" &&
+        this.form.intName !== ""
+      ) {
+        object = this.form.intName;
+      }
+      this.getList(object);
     },
     handleSizeChange(pageSize) {
       this.param.pno = 1;
@@ -260,18 +309,16 @@ export default {
     handleEdit(pointInfo) {
       this.$refs.createRef.handleOpen(pointInfo);
     },
-    async getList() {
+    async getList(object) {
       const response = await reqGetNetspot({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object:
-          this.form.doiName || this.form.intName || this.form.region || "",
+        object: object,
       });
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
-        console.log(this.tableData, "===========");
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");
@@ -305,6 +352,7 @@ export default {
           type: "success",
           message: "删除成功!",
         });
+        this.getList();
       } else {
         this.$message.error(response.statusText);
       }

@@ -13,6 +13,7 @@
                 size="mini"
                 clearable
                 @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -23,6 +24,7 @@
                 size="mini"
                 clearable
                 @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -53,7 +55,13 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="device_name" label="设备名称" width="250" fixed align="center">
+        <el-table-column
+          prop="device_name"
+          label="设备名称"
+          width="250"
+          fixed
+          align="center"
+        >
         </el-table-column>
         <el-table-column
           prop="imei"
@@ -157,16 +165,26 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (this.form.name !== "" && this.form.number !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number !== "") {
+        object = this.form.number;
+      } else if (this.form.number == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.number == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
     //获取列表
-    async getList() {
+    async getList(object) {
       const response = await reqGetTuRangDevice({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         tid: this.param.tid,
         pageSize: this.param.pageSize,
-        object: this.form.name || this.form.number || '',
+        object: object,
       });
       if (response.status === 200) {
         this.loading = true;

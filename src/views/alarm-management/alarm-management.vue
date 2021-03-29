@@ -47,7 +47,12 @@
         </el-row>
       </el-form>
 
-      <el-table :data="tableData" style="width: 100%" align="center">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        align="center"
+        v-loading="loading"
+      >
         <el-table-column label="序号" type="index" width="80" align="center">
           <template slot-scope="scope">
             <span>{{
@@ -144,22 +149,73 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (
+        this.form.projectName !== "" &&
+        this.form.deviceName !== "" &&
+        this.form.deviceNum !== ""
+      ) {
+        object = this.form.projectName;
+      } else if (
+        this.form.projectName == "" &&
+        this.form.deviceName !== "" &&
+        this.form.deviceNum !== ""
+      ) {
+        object = this.form.deviceName;
+      } else if (
+        this.form.projectName !== "" &&
+        this.form.deviceName == "" &&
+        this.form.deviceNum !== ""
+      ) {
+        object = this.form.projectName;
+      } else if (
+        this.form.projectName !== "" &&
+        this.form.deviceName !== "" &&
+        this.form.deviceNum == ""
+      ) {
+        object = this.form.projectName;
+      } else if (
+        this.form.projectName == "" &&
+        this.form.deviceName == "" &&
+        this.form.deviceNum == ""
+      ) {
+        return this.getList(object);
+      } else if (
+        this.form.projectName !== "" &&
+        this.form.deviceName == "" &&
+        this.form.deviceNum == ""
+      ) {
+        object = this.form.projectName;
+      } else if (
+        this.form.projectName == "" &&
+        this.form.deviceName !== "" &&
+        this.form.deviceNum == ""
+      ) {
+        object = this.form.deviceName;
+      } else if (
+        this.form.projectName == "" &&
+        this.form.deviceName == "" &&
+        this.form.deviceNum !== ""
+      ) {
+        object = this.form.deviceNum;
+      }
+      this.getList(object);
     },
-    async getList() {
+    async getList(object) {
       const response = await reqAlarmList({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object:
-          this.form.projectName || this.form.deviceName || this.form.deviceNum,
+        object: object,
       });
       if (response.status === 200) {
+        this.loading = true;
         this.tableData = response.data.data;
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
+      this.loading = false;
     },
   },
   mounted() {

@@ -1,0 +1,51 @@
+{
+  "id": "2433223",
+  "name": "no name",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1239085",
+      "name": "用户",
+      "font_class": "user",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "2116289",
+      "name": "饼状图",
+      "font_class": "pie-chart_icon",
+      "unicode": "e65f",
+      "unicode_decimal": 58975
+    },
+    {
+      "icon_id": "11121461",
+      "name": "流程管理器",
+      "font_class": "liuchengguanliqi",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
+      "icon_id": "13345031",
+      "name": "项目流程管理",
+      "font_class": "icon-",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "14625639",
+      "name": "配置",
+      "font_class": "peizhi",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "20406822",
+      "name": "权限",
+      "font_class": "quanxian",
+      "unicode": "e790",
+      "unicode_decimal": 59280
+    }
+  ]
+}

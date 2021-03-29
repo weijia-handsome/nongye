@@ -203,8 +203,6 @@ export default {
     };
   },
   methods: {
-    // 初始化
-    // 初始化
     setMap() {
       this.$nextTick(() => {
         this.map = new AMap.Map("map", {
@@ -282,7 +280,57 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (
+        this.form.netName !== "" &&
+        this.form.pipeName !== "" &&
+        this.form.address !== ""
+      ) {
+        object = this.form.netName;
+      } else if (
+        this.form.netName !== "" &&
+        this.form.pipeName !== "" &&
+        this.form.address == ""
+      ) {
+        object = this.form.netName;
+      } else if (
+        this.form.netName !== "" &&
+        this.form.pipeName == "" &&
+        this.form.address !== ""
+      ) {
+        object = this.form.netName;
+      } else if (
+        this.form.netName == "" &&
+        this.form.pipeName !== "" &&
+        this.form.address !== ""
+      ) {
+        object = this.form.pipeName;
+      } else if (
+        this.form.netName !== "" &&
+        this.form.pipeName == "" &&
+        this.form.address == ""
+      ) {
+        object = this.form.netName;
+      } else if (
+        this.form.netName == "" &&
+        this.form.pipeName !== "" &&
+        this.form.address == ""
+      ) {
+        object = this.form.pipeName;
+      } else if (
+        this.form.netName == "" &&
+        this.form.pipeName == "" &&
+        this.form.address !== ""
+      ) {
+        object = this.form.address;
+      } else if (
+        this.form.netName == "" &&
+        this.form.pipeName == "" &&
+        this.form.address == ""
+      ) {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
     handleCreate() {
       this.$refs.editRef.handleOpen();

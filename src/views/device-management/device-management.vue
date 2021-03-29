@@ -9,15 +9,15 @@
           <el-col :span="5">
             <el-form-item label="设备状态">
               <el-select
-                v-model="form.region"
+                v-model="form.type"
                 placeholder="请选择活动区域"
                 size="mini"
                 clearable
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               >
-                <el-option label="全部" value="0"></el-option>
-                <el-option label="其他" value="1"></el-option>
+                <el-option label="离线" value="off"></el-option>
+                <el-option label="在线" value="on"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -183,7 +183,7 @@ export default {
         name: "",
         deviceName: "",
         deviceNumber: "",
-        region: "",
+        type: "",
       },
       param: {
         pno: 1,
@@ -268,6 +268,7 @@ export default {
               type: "success",
               message: "删除成功!",
             });
+            this.getList();
           } else {
             this.$message.error(response.statusText || "服务错误!");
           }

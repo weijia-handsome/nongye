@@ -8,12 +8,24 @@
         <el-row :gutter="24">
           <el-col :span="6">
             <el-form-item label="项目名称">
-              <el-input v-model="form.name" size="mini"></el-input>
+              <el-input
+                v-model="form.name"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="项目地址">
-              <el-input v-model="form.address" size="mini"></el-input>
+              <el-input
+                v-model="form.address"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -41,9 +53,19 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="项目名称" width="180">
+        <el-table-column
+          prop="name"
+          label="项目名称"
+          width="180"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column prop="adss" label="项目地址" align="center" width="450">
+        <el-table-column
+          prop="adss"
+          label="项目地址"
+          align="center"
+          width="450"
+        >
         </el-table-column>
         <el-table-column prop="firemanname" label="护理人" align="center">
         </el-table-column>
@@ -99,6 +121,7 @@ export default {
   data() {
     return {
       total: 0,
+      loading: false,
       form: {
         name: "",
         address: "",
@@ -130,7 +153,17 @@ export default {
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
-      this.getList();
+      let object;
+      if (this.form.name !== "" && this.form.address !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.address !== "") {
+        object = this.form.address;
+      } else if (this.form.address == "" && this.form.name !== "") {
+        object = this.form.name;
+      } else if (this.form.name == "" && this.form.address == "") {
+        return this.getList(object);
+      }
+      this.getList(object);
     },
     handleDelete(id, name) {
       this.$confirm(
@@ -166,11 +199,12 @@ export default {
         });
     },
     //获取项目列表
-    async getList() {
+    async getList(object) {
       const response = await reqGetProject({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
+        object: object,
       });
       if (response.status === 200) {
         this.loading = true;
