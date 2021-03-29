@@ -214,7 +214,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
           var cluster,
             markers = [];
           let data = res.data.data;

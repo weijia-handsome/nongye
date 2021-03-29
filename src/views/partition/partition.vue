@@ -225,7 +225,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
           console.log(res);
           var cluster,
             markers = [];
@@ -331,6 +331,7 @@ export default {
       }
       this.loading = false;
     },
+    //新增
 
     //删除
     async delFeiqu() {

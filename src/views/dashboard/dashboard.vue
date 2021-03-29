@@ -6,6 +6,17 @@
     element-loading-background="rgba(0, 0, 0, 0.3)"
   >
     <div class="m-map" id="map"></div>
+    <!-- <iframe
+      ref="myIframe"
+      src="http://www.thingjs.com/pp/cbef708871808028b76394fe"
+      style="
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        z-index: 999;
+        display: none;
+      "
+    ></iframe> -->
     <!-- 按钮 -->
     <div class="m-button" @click="handleSelect">
       <span>全部项目</span>
@@ -237,7 +248,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: 1, pageSize: 100 }).then((res) => {
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
           var cluster,
             markers = [];
           let data = res.data.data;
@@ -292,7 +303,12 @@ export default {
           //   );
           // }
           // var count = markers.length;
-
+          // const _that = this;
+          // mass.on("click", (e) => {
+          //   console.log(123);
+          //   _that.$refs.myIframe.style.display = "block";
+          //   _that.callFuncInThingJS("changeLevel", 1);
+          // });
           // if (cluster) {
           //   cluster.setMap(null);
           // }
@@ -302,7 +318,15 @@ export default {
         });
       });
     },
+    // callFuncInThingJS(funcName, data) {
+    //   // var iframe = $("#myIframe")[0];
 
+    //   var message = {
+    //     funcName: funcName, // 所要调用ThingJS页面里的函数名
+    //     param: data,
+    //   };
+    //   this.$refs.myIframe.contentWindow.postMessage(message, "*");
+    // },
     //流量柱状图
     setRoundChart() {
       let roundChart = echarts.init(document.getElementById("roundChart"));
