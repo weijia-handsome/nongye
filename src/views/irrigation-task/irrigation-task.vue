@@ -20,14 +20,18 @@
           </el-col>
           <el-col :span="5">
             <el-form-item label="滴灌类型">
-              <el-input
-                placeholder="请输入"
+              <el-select
                 v-model="form.irrType"
+                placeholder="请选择"
                 size="mini"
                 clearable
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
-              ></el-input>
+              >
+                <el-option label="轮灌" value="1"></el-option>
+                <el-option label="直灌" value="2"></el-option>
+                <el-option label="所有" value=""></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="5">
@@ -40,29 +44,17 @@
                 @clear="handleSearch"
                 @keyup.enter.native="handleSearch"
               >
+                <el-option label="未执行" value="0"></el-option>
                 <el-option label="执行中" value="1"></el-option>
                 <el-option label="完成" value="2"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="5">
-            <el-form-item label="启用状态">
-              <el-select
-                v-model="form.userType"
-                placeholder="请选择"
-                size="mini"
-                clearable
-                @clear="handleSearch"
-                @keyup.enter.native="handleSearch"
-              >
-                <el-option label="未启用" value="1"></el-option>
-                <el-option label="已启用" value="2"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
 
           <el-col :span="4">
-            <el-button type="primary" size="mini" @click="handleSearch">查询</el-button>
+            <el-button type="primary" size="mini" @click="handleSearch"
+              >查询</el-button
+            >
             <el-button type="primary" size="mini" @click="handleCreate"
               >新增</el-button
             >
@@ -164,19 +156,32 @@
           fixed="right"
         >
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="handleBegin(scope.row.id)"
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleBegin(scope.row.id)"
               >启动</el-button
             >
-            <el-button type="text" size="mini" @click="handleStop(scope.row.id)" v-if="scope.row.state === '1'"
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleStop(scope.row.id)"
+              v-if="scope.row.state === '1'"
               >停止</el-button
             >
             <el-button type="text" size="mini" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
-            <el-button type="text" size="mini" @click="handleDelete(scope.row.id)"
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleDelete(scope.row.id)"
               >删除</el-button
             >
-            <el-button type="text" size="mini" @click="handleCheckVideo(scope.row)"
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleCheckVideo(scope.row)"
               >查看现场</el-button
             >
           </template>
@@ -204,10 +209,10 @@
 <script>
 import Edit from "./edit/edit.vue";
 import CheckVideo from "./check/check.vue";
-import { getGridTask, stopGrid, delGridTask,upState } from "@/api/api.js";
+import { getGridTask, stopGrid, delGridTask, upState } from "@/api/api.js";
 
 export default {
-  components: { Edit,CheckVideo },
+  components: { Edit, CheckVideo },
   name: "WellRoom",
   data() {
     return {
@@ -217,7 +222,6 @@ export default {
         taskName: "",
         irrType: "",
         taskType: "",
-        userType: "",
       },
       loading: true,
       param: {
@@ -260,17 +264,14 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object:
-          this.form.taskName ||
-          this.form.irrType ||
-          this.form.taskType ||
-          this.form.userType ||
-          "",
+        state: this.form.taskType || "",
+        type: this.form.irrType || "",
+        name: this.form.taskName || "",
       });
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
-        console.log(this.tableData, '/////');
+        console.log(this.tableData, "滴灌任务");
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText);
@@ -291,23 +292,23 @@ export default {
     //开启滴灌任务
     async handleBegin(id) {
       const response = await upState({
-        username: window.sessionStorage.getItem('username'),
-        id: id
-      })
-      if (response.data.code === '200') {
+        username: window.sessionStorage.getItem("username"),
+        id: id,
+      });
+      if (response.data.code === "200") {
         this.$message.success(response.data.mess);
       } else {
-        this.$message.error(response.data.mess || '请重试');
+        this.$message.error(response.data.mess || "请重试");
       }
     },
     //删除滴灌任务
     async delGridTask(id) {
       const response = await delGridTask({
-        username: window.sessionStorage.getItem('username'),
-        id: id
-      })
+        username: window.sessionStorage.getItem("username"),
+        id: id,
+      });
       if (response.status === 200) {
-        this.$message.success('删除成功');
+        this.$message.success("删除成功");
         this.getList();
       } else {
         this.$message.error(response.data.mess);

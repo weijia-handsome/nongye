@@ -112,9 +112,9 @@ export default {
     handleOpen(info) {
       this.dialogVisible = true;
       this.imei = info.imei;
-      this.$nextTick(() => {
-        this.$refs.formData.clearValidate();
-      });
+      // this.$nextTick(() => {
+      //   this.$refs.formData.clearValidate();
+      // });
     },
     handleComfirm() {
       this.dialogVisible = false;
@@ -137,7 +137,7 @@ export default {
         return;
       }
       this.tableData.forEach((i) => {
-        i.state = 1;
+        i.state = 0;
       });
       this.$message.error(response.data.mess || "请重试");
     },
@@ -159,7 +159,7 @@ export default {
         return;
       }
       this.tableData.forEach((i) => {
-        i.state = 0;
+        i.state = 1;
       });
       this.$message.error(response.data.mess || "请重试");
     },

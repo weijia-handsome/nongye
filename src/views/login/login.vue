@@ -81,9 +81,11 @@ export default {
           image: require("../../assets/img/6.17ae7c4.jpg"),
         },
       ],
+      //  userName: "15679193873",
+      //   password: "admin",
       ruleForm: {
-        userName: "15679193873",
-        password: "admin",
+        userName: "",
+        password: "",
       },
     };
   },

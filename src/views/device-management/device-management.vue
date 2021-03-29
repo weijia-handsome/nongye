@@ -10,7 +10,7 @@
             <el-form-item label="设备状态">
               <el-select
                 v-model="form.type"
-                placeholder="请选择活动区域"
+                placeholder="请选择设备状态"
                 size="mini"
                 clearable
                 @clear="handleSearch"
@@ -221,7 +221,7 @@ export default {
         this.$message.success("更新成功");
         return;
       }
-      
+
       this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
       this.$message.error(response.statusText || "请重试");
     },
@@ -240,12 +240,19 @@ export default {
           this.form.name ||
           this.form.deviceName ||
           this.form.deviceNumber ||
-          this.form.region ||
           "",
       });
       if (response.status === 200) {
         this.loading = true;
-        this.tableData = response.data.data;
+        if (this.form.type === "on") {
+          this.tableData = response.data.data.filter((i) => i.line === "on");
+          console.log(this.tableData, "在线");
+        } else if (this.form.type === "off") {
+          this.tableData = response.data.data.filter((i) => i.line === "off");
+          console.log(this.tableData, "离线");
+        } else {
+          this.tableData = response.data.data;
+        }
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

@@ -48,8 +48,12 @@
             :rules="[{ required: true, message: '角色不能为空' }]"
           >
             <el-select placeholder="请选择" v-model="form.region" clearable>
-              <el-option label="管理员" value="0"></el-option>
-              <el-option label="超级管理员" value="1"></el-option>
+              <el-option
+                v-for="(item, index) in role"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -63,7 +67,7 @@
 </template>
 
 <script>
-import { reqEditUser, reqSaveUser } from "@/api/api.js";
+import { reqEditUser, reqSaveUser, reqGetRole } from "@/api/api.js";
 
 export default {
   name: "Edit",
@@ -78,6 +82,7 @@ export default {
         passward: "",
         phone: "",
       },
+      role: [],
     };
   },
   methods: {
@@ -87,8 +92,22 @@ export default {
     handleCancal() {
       this.dialogVisible = false;
     },
+    async getrole() {
+      const response = await reqGetRole({
+        username: window.sessionStorage.getItem("username"),
+        pno: 1,
+        pageSize: 10,
+        object: "",
+      });
+      if (response.status === 200) {
+        this.role = response.data.data;
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
+    },
     handleOpen(userInfo) {
       this.dialogVisible = true;
+      this.getrole();
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
@@ -126,6 +145,8 @@ export default {
         password: this.form.passward,
         phone: this.form.phone,
         role: this.form.region,
+        id: this.id,
+        name: this.form.userName
       });
       if (response.data.code === "200") {
         this.$message.success(response.data.mess);

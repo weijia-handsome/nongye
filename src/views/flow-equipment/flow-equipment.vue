@@ -32,13 +32,15 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="device_name" label="设备名称" width="180">
+        <el-table-column prop="device_name" label="设备名称" width="180" align="center">
         </el-table-column>
         <el-table-column prop="imei" label="设备编号" align="center">
         </el-table-column>
         <el-table-column prop="adss" label="安装地址" align="center">
         </el-table-column>
         <el-table-column prop="instantFlow" label="实时流量" align="center">
+        </el-table-column>
+        <el-table-column prop="totalFlow" label="累计流量" align="center">
         </el-table-column>
         <el-table-column prop="reg_time" label="创建时间" align="center">
         </el-table-column>
@@ -131,6 +133,7 @@ export default {
       });
       if (response.status === 200) {
         this.tableData = response.data.data;
+        console.log(this.tableData, '=========');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

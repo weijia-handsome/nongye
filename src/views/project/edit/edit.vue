@@ -76,7 +76,7 @@
           >
           </el-input>
         </el-col>
-        <el-col :span="24" class="m-map" id="map"></el-col>
+        <el-col :span="24" class="m-map" id="map2"></el-col>
       </el-form>
     </el-row>
     <span slot="footer" class="dialog-footer">
@@ -235,11 +235,11 @@ export default {
         pdi: this.pid,
       };
       const response = await reqSavaProject(params, username);
-      if (response.data.code === '200') {
+      if (response.data.code === "200") {
         this.$message.success(response.data.mess);
         this.$emit("refresh");
       } else {
-        this.$message.error(response.data.mess || '服务错误!');
+        this.$message.error(response.data.mess || "服务错误!");
       }
     },
     //编辑

@@ -9,21 +9,41 @@
         <el-row :gutter="24">
           <el-col :span="6">
             <el-form-item label="分区名称">
-              <el-input v-model="form.name" size="mini"></el-input>
+              <el-input
+                v-model="form.name"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="项目名称">
-              <el-input v-model="form.phone" size="mini"></el-input>
+              <el-input
+                v-model="form.phone"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="分区地址">
-              <el-input v-model="form.adress" size="mini"></el-input>
+              <el-input
+                v-model="form.adress"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-button type="primary" size="mini">查询</el-button>
+            <el-button type="primary" size="mini" @click="handleSearch"
+              >查询</el-button
+            >
             <el-button type="primary" size="mini" @click="handleCreate"
               >新增</el-button
             >
@@ -189,7 +209,6 @@ export default {
         pno: 1,
         pageSize: 10,
       },
-      loading: true,
       tableData: [],
     };
   },
@@ -281,13 +300,27 @@ export default {
     handleEdit() {
       this.$refs.editRef.handleOpen();
     },
+    handleSizeChange(pageSize) {
+      this.param.pno = 1;
+      this.param.pageSize = pageSize;
+      this.getList();
+    },
+    handleCurrentChange(currentPage) {
+      this.param.pno = currentPage;
+      this.getList();
+    },
+    handleSearch() {
+      this.total = 0;
+      this.param.pno = 1;
+      this.getList();
+    },
     //获取列表
     async getList() {
       const response = await getPartitionList({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         pageSize: this.param.pageSize,
-        object: this.form.phone || this.form.name || this.form.region || "",
+        object: this.form.phone || this.form.name || this.form.adress || "",
       });
       if (response.status === 200) {
         this.loading = true;
@@ -298,8 +331,6 @@ export default {
       }
       this.loading = false;
     },
-    //新增
-    
 
     //删除
     async delFeiqu() {

@@ -32,6 +32,9 @@
             <el-button type="primary" size="mini" @click="handleSearch"
               >查询</el-button
             >
+            <el-button type="primary" size="mini" @click="handleCreate"
+              >新增</el-button
+            >
           </el-col>
         </el-row></el-form
       >
@@ -65,6 +68,12 @@
               @click="handleCheck(scope.row.imei)"
               >查看</el-button
             >
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleEdit(scope.row)"
+              >编辑</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -82,6 +91,7 @@
         />
       </div>
       <check-video ref="videoRef" :imei="imei"></check-video>
+      <edit ref="editRef" :videoInfo="tableData" @refresh="getList"></edit>
     </el-card>
   </div>
 </template>
@@ -89,11 +99,13 @@
 <script>
 import CheckVideo from "./check/check.vue";
 import { reqGetVideoDevice } from "@/api/api.js";
+import Edit from "./edit/edit.vue";
 
 export default {
   name: "VideoDevices",
   components: {
     CheckVideo,
+    Edit,
   },
   data() {
     return {
@@ -127,6 +139,12 @@ export default {
       this.imei = imei;
       this.$refs.videoRef.handleOpen();
     },
+    handleCreate() {
+      this.$refs.editRef.handleOpen();
+    },
+    handleEdit(info) {
+      this.$refs.editRef.handleOpen(info);
+    },
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
@@ -153,6 +171,7 @@ export default {
       });
       if (response.status === 200) {
         this.tableData = response.data.data;
+        console.log(this.tableData);
         this.total = response.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误！");

@@ -98,6 +98,13 @@
           width="180"
         >
         </el-table-column>
+        <el-table-column
+          prop="lastTime"
+          label="最后上传时间"
+          align="center"
+          width="180"
+        >
+        </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" width="180">
           <template slot-scope="scope"
             ><el-button type="text" size="mini" @click="handleCheck(scope.row)"
@@ -189,6 +196,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData);
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.data.mess || "服务错误！");

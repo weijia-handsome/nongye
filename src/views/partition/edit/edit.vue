@@ -21,7 +21,7 @@
             ></el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12" class="m-content-btn"
+        <el-col :span="12" class="m-dialog__address"
           ><el-form-item
             label="管网地址"
             prop="projectAddress"
@@ -245,8 +245,10 @@ export default {
 <style lang="scss" scoped>
 .m-dialog {
   .m {
-    &-content-btn {
-      display: flex;
+    &-dialog__address {
+      & .el-form-item__content {
+        width: 350px;
+      }
     }
 
     &-map {
