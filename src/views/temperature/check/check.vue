@@ -34,7 +34,7 @@
                 <span class="m-left__text2">实时湿度</span>
                 <span class="m-left__text1">{{ deviceInfo.soilH }}%</span>
               </div>
-              <div class="m-left__time">{{ deviceInfo.heartTime }}</div>
+              <div class="m-left__time">{{ deviceInfo.h_ime }}</div>
             </li>
             <li>
               <div class="m-left__box1">
@@ -42,7 +42,7 @@
                 <span class="m-left__text2">实时温度</span>
                 <span class="m-left__text1">{{ deviceInfo.soilT }}℃</span>
               </div>
-              <div class="m-left__time">{{ deviceInfo.heartTime }}</div>
+              <div class="m-left__time">{{ deviceInfo.h_ime }}</div>
             </li>
           </ul>
         </div>
@@ -93,7 +93,7 @@ export default {
       soilTArr: [],
       soilHArr: [],
       alarms: [],
-      alarmsValue: '',
+      alarmsValue: "",
       response: "",
       deviceInfo: {
         imei: "",
@@ -106,6 +106,7 @@ export default {
         soilT: "",
         soilH: "",
         s_time: "",
+        h_ime: "",
       },
     };
   },
@@ -113,7 +114,7 @@ export default {
     response(val) {
       this.setlineOne();
       this.setlineTwo();
-      this.setlineThree();    
+      this.setlineThree();
     },
   },
   methods: {
@@ -127,6 +128,8 @@ export default {
       this.deviceInfo.status = deviceInfo.state;
       this.deviceInfo.type = deviceInfo.state;
       this.deviceInfo.createTime = deviceInfo.reg_time;
+      this.deviceInfo.soilT = deviceInfo.soilT;
+      this.deviceInfo.soilH = deviceInfo.soilH;
     },
     handleOpen(deviceInfo) {
       this.dialogVisible = true;
@@ -145,11 +148,10 @@ export default {
       });
       if (this.response.status === 200) {
         this.loading = true;
+        this.deviceInfo.h_ime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
           this.deviceInfo.heartTime = i.s_time;
-          this.deviceInfo.soilT = i.soilT;
           this.soilTArr.push(i.soilT);
-          this.deviceInfo.soilH = i.soilH;
           this.soilHArr.push(i.soilH);
         }
         const dataTimeArr = this.response.data.data.map((item) => {
@@ -157,12 +159,12 @@ export default {
         });
         this.dataTime = dataTimeArr.slice(0, 6);
 
-        for(let j of this.response.data.alarms) {
+        for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
         }
-       this.alarms = this.response.data.alarms.map(item => {
+        this.alarms = this.response.data.alarms.map((item) => {
           return item.alarmtime;
-        })     
+        });
       } else {
         this.$message.error(this.response.statusText || "获取设备信息失败!");
       }
@@ -172,6 +174,15 @@ export default {
     setlineOne() {
       let lineFirst = echarts.init(document.getElementById("lineOne"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.dataTime,
@@ -206,6 +217,15 @@ export default {
     setlineTwo() {
       let lineSecond = echarts.init(document.getElementById("lineTwo"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.dataTime,
@@ -240,6 +260,15 @@ export default {
     setlineThree() {
       let lineThird = echarts.init(document.getElementById("lineThree"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
           data: this.alarms,

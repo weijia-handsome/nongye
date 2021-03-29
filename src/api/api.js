@@ -13,7 +13,7 @@ export function reqLogin({ username, password }) {
     })
 }
 //获取用户管理列表
-export function reqUserList({ username, pno, pageSize, phone,name }) {
+export function reqUserList({ username, pno, pageSize, phone, name }) {
     return request({
         url: `${API_NAME}/getUser_info`,
         method: 'GET',
@@ -40,7 +40,7 @@ export function reqDelUser({ username, id }) {
 }
 
 //编辑用户 /editUser_info
-export function reqEditUser({ username, password, phone, role }) {
+export function reqEditUser({ username, password, phone, role, id, name }) {
     return request({
         url: `${API_NAME}/editUser_info`,
         method: 'GET',
@@ -48,7 +48,9 @@ export function reqEditUser({ username, password, phone, role }) {
             username,
             password,
             phone,
-            role
+            role,
+            id,
+            name,
         },
     })
 }
@@ -69,7 +71,7 @@ export function reqSaveUser({ username, name, pass, phone, role }) {
 }
 
 //获取角色
-export function reqGetRole({ username, pno, pageSize,object }) {
+export function reqGetRole({ username, pno, pageSize, object }) {
     return request({
         url: `${API_NAME}/getrole`,
         method: 'GET',
@@ -134,7 +136,7 @@ export function reqGetPower({ username }) {
 }
 
 //获取项目 getProject
-export function reqGetProject({ username, pno, pageSize,object }) {
+export function reqGetProject({ username, pno, pageSize, object }) {
     return request({
         url: `${API_NAME}/getProject`,
         method: 'GET',
@@ -210,6 +212,44 @@ export function reqGetVideoDevice({ username, tid, pno, pageSize, object }) {
             pageSize,
             object,
         },
+    })
+}
+//新增视频
+export function adDevice({ username, nid, device_name, imei, tid, lant_lat, netid, adss }) {
+    return request({
+        url: `${API_NAME}/adDevice`,
+        method: 'GET',
+        params: {
+            username,
+            nid,
+            device_name, imei, tid, lant_lat, netid,
+            adss
+        },
+    })
+}
+
+//编辑视频
+export function editVideo({ username, id, netid, addr }) {
+    return request({
+        url: `${API_NAME}/editVideo`,
+        method: 'GET',
+        params: {
+            username,
+            id,
+            netid,
+            addr
+        }
+    })
+}
+
+//获取视频里的管网
+export function getGW({ username }) {
+    return request({
+        url: `${API_NAME}/getGW`,
+        method: 'GET',
+        params: {
+            username,
+        }
     })
 }
 
@@ -289,8 +329,8 @@ export function reqAlarmList({ username, pno, pageSize, object }) {
         method: 'GET',
         params: {
             username,
-            pno, 
-            pageSize, 
+            pno,
+            pageSize,
             object
         },
     })
@@ -602,7 +642,7 @@ export function getReclosing({ username, fid }) {
 }
 
 //滴灌任务列表
-export function getGridTask({ username, pno, pageSize, object }) {
+export function getGridTask({ username, pno, pageSize, state, type, name }) {
     return request({
         url: `${API_NAME}/getGridTask`,
         method: 'GET',
@@ -610,7 +650,9 @@ export function getGridTask({ username, pno, pageSize, object }) {
             username,
             pno,
             pageSize,
-            object
+            state,
+            type,
+            name,
         },
     })
 }
@@ -793,6 +835,18 @@ export function getScene({ username, object, cut }) {
             username,
             object,
             cut,
+        },
+    })
+}
+
+//流量设备
+export function checkFlowDevice({ username, imei }) {
+    return request({
+        url: `${API_NAME}/checkFlowDevice`,
+        method: 'GET',
+        params: {
+            username,
+            imei
         },
     })
 }

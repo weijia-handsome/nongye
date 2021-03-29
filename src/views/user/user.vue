@@ -171,6 +171,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData);
         this.total = response.data.recordCount;
       } else {
         this.$message(response.statusText);

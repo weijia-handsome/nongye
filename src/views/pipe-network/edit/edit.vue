@@ -357,6 +357,9 @@ export default {
     & .el-dialog__header {
       border-bottom: 1px solid #f0f1ef;
     }
+    & .el-form-item__content {
+      width: 350px;
+    }
   }
 }
 </style>

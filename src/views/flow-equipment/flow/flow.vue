@@ -14,10 +14,13 @@
             <p class="m-left__text">设备id：{{ deviceInfo.imei }}</p>
             <p class="m-left__text">设备名称：{{ deviceInfo.name }}</p>
             <p class="m-left__text">安装位置：{{ deviceInfo.address }}</p>
-            <p class="m-left__text" :class="{ 'm-left__text--select': deviceInfo.status === '1' }"
-              v-text="deviceInfo.status === '1' ? '状态：报警' : '状态：未报警'"></p>
+            <p
+              class="m-left__text"
+              :class="{ 'm-left__text--select': deviceInfo.status === '1' }"
+              v-text="deviceInfo.status === '1' ? '状态：报警' : '状态：未报警'"
+            ></p>
             <p class="m-left__text">设备类型：流量设备</p>
-            <p class="m-left__text">心跳时间：</p>
+            <p class="m-left__text">心跳时间：{{ deviceInfo.heartTime }}</p>
             <p class="m-left__text">创建时间：{{ deviceInfo.createTime }}</p>
           </div>
         </div>
@@ -27,25 +30,25 @@
             <li class="m-left__item">
               <div class="m-left__box1">
                 <div class="m-left__dot"></div>
-                <span class="m-left__text2">实时湿度</span>
-                <span class="m-left__text1">{{ deviceInfo.soilH }}%</span>
+                <span class="m-left__text2">实时流量</span>
+                <span class="m-left__text1">120</span>
               </div>
               <div class="m-left__time">{{ deviceInfo.heartTime }}</div>
             </li>
-            <li>
+            <!-- <li>
               <div class="m-left__box1">
                 <div class="m-left__dot"></div>
                 <span class="m-left__text2">实时温度</span>
                 <span class="m-left__text1">{{ deviceInfo.soilT }}℃</span>
               </div>
               <div class="m-left__time">{{ deviceInfo.heartTime }}</div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
       <div class="m-right">
         <div class="m-top">
-          <p class="m-top__text">温度统计图</p>
+          <p class="m-top__text">流量统计图</p>
           <div
             class="m-top__item"
             id="lineOne"
@@ -59,12 +62,14 @@
 
 <script>
 import echarts from "echarts/lib/echarts";
+import { checkFlowDevice } from "@/api/api.js";
 
 export default {
   name: "Flow",
   data() {
     return {
       dialogVisible: false,
+      response: "",
       deviceInfo: {
         imei: "",
         name: "",
@@ -90,29 +95,47 @@ export default {
       this.deviceInfo.status = deviceInfo.state;
       this.deviceInfo.type = deviceInfo.state;
       this.deviceInfo.createTime = deviceInfo.reg_time;
+      this.deviceInfo.heartTime = deviceInfo.lastTime;
     },
     handleOpen(deviceInfo) {
       this.dialogVisible = true;
       this.createParam(deviceInfo);
+      this.checkFlowDevice();
       this.$nextTick(() => {
         setTimeout(() => {
           this.setlineOne();
         });
       });
     },
+    async checkFlowDevice() {
+      this.response = await checkFlowDevice({
+        username: window.sessionStorage.getItem('username'),
+        imei:this.deviceInfo.imei
+      })
+      console.log(this.response);
+    },
     setlineOne() {
       let lineFirst = echarts.init(document.getElementById("lineOne"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          data: ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
         },
         yAxis: {
           type: "value",
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            data: [120, 200, 150, 80, 70, 110, 130],
             type: "line",
             smooth: true,
             itemStyle: {
@@ -187,6 +210,11 @@ export default {
         padding-left: 15px;
       }
 
+      &__time {
+        font-size: 12px;
+        margin-top: 5px;
+      }
+
       &__box1 {
         position: relative;
         width: 200px;
@@ -194,7 +222,7 @@ export default {
         justify-content: space-between;
       }
 
-       &__dot {
+      &__dot {
         position: absolute;
         width: 3px;
         height: 3px;

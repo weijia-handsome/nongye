@@ -6,14 +6,34 @@
     width="50%"
     :before-close="handleClose"
   >
-    <el-row :gutter="24">
+    <el-table :data="gridData">
+      <el-table-column
+        prop="device_name"
+        label="设备名称"
+        width="150"
+        align="center"
+      ></el-table-column>
+      <el-table-column
+        prop="imei"
+        label="设备号"
+        width="150"
+        align="center"
+      ></el-table-column>
+      <el-table-column
+        prop="adss"
+        label="地址"
+        align="center"
+      ></el-table-column>
+      <el-table-column label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button type="text" size="mini" @click="handleVideo(scope.row)"
+            >查看现场</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-row :gutter="24" :visible.sync="dialogFormVisible">
       <el-col :span="12">
-        <!-- <video-player
-          class="m-video"
-          ref="videoPlayer"
-          :playsinline="true"
-          :options="playerOptions"
-        ></video-player> -->
         <div id="ezuikitTalkData"></div>
       </el-col>
     </el-row>
@@ -29,9 +49,11 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      dialogFormVisible: false,
       video: "",
       cut: "",
       object: "",
+      gridData: [],
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -67,19 +89,27 @@ export default {
       this.dialogVisible = true;
       this.cut = irrInfo.cut;
       this.object = irrInfo.object;
-      this.getVideo();
       this.getScene();
+    },
+    handleVideo() {
+      this.getVideo();
     },
     async getScene() {
       const response = await getScene({
-        username: window.sessionStorage.getItem('username'),
+        username: window.sessionStorage.getItem("username"),
         cut: this.cut,
         object: this.object,
       });
-      console.log(response, '视频');
+      if (response.data.code === 200) {
+        this.gridData = response.data.data;
+        console.log(this.gridData, "///////");
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
     },
     //获取视频设备
     async getVideo() {
+      this.dialogFormVisible = true;
       const username = sessionStorage.getItem("username");
       reqGetVideo(username).then((res) => {
         const item = document.getElementById("ezuikitTalkData");

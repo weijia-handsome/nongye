@@ -71,8 +71,8 @@
         </el-table-column>
         <el-table-column prop="imei" label="设备编号" align="center">
         </el-table-column>
-        <el-table-column prop="alarmType" label="报警名称" align="center">
-        </el-table-column>
+        <!-- <el-table-column prop="alarmType" label="报警名称" align="center">
+        </el-table-column> -->
         <el-table-column
           prop="d_adss"
           label="设备安装地址"
@@ -211,6 +211,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData);
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

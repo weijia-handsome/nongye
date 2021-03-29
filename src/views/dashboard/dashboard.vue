@@ -232,6 +232,7 @@ export default {
       getAverageArrT: [],
       getAverageArrH: [],
       getAverageTime: [],
+      flowTotal: [],
     };
   },
   methods: {
@@ -318,9 +319,18 @@ export default {
     setRoundChart() {
       let roundChart = echarts.init(document.getElementById("roundChart"));
       let option = {
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
         xAxis: {
           type: "category",
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          data: ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
           axisLabel: {
             textStyle: {
               color: "#04E0F9", //坐标值得具体的颜色
@@ -331,7 +341,7 @@ export default {
         yAxis: {
           type: "value",
           axisLabel: {
-            formatter: "{value} ml",
+            formatter: "{value} L",
             textStyle: {
               color: "#04E0F9", //坐标值得具体的颜色
             },
@@ -410,10 +420,10 @@ export default {
               color: "#C8742D",
             },
             min: 0,
-            max: 250,
-            interval: 50,
+            max: 25,
+            interval: 5,
             axisLabel: {
-              formatter: "{value} ml",
+              formatter: "{value} ℃",
               textStyle: {
                 color: "#04E0F9", //坐标值得具体的颜色
               },
@@ -429,7 +439,7 @@ export default {
             max: 25,
             interval: 5,
             axisLabel: {
-              formatter: "{value} °C",
+              formatter: "{value} %",
               textStyle: {
                 color: "#04E0F9", //坐标值得具体的颜色
               },
@@ -667,7 +677,11 @@ export default {
       const response = await getFlowDevice({
         username: window.sessionStorage.getItem("username"),
       });
-      console.log(response, "流量计");
+      if (response.status === 200) {
+        this.flowTotal = response.data.data;
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
     },
     //温湿度传感器
     async getAverage() {
@@ -675,17 +689,18 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pid: this.pid,
       });
+      console.log(this.getAverageResponse);
       if (this.getAverageResponse.status === 200) {
         this.pageLoading = true;
         const arrT = this.getAverageResponse.data.mess.map((item) => {
-          return item.soilT;
+          return Number(item.soilT).toFixed(1);
         });
         this.getAverageArrT = arrT.slice(0, 4);
         const arrH = this.getAverageResponse.data.mess.map((item) => {
-          return item.soilH;
+          return  Number(item.soilH).toFixed(1);
         });
+        
         this.getAverageArrH = arrH.slice(0, 4);
-
         const arrTime = this.getAverageResponse.data.mess.map((item) => {
           return item.time;
         });

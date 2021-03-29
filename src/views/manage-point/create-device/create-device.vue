@@ -232,6 +232,12 @@ export default {
     & .el-form-item__label {
       padding: 0;
     }
+    & .el-form-item__content {
+      width: 350px;
+    }
+    & .el-select--mini {
+      width: 340px;
+    }
   }
 }
 </style>
