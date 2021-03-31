@@ -105,9 +105,12 @@
               v-for="(activity, index) in activities"
               :key="index"
               size="normal"
-              color="#04E0F9"
             >
-              <div class="m-min__mask" @click="handleiIll(activity)">
+              <div
+                class="m-min__mask"
+                @click="handleiIll(activity)"
+                :style="randomRgb(activity)"
+              >
                 <span class="m-min__task">任务名称：{{ activity.name }}</span>
                 <span v-if="activity.state === '0'"
                   >任务在{{ activity.start_time }}未执行 时长为：{{
@@ -129,8 +132,11 @@
                     activity.time
                   }}
                 </span>
-                <span v-if="activity.state === '1'">已完成</span>
-                <span v-if="activity.state === '2'">未完成</span>
+                <span v-if="activity.state === '1'">执行中</span>
+                <span v-if="activity.state === '2'">完成</span>
+                <el-button size="mini" type="text" 
+                  >查看现场</el-button
+                >
               </div>
             </el-timeline-item>
           </el-timeline>
@@ -514,7 +520,7 @@ export default {
           {
             type: "pie",
             radius: ["40%", "70%"],
-            avoidLabelOverlap: false,
+            avoidLabelOverlap: true,
             itemStyle: {
               borderRadius: 10,
               borderColor: "#fff",
@@ -556,7 +562,7 @@ export default {
           {
             type: "pie",
             radius: ["40%", "70%"],
-            avoidLabelOverlap: false,
+            avoidLabelOverlap: true,
             label: {
               show: false,
               position: "center",
@@ -648,6 +654,7 @@ export default {
       this.menuVisible = !this.menuVisible;
     },
     handleSelectMenu(index) {
+      this.deviceType = [];
       this.getPidAndPname(index);
       this.getAverage();
       this.getPidAndPname();
@@ -697,9 +704,9 @@ export default {
         });
         this.getAverageArrT = arrT.slice(0, 4);
         const arrH = this.getAverageResponse.data.mess.map((item) => {
-          return  Number(item.soilH).toFixed(1);
+          return Number(item.soilH).toFixed(1);
         });
-        
+
         this.getAverageArrH = arrH.slice(0, 4);
         const arrTime = this.getAverageResponse.data.mess.map((item) => {
           return item.time;
@@ -752,7 +759,6 @@ export default {
         for (let i of this.deviceData.data.mess) {
           this.deviceType.push({ value: i.num, name: i.name, index: [] });
         }
-        console.log(this.deviceType, "物联设备");
       } else {
         this.$message.error(this.deviceData.statusText || "服务错误！");
       }
@@ -815,6 +821,19 @@ export default {
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
+    },
+    // handleCheck() {
+    //   this.$refs.videoRef.handleOpen();
+    // },
+    //随机颜色
+    randomRgb(item) {
+      let R = Math.floor(Math.random() * 255);
+      let G = Math.floor(Math.random() * 255);
+      let B = Math.floor(Math.random() * 255);
+      return {
+        // width: (item.num / item.total) * 100 + "%", // 进度条
+        color: "rgb(" + R + "," + G + "," + B + ")",
+      };
     },
   },
   watch: {

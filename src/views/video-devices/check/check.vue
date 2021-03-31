@@ -31,6 +31,7 @@ export default {
     return {
       dialogVisible: false,
       video: "",
+      videoImei: "",
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -76,7 +77,8 @@ export default {
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        this.imei = "E48829946_NQACPR";
+        // this.imei = "E48829946_NQACPR";
+        this.videoImei = this.imei;
         const deviceSerial = this.imei.split("_")[0];
         const deviceSerial2 = this.imei.split("_")[1];
 

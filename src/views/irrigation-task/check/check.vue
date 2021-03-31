@@ -26,17 +26,23 @@
       ></el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="mini" @click="handleVideo(scope.row)"
+          <el-button type="text" size="mini" @click="handleVideo(scope.row.imei)"
             >查看现场</el-button
           >
         </template>
       </el-table-column>
     </el-table>
-    <el-row :gutter="24" :visible.sync="dialogFormVisible">
-      <el-col :span="12">
-        <div id="ezuikitTalkData"></div>
-      </el-col>
-    </el-row>
+    <el-dialog
+      width="40%"
+      :visible.sync="dialogFormVisible"
+      append-to-body
+      :before-close="handleCloseVideo"
+    >
+      <el-row :gutter="24"
+        ><el-col :span="24">
+          <div id="ezuikitTalkData"></div> </el-col
+      ></el-row>
+    </el-dialog>
   </el-dialog>
 </template>
 
@@ -85,14 +91,17 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
+    handleCloseVideo() {
+      this.dialogFormVisible = false;
+    },
     handleOpen(irrInfo) {
       this.dialogVisible = true;
       this.cut = irrInfo.cut;
       this.object = irrInfo.object;
       this.getScene();
     },
-    handleVideo() {
-      this.getVideo();
+    handleVideo(imei) {
+      this.getVideo(imei);
     },
     async getScene() {
       const response = await getScene({
@@ -102,13 +111,12 @@ export default {
       });
       if (response.data.code === 200) {
         this.gridData = response.data.data;
-        console.log(this.gridData, "///////");
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
     },
     //获取视频设备
-    async getVideo() {
+    async getVideo(imei) {
       this.dialogFormVisible = true;
       const username = sessionStorage.getItem("username");
       reqGetVideo(username).then((res) => {
@@ -118,7 +126,8 @@ export default {
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        this.imei = "E48829946_NQACPR";
+        // this.imei = "E48829946_NQACPR";
+        this.imei = imei;
         const deviceSerial = this.imei.split("_")[0];
         const deviceSerial2 = this.imei.split("_")[1];
 

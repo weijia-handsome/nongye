@@ -130,7 +130,7 @@ export default {
       ruleForm: {
         content: "",
       },
-      dataTime: [],
+      // dataTime: [],
       soilTArr: [],
       soilHArr: [],
       alarms: [],
@@ -195,15 +195,13 @@ export default {
         this.deviceInfo.h_ime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
           this.deviceInfo.heartTime = i.s_time;
-          // this.deviceInfo.soilT = i.soilT;
           this.soilTArr.push(i.soilT);
-          // this.deviceInfo.soilH = i.soilH;
           this.soilHArr.push(i.soilH);
         }
-        const dataTimeArr = this.response.data.data.map((item) => {
-          return item.s_time;
-        });
-        this.dataTime = dataTimeArr.slice(0, 6);
+        // const dataTimeArr = this.response.data.data.map((item) => {
+        //   return item.s_time;
+        // });
+        // this.dataTime = dataTimeArr.slice(0, 6);
 
         for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
@@ -251,7 +249,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: this.dataTime,
+          // data: this.dataTime,
           axisLabel: {
             interval: 0,
           },
@@ -293,7 +291,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: this.dataTime,
+          // data: this.dataTime,
           axisLabel: {
             interval: 0,
           },

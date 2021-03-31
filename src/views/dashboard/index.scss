@@ -111,12 +111,14 @@
         height: 87%;
         background-color: #173155;
       }
+
       &__round1 {
         height: 83%;
         width: 87%;
         padding-top: 15px;
         background-color: #173155;
       }
+
       &__round2 {
         width: 99.5%;
         height: 91%;
@@ -166,7 +168,7 @@
             font-size: 12px;
             color: #fff;
           }
- 
+
           & .el-timeline {
             padding: 20px;
           }
@@ -174,11 +176,13 @@
           & .el-timeline-item__node {
             width: 7px;
             height: 7px;
-            left: 1px;
+            left: 1.5px;
+            background-color: #04E0F9;
           }
 
           & .el-timeline-item__tail {
-            color: #04E0F9;
+            // left: 4px;
+            background-color: #04E0F9;
           }
 
           & .el-timeline-item {
@@ -227,23 +231,26 @@
         cursor: pointer;
       }
 
-      // &__txt:active {
-      //   background-color: #047cf7;
-      // }
-
       &__round2 {
         height: 94%;
       }
 
       &__task {
         margin-right: 5px;
-        // color: #047cf7;
+      }
+
+      &__mask {
+        /deep/ {
+          & .el-button {
+            margin-left: 10px;
+          }
+        }
       }
     }
 
     &-right {
       position: absolute;
-      top:12px;
+      top: 12px;
       right: 12px;
       display: flex;
       flex-direction: column;
@@ -280,7 +287,7 @@
         font-size: 10px;
         color: #fff;
         margin: 3px 0;
-      } 
+      }
 
       &__time {
         font-size: 10px;
@@ -321,13 +328,12 @@
             height: 245px;
             // border: 1px solid #2773e6;
           }
-        }
-      }
 
-      &__box {
-        // border: 1px solid #2773e6;
+          & .el-timeline-item__node {
+            left: -2px;
+          }
+        }
       }
     }
   }
 }
-

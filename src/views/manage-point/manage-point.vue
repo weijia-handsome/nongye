@@ -172,60 +172,104 @@ export default {
     // 初始化
     setMap() {
       this.$nextTick(() => {
-        this.map = new AMap.Map("map", {
-          resizeEnable: true,
-          center: [110.397428, 25.90923],
-          // keyboardEnable: false,
-          zoom: 4,
-          mapStyle: "amap://styles/blue",
-        });
+        // this.map = new AMap.Map("map", {
+        //   resizeEnable: true,
+        //   center: [110.397428, 25.90923],
+        //   // keyboardEnable: false,
+        //   zoom: 4,
+        //   mapStyle: "amap://styles/blue",
+        // });
 
-        const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
-          console.log(res);
-          var cluster,
-            markers = [];
-          let data = res.data.data;
-
-          const points2 = [];
-          for (var i = 0; i < data.length; i++) {
-            var pp = data[i].lnt;
-            if (lat > 54) {
-              var lng = pp.split(",")[1];
-              var lat = pp.split(",")[0];
-              points2.push({ lnglat: [lng, lat] });
-            } else {
-              var lng = pp.split(",")[0];
-              var lat = pp.split(",")[1];
-              points2.push({ lnglat: [lng, lat] });
-            }
-          }
-          var style = [
-            {
-              url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
-              anchor: new AMap.Pixel(6, 6),
-              size: new AMap.Size(30, 30),
-            },
-            // {
-            //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
-            //   anchor: new AMap.Pixel(4, 4),
-            //   size: new AMap.Size(7, 7),
-            // },
-            // {
-            //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
-            //   anchor: new AMap.Pixel(3, 3),
-            //   size: new AMap.Size(5, 5),
-            // },
-          ];
-          var mass = new AMap.MassMarks(points2, {
-            opacity: 0.8,
-            zIndex: 111,
-            cursor: "pointer",
-            style: style[0],
+        AMapUI.loadUI(["misc/PositionPicker"], function (PositionPicker) {
+          var map = new AMap.Map("map", {
+            resizeEnable: true,
+            center: [110.397428, 25.90923],
+            // keyboardEnable: false,
+            zoom: 4,
+            mapStyle: "amap://styles/blue",
           });
 
-          var marker = new AMap.Marker({ content: " ", map: this.map });
-          mass.setMap(this.map);
+          const username = sessionStorage.getItem("username");
+          reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
+            var cluster,
+              markers = [];
+            let data = res.data.data;
+            console.log(data, "获取管点信息");
+
+            const points2 = [];
+            for (var i = 0; i < data.length; i++) {
+              var pp = data[i].lnt; //经纬度
+              var name = data[i].name;
+              if (lat > 54) {
+                var lng = pp.split(",")[1];
+                var lat = pp.split(",")[0];
+                points2.push({ lnglat: [lng, lat], name: name });
+              } else {
+                var lng = pp.split(",")[0];
+                var lat = pp.split(",")[1];
+                points2.push({ lnglat: [lng, lat], name: name });
+              }
+            }
+            var style = [
+              {
+                url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
+                anchor: new AMap.Pixel(6, 6),
+                size: new AMap.Size(30, 30),
+              },
+              // {
+              //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
+              //   anchor: new AMap.Pixel(4, 4),
+              //   size: new AMap.Size(7, 7),
+              // },
+              // {
+              //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
+              //   anchor: new AMap.Pixel(3, 3),
+              //   size: new AMap.Size(5, 5),
+              // },
+            ];
+            var mass = new AMap.MassMarks(points2, {
+              opacity: 0.8,
+              zIndex: 111,
+              cursor: "pointer",
+              style: style[0],
+            });
+
+            mass.on("mouseover", function (e) {
+              console.log(e);
+              marker.setPosition(e.data.lnglat);
+              marker.setLabel({ content: e.data.name });
+            });
+            var marker = new AMap.Marker({ content: " ", map: map });
+
+            mass.setMap(map);
+
+            // var marker = new AMap.Marker({
+            //   icon:
+            //     "https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+            //   offset: new AMap.Pixel(-13, -30),
+            //   // 设置是否可以拖拽
+            //   draggable: true,
+            //   cursor: "move",
+            //   // 设置拖拽效果
+            //   raiseOnDrag: true,
+            // });
+            // marker.setMap(map);
+
+            // var positionPicker = new PositionPicker({
+            //   mode: "dragMarker",
+            //   map: map,
+            //   iconStyle: {
+            //     url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
+            //     size: [24, 24],
+            //     ancher: [24, 40],
+            //   },
+            // });
+            // console.log(positionPicker, "定位信息");
+            // positionPicker.on("success", function (positionResult) {
+            //   console.log(positionResult, "============");
+            // });
+            // positionPicker.start();
+          });
         });
       });
     },

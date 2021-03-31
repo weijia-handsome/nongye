@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- <meta name="viewport" content="width=device-width,initial-scale=1.0"> -->
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <link rel="icon" href="<%= BASE_URL %>favicon.ico">
   <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <!-- <script type="text/javascript"
@@ -12,7 +13,7 @@
 
 
   <script
-    src="https://webapi.amap.com/maps?v=1.4.15&key=eb34eb637f271e0e1d2c36267417dae5&plugin=AMap.MapType,AMap.Autocomplete,AMap.PlaceSearch,AMap.MarkerClusterer"></script>
+    src="https://webapi.amap.com/maps?v=1.4.15&key=eb34eb637f271e0e1d2c36267417dae5&plugin=AMap.MapType,AMap.Autocomplete,AMap.PlaceSearch,AMap.MarkerClusterer,AMap.ToolBar"></script>
 
   <script src="//a.amap.com/jsapi_demos/static/china.js"></script>
 
@@ -22,6 +23,7 @@
 
 
   <script src="https://webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
+  <!-- <base href="https://webapi.amap.com/ui/1.1/ui/misc/PositionPicker/examples/" /> -->
   <!-- <script src="./public/ezuikit.js"></script> -->
   <title>
     <%= htmlWebpackPlugin.options.title %>

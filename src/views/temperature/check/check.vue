@@ -89,7 +89,7 @@ export default {
     return {
       dialogVisible: false,
       loading: false,
-      dataTime: [],
+      // dataTime: [],
       soilTArr: [],
       soilHArr: [],
       alarms: [],
@@ -154,11 +154,10 @@ export default {
           this.soilTArr.push(i.soilT);
           this.soilHArr.push(i.soilH);
         }
-        const dataTimeArr = this.response.data.data.map((item) => {
-          return item.s_time;
-        });
-        this.dataTime = dataTimeArr.slice(0, 6);
-
+        // const dataTimeArr = this.response.data.data.map((item) => {
+        //   return item.s_time;
+        // });
+        // this.dataTime = dataTimeArr.slice(0, 6);
         for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
         }
@@ -185,7 +184,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: this.dataTime,
+          // data: this.dataTime,
           axisLabel: {
             interval: 0,
           },
@@ -228,7 +227,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: this.dataTime,
+          // data: this.dataTime,
           axisLabel: {
             interval: 0,
           },

@@ -1,6 +1,15 @@
 // var path = require('path');
 const path = require('path')
-const resolve = dir => path.join(__dirname, dir)
+const resolve = dir => path.join(__dirname, dir);
+// 引入等比适配插件
+// const px2rem = require('postcss-px2rem')
+ 
+// // 配置基本大小
+// const postcss = px2rem({
+//   // 基准大小 baseSize，需要和rem.js中相同
+//   remUnit: 16
+// })
+
 module.exports = {
 
   devServer: {
@@ -57,11 +66,15 @@ module.exports = {
   // }
   css: {
     loaderOptions: {
-      css: {},
+      // css: {},
       postcss: {
+        // plugins: [
+        //   postcss,
+        // ]
         plugins: [
           require('postcss-px2rem')({
             remUnit: 45 //列如设计稿尺寸为320
+            // remUnit: 192 //列如设计稿尺寸为320
           })
         ]
       }
