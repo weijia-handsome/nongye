@@ -134,7 +134,10 @@
                 </span>
                 <span v-if="activity.state === '1'">执行中</span>
                 <span v-if="activity.state === '2'">完成</span>
-                <el-button size="mini" type="text" 
+                <el-button
+                  size="mini"
+                  type="text"
+                  @click.stop="handleCheck(activity)"
                   >查看现场</el-button
                 >
               </div>
@@ -188,6 +191,7 @@
     </div>
     <task ref="taskRef" @refresh="handleLunGuan"></task>
     <alarm ref="alarmRef"></alarm>
+    <check-video ref="videoRef"></check-video>
   </div>
 </template>
 
@@ -205,12 +209,14 @@ import {
 } from "@/api/api.js";
 import Task from "./task/task.vue";
 import Alarm from "./alarm/alarm.vue";
+import CheckVideo from "./checkVideo/checkVideo.vue";
 
 export default {
   name: "bigData",
   components: {
     Task,
     Alarm,
+    CheckVideo,
   },
   data() {
     return {
@@ -262,14 +268,15 @@ export default {
           const points2 = [];
           for (var i = 0; i < data.length; i++) {
             var pp = data[i].lnt;
+            var name = data[i].name;
             if (lat > 54) {
               var lng = pp.split(",")[1];
               var lat = pp.split(",")[0];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             } else {
               var lng = pp.split(",")[0];
               var lat = pp.split(",")[1];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             }
           }
           var style = [
@@ -295,13 +302,16 @@ export default {
             cursor: "pointer",
             style: style[0],
           });
+          mass.on("mouseover", function (e) {
+            marker.setPosition(e.data.lnglat);
+            marker.setLabel({ content: e.data.name });
+          });
 
           var marker = new AMap.Marker({ content: " ", map: this.map });
           mass.setMap(this.map);
 
           const _that = this;
           mass.on("click", (e) => {
-            console.log(123);
             _that.$refs.myIframe.style.display = "block";
             _that.callFuncInThingJS("changeLevel", 1);
           });
@@ -686,6 +696,7 @@ export default {
       });
       if (response.status === 200) {
         this.flowTotal = response.data.data;
+        console.log(this.flowTotal, "流量计");
       } else {
         this.$message.error(response.data.mess || "服务错误!");
       }
@@ -822,9 +833,9 @@ export default {
         this.$message.error(response.statusText || "服务错误!");
       }
     },
-    // handleCheck() {
-    //   this.$refs.videoRef.handleOpen();
-    // },
+    handleCheck(item) {
+      this.$refs.videoRef.handleOpen(item.imei);
+    },
     //随机颜色
     randomRgb(item) {
       let R = Math.floor(Math.random() * 255);

@@ -13,7 +13,7 @@ import 'video.js/dist/video-js.css';
 import 'lib-flexible';
 import axios from 'axios';
 import './assets/iconfont/iconfont.css';
-// import './utils/rem';
+import './utils/rem';
 
 Vue.prototype.axios = axios;
 Vue.config.productionTip = false;

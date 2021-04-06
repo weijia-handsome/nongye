@@ -91,14 +91,19 @@ export default new Router({
           meta: { title: '滴灌任务' }
         },
         {
-          path: '/diary',
-          component: () => import(/* webpackChunkName: "dashboard" */ '../views/diary/diary.vue'),
-          meta: { title: '统计日记' }
+          path: '/flowmeter',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../views/flowmeter/flowmeter.vue'),
+          meta: { title: '流量计' }
         },
         {
           path: '/well-room',
           component: () => import(/* webpackChunkName: "dashboard" */ '../views/well-room/well-room.vue'),
           meta: { title: '井房分区管理' }
+        },
+        {
+          path: '/total-temperture',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../views/total-temperture/total-temperture.vue'),
+          meta: { title: '土壤温湿度' }
         },
         {
           path: '/404',

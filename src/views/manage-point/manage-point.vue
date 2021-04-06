@@ -63,6 +63,41 @@
 
       <!-- 地图模式 -->
       <div class="m-map" id="map" v-if="mapVisible"></div>
+      <div class="m-content" v-if="mapVisible" ref="massRefs">
+        <div class="m-content__c">管点名称:</div>
+        <el-col>
+          <el-input
+            size="mini"
+            v-model="mapParams.name"
+            class="m-content__inp"
+          ></el-input>
+        </el-col>
+
+        <div class="m-content__c">经纬度:</div>
+        <!-- <div id="lnglat" class="m-content__text"></div> -->
+        <el-col>
+          <el-input
+            size="mini"
+            v-model="mapParams.lnglat"
+            class="m-content__inp"
+          ></el-input>
+        </el-col>
+
+        <div class="m-content__c">地址:</div>
+        <el-col>
+          <el-input
+            size="mini"
+            v-model="mapParams.address"
+            class="m-content__inp"
+            id="tipinput"
+          ></el-input>
+        </el-col>
+        <div class="m-content__button">
+          <el-button type="primary" size="mini" @click="handleSumit"
+            >确定</el-button
+          >
+        </div>
+      </div>
       <div v-else>
         <el-table :data="tableData" border style="width: 100%" height="600">
           <el-table-column
@@ -141,7 +176,7 @@
 <script>
 import CreateDevice from "./create-device/create-device.vue";
 import Create from "./create/create.vue";
-import { reqGetNetspot, delNetspot } from "@/api/api.js";
+import { reqGetNetspot, delNetspot, editNetspot } from "@/api/api.js";
 
 export default {
   name: "DevieManagement",
@@ -155,6 +190,9 @@ export default {
       mapVisible: false,
       total: 0,
       loading: false,
+      points2: [],
+      lng: "",
+      lat: "",
       form: {
         doiName: "",
         intName: "",
@@ -164,9 +202,28 @@ export default {
         pno: 1,
         pageSize: 10,
       },
+      mapParams: {
+        name: "",
+        lnglat: "",
+        address: "",
+        fireman: "",
+        firemanname: "",
+        person: "",
+        personname: "",
+        tube: "",
+        marker: "",
+        nid: "",
+        spid: "",
+      },
       loading: true,
       tableData: [],
     };
+  },
+  watch: {
+    // points2(val) {
+    //   console.log(val, 'points2-------------');
+    //   this.setMap();
+    // }
   },
   methods: {
     // 初始化
@@ -179,99 +236,159 @@ export default {
         //   zoom: 4,
         //   mapStyle: "amap://styles/blue",
         // });
-
-        AMapUI.loadUI(["misc/PositionPicker"], function (PositionPicker) {
-          var map = new AMap.Map("map", {
+        var clickListener,
+          map = new AMap.Map("map", {
             resizeEnable: true,
-            center: [110.397428, 25.90923],
+            // center: [116.397428, 39.90923],
             // keyboardEnable: false,
             zoom: 4,
             mapStyle: "amap://styles/blue",
           });
 
-          const username = sessionStorage.getItem("username");
-          reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
-            var cluster,
-              markers = [];
-            let data = res.data.data;
-            console.log(data, "获取管点信息");
+        const username = sessionStorage.getItem("username");
+        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
+          var cluster,
+            markers = [];
+          let data = res.data.data;
+          console.log(data, "管点信息");
 
-            const points2 = [];
-            for (var i = 0; i < data.length; i++) {
-              var pp = data[i].lnt; //经纬度
-              var name = data[i].name;
-              if (lat > 54) {
-                var lng = pp.split(",")[1];
-                var lat = pp.split(",")[0];
-                points2.push({ lnglat: [lng, lat], name: name });
-              } else {
-                var lng = pp.split(",")[0];
-                var lat = pp.split(",")[1];
-                points2.push({ lnglat: [lng, lat], name: name });
-              }
+          // const points2 = [];
+          for (var i = 0; i < data.length; i++) {
+            var pp = data[i].lnt; //经纬度
+            var name = data[i].name;
+            var adss = data[i].adss;
+            var fireman = data[i].fireman;
+            var firemanname = data[i].firemanname;
+            var person = data[i].person;
+            var personname = data[i].personname;
+            var tube = data[i].tube;
+            var markers = data[i].marker;
+            var nid = data[i].nid;
+            var spid = data[i].spid;
+
+            if (this.lat > 54) {
+              this.lng = pp.split(",")[1];
+              this.lat = pp.split(",")[0];
+              this.points2.push({
+                lnglat: [this.lng, this.lat],
+                name: name,
+                address: adss,
+                lnt: pp,
+                fireman: fireman,
+                firemanname: firemanname,
+                person: person,
+                personname: personname,
+                tube: tube,
+                marker: markers,
+                nid: nid,
+                spid: spid,
+              });
+            } else {
+              this.lng = pp.split(",")[0];
+              this.lat = pp.split(",")[1];
+              this.points2.push({
+                lnglat: [this.lng, this.lat],
+                name: name,
+                address: adss,
+                lnt: pp,
+                fireman: fireman,
+                firemanname: firemanname,
+                person: person,
+                personname: personname,
+                tube: tube,
+                marker: markers,
+                nid: nid,
+                spid: spid,
+              });
             }
-            var style = [
-              {
-                url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
-                anchor: new AMap.Pixel(6, 6),
-                size: new AMap.Size(30, 30),
-              },
-              // {
-              //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
-              //   anchor: new AMap.Pixel(4, 4),
-              //   size: new AMap.Size(7, 7),
-              // },
-              // {
-              //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
-              //   anchor: new AMap.Pixel(3, 3),
-              //   size: new AMap.Size(5, 5),
-              // },
-            ];
-            var mass = new AMap.MassMarks(points2, {
-              opacity: 0.8,
-              zIndex: 111,
-              cursor: "pointer",
-              style: style[0],
-            });
+          }
 
-            mass.on("mouseover", function (e) {
-              console.log(e);
-              marker.setPosition(e.data.lnglat);
-              marker.setLabel({ content: e.data.name });
-            });
-            var marker = new AMap.Marker({ content: " ", map: map });
+          var style = [
+            {
+              url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
+              anchor: new AMap.Pixel(6, 6),
+              size: new AMap.Size(30, 30),
+            },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
+            //   anchor: new AMap.Pixel(4, 4),
+            //   size: new AMap.Size(7, 7),
+            // },
+            // {
+            //   url: "https://a.amap.com/jsapi_demos/static/images/mass2.png",
+            //   anchor: new AMap.Pixel(3, 3),
+            //   size: new AMap.Size(5, 5),
+            // },
+          ];
+          var mass = new AMap.MassMarks(this.points2, {
+            opacity: 0.8,
+            zIndex: 111,
+            cursor: "pointer",
+            style: style[0],
+          });
 
-            mass.setMap(map);
+          mass.on("click", (e) => {
+            this.$refs.massRefs.style.display = "block";
+            this.mapParams.address = e.data.address;
+            this.mapParams.name = e.data.name;
+            this.mapParams.lnglat = e.data.lnt;
+            this.mapParams.fireman = e.data.fireman;
+            this.mapParams.firemanname = e.data.firemanname;
+            this.mapParams.person = e.data.person;
+            this.mapParams.personname = e.data.personname;
+            this.mapParams.tube = e.data.tube;
+            this.mapParams.marker = e.data.marker;
+            this.mapParams.nid = e.data.nid;
+            this.mapParams.spid = e.data.spid;
+          });
 
-            // var marker = new AMap.Marker({
-            //   icon:
-            //     "https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
-            //   offset: new AMap.Pixel(-13, -30),
-            //   // 设置是否可以拖拽
-            //   draggable: true,
-            //   cursor: "move",
-            //   // 设置拖拽效果
-            //   raiseOnDrag: true,
-            // });
-            // marker.setMap(map);
+          mass.on("mouseover", function (e) {
+            marker.setPosition(e.data.lnglat);
+            marker.setLabel({ content: e.data.name });
+          });
 
-            // var positionPicker = new PositionPicker({
-            //   mode: "dragMarker",
+          var marker = new AMap.Marker({ content: " ", map: map });
+          mass.setMap(map);
+
+          var autoOptions = {
+            input: "tipinput",
+          };
+          var auto = new AMap.Autocomplete(autoOptions);
+          this.placeSearch = new AMap.PlaceSearch({
+            map: map,
+          }); //构造地点查询类
+          AMap.event.addListener(auto, "select", this.select); //注册监听，当选中某条记录时会触发
+          AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
+            // console.log(e.data.location.lng, e.data.location.lat); // 经纬度
+            // // console.log(e, 654);
+            this.mapParams.lnglat =
+              e.data.location.lng + "," + e.data.location.lat;
+            // this.mapInfo.lnglat = this.lanlat;
+            this.mapParams.address = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+          });
+          let _that = this;
+          clickListener = AMap.event.addListener(map, "click", function (e) {
+            // _that.mapParams.address = e.lnglat.toString();
+            // console.log(e.count);
+            _that.lnt = e.lnglat.toString();
+            // markers
+            map.clearMap();
+            // var markers = new AMap.Marker({
+            //   position: e.lnglat,
             //   map: map,
-            //   iconStyle: {
-            //     url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
-            //     size: [24, 24],
-            //     ancher: [24, 40],
-            //   },
             // });
-            // console.log(positionPicker, "定位信息");
-            // positionPicker.on("success", function (positionResult) {
-            //   console.log(positionResult, "============");
-            // });
-            // positionPicker.start();
+            // // if()
+            // console.log(markers);
           });
         });
       });
+    },
+    select(e) {
+      this.placeSearch.setCity(e.poi.adcode);
+      this.placeSearch.search(e.poi.name); //关键字查询查询
+      this.form.projectAddress =
+        e.poi.district + "" + e.poi.address + "" + e.poi.name;
+      this.lnt = e.poi.location.lng + "," + e.poi.location.lat;
     },
     handleMap() {
       this.mapVisible = true;
@@ -352,6 +469,30 @@ export default {
     },
     handleEdit(pointInfo) {
       this.$refs.createRef.handleOpen(pointInfo);
+    },
+    //地图确定
+    async handleSumit() {
+      const response = await editNetspot({
+        username: window.sessionStorage.getItem("username"),
+        name: this.mapParams.name,
+        adss: this.mapParams.address,
+        fireman: this.mapParams.fireman,
+        person: this.mapParams.person,
+        firemanname: this.mapParams.firemanname,
+        personname: this.mapParams.personname,
+        tube: this.mapParams.tube,
+        marker: this.mapParams.marker,
+        nid: this.mapParams.nid,
+        spid: this.mapParams.spid,
+        lnt: this.mapParams.lnglat,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.points2 = [];
+        this.setMap();
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
     },
     async getList(object) {
       const response = await reqGetNetspot({
@@ -442,6 +583,48 @@ export default {
       left: 10px;
       width: 98%;
       height: 98%;
+    }
+
+    &-content {
+      display: none;
+      position: absolute;
+      right: 25px;
+      width: 250px;
+      height: 180px;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #fff;
+
+      &__c {
+        font-size: 12px;
+        color: #333;
+        font-weight: bold;
+      }
+
+      &__inp {
+        /deep/ {
+          & .el-input__inner {
+            width: 250px;
+            height: 25px;
+            margin-top: 5px;
+            border-radius: 0;
+          }
+        }
+      }
+
+      &__button {
+        text-align: right;
+
+        /deep/ {
+          & .el-button {
+            margin-top: 10px;
+            color: #333;
+            border-radius: 0;
+            background-color: #fff;
+            border: none;
+          }
+        }
+      }
     }
 
     &-header {

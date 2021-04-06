@@ -156,6 +156,16 @@ export default {
           icon: "iconfont iconpie-chart_icon",
           index: "diary",
           title: "统计日记",
+          subs: [
+            {
+              index: "total-temperture",
+              title: "土壤温湿度",
+            },
+            {
+              index: "flowmeter",
+              title: "流量计",
+            },
+          ],
         },
       ],
     };

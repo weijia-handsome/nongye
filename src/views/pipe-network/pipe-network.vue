@@ -222,14 +222,15 @@ export default {
           const points2 = [];
           for (var i = 0; i < data.length; i++) {
             var pp = data[i].lnt;
+            var name = data[i].name;
             if (lat > 54) {
               var lng = pp.split(",")[1];
               var lat = pp.split(",")[0];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             } else {
               var lng = pp.split(",")[0];
               var lat = pp.split(",")[1];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             }
           }
           var style = [
@@ -254,6 +255,11 @@ export default {
             zIndex: 111,
             cursor: "pointer",
             style: style[0],
+          });
+          mass.on("mouseover", function (e) {
+            console.log(e);
+            marker.setPosition(e.data.lnglat);
+            marker.setLabel({ content: e.data.name });
           });
 
           var marker = new AMap.Marker({ content: " ", map: this.map });
