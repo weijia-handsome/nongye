@@ -66,6 +66,31 @@
             <el-input v-model="form.liablePhone" size="mini"></el-input>
           </el-form-item>
         </el-col>
+        <el-col :span="12"
+          ><el-form-item
+            label="管径"
+            prop="tube"
+            :rules="[{ required: true, message: '请输入' }]"
+          >
+            <el-input v-model="form.tube" size="mini"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item
+            label="管网"
+            prop="nid"
+            :rules="[{ required: true, message: '角色不能为空' }]"
+          >
+            <el-select placeholder="请选择" v-model="form.nid" size="mini" clearable>
+              <el-option
+                v-for="(item, index) in guanwangArr"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="24">
           <p style="margin-bottom: 10px">项目描述</p>
           <el-input
@@ -88,7 +113,7 @@
 
 <script>
 import MapLoader from "../../../components/common/AMap.js";
-import { editNetspot, adNetspot } from "@/api/api.js";
+import { editNetspot, adNetspot, usNetwork } from "@/api/api.js";
 
 export default {
   name: "Edit",
@@ -101,6 +126,7 @@ export default {
       textarea: "",
       dialogVisible: false,
       id: "",
+      guanwangArr: [],
       form: {
         projectName: "",
         projectAddress: "",
@@ -118,14 +144,12 @@ export default {
   },
   watch: {
     "form.projectAddress"(val) {
-      console.log(val);
       let newVal = val.split(",");
       // 经度
       const longreg = /^(\-|\+)?(((\d|[1-9]\d|1[0-7]\d|0{1,3})\.\d{0,6})|(\d|[1-9]\d|1[0-7]\d|0{1,3})|180\.0{0,6}|180)$/;
       //纬度
       var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
       if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
-        console.log(111);
         let marker = new AMap.Marker({
           position: [newVal[0], newVal[1]],
           offset: new AMap.Pixel(-13, -30),
@@ -194,6 +218,7 @@ export default {
     },
     handleOpen(pointInfo) {
       this.dialogVisible = true;
+      this.usNetwork();
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
         this.setMap();
@@ -236,7 +261,6 @@ export default {
           }
           this.dialogVisible = false;
         } else {
-          console.log("失败");
           return false;
         }
       });
@@ -291,6 +315,18 @@ export default {
         this.$emit("refresh");
       } else {
         this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
+    //获取管网
+    async usNetwork() {
+      const response = await usNetwork({
+        username: window.sessionStorage.getItem("username"),
+      });
+      console.log(response, "/././,/.,/");
+      if (response.data.code === "200") {
+        this.guanwangArr = response.data.mess;
+      } else {
+        this.$message.error(response.data.mess || '服务错误!');
       }
     },
   },

@@ -40,7 +40,9 @@ export default {
       bus.$emit("collapse", this.collapse);
     },
     handleBack() {
-      this.$router.go(-1);
+      this.$router.push({
+        path: '/login',
+      });
     },
     getTime() {
       this.currentTime = this.$moment().format("hh:mm:ss");

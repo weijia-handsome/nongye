@@ -153,7 +153,7 @@
                 size="small"
                 >井房分区设备</el-button
               >
-              <el-button type="text" size="small" @click="handleEdit"
+              <el-button type="text" size="small" @click="handleEdit(scope.row)"
                 >编辑</el-button
               >
               <el-button
@@ -180,7 +180,7 @@
           />
         </div>
       </div>
-      <edit ref="editRef"></edit>
+      <edit ref="editRef" @refresh="getList"></edit>
     </el-card>
   </div>
 </template>
@@ -225,7 +225,7 @@ export default {
         });
 
         const username = sessionStorage.getItem("username");
-        reqGetNetspot({ username, pno: "", pageSize: "" }).then((res) => {
+        getPartitionList({ username, pno: "", pageSize: "" }).then((res) => {
           console.log(res);
           var cluster,
             markers = [];
@@ -234,14 +234,15 @@ export default {
           const points2 = [];
           for (var i = 0; i < data.length; i++) {
             var pp = data[i].lnt;
+            var name = data[i].name;
             if (lat > 54) {
               var lng = pp.split(",")[1];
               var lat = pp.split(",")[0];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             } else {
               var lng = pp.split(",")[0];
               var lat = pp.split(",")[1];
-              points2.push({ lnglat: [lng, lat] });
+              points2.push({ lnglat: [lng, lat], name: name });
             }
           }
           var style = [
@@ -270,6 +271,11 @@ export default {
 
           var marker = new AMap.Marker({ content: " ", map: this.map });
           mass.setMap(this.map);
+
+          mass.on("mouseover", function (e) {
+            marker.setPosition(e.data.lnglat);
+            marker.setLabel({ content: e.data.name });
+          });
         });
       });
     },
@@ -280,25 +286,20 @@ export default {
     handleList() {
       this.mapVisible = false;
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
-    },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
-    },
     handleClick(id) {
       this.$router.push({
         path: "/well-room",
-        query: {
-          id: id,
-        },
+        // query: {
+        //   id: id,
+        // },
       });
+      window.sessionStorage.setItem('fid', id);
     },
     handleCreate() {
       this.$refs.editRef.handleOpen();
     },
-    handleEdit() {
-      this.$refs.editRef.handleOpen();
+    handleEdit(listInfo) {
+      this.$refs.editRef.handleOpen(listInfo);
     },
     handleSizeChange(pageSize) {
       this.param.pno = 1;
@@ -322,19 +323,19 @@ export default {
         pageSize: this.param.pageSize,
         object: this.form.phone || this.form.name || this.form.adress || "",
       });
+      console.log(response);
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, "分区管理");
         this.total = response.data.recordCount;
       } else {
-        this.$message.error(response.statusText);
+        this.$message.error(response.data.mess || '服务错误!');
       }
       this.loading = false;
     },
-    //新增
-
     //删除
-    async delFeiqu() {
+    async delFeiqu(id) {
       const response = await delFeiqu({
         username: window.sessionStorage.getItem("username"),
         id: id,

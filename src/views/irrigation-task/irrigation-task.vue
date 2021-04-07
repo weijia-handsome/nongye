@@ -271,7 +271,6 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
-        console.log(this.tableData, "滴灌任务");
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText);
@@ -307,8 +306,8 @@ export default {
         username: window.sessionStorage.getItem("username"),
         id: id,
       });
-      if (response.status === 200) {
-        this.$message.success("删除成功");
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
         this.getList();
       } else {
         this.$message.error(response.data.mess);

@@ -1,13 +1,13 @@
 <template>
-    <div id="app">
-        <router-view></router-view>
-    </div>
+  <div id="app">
+    <router-view></router-view>
+  </div>
 </template>
 <style>
-    @import "./assets/css/main.css";
-    @import "./assets/css/color-dark.css";     /*深色主题*/
-    #app {
-      position: absolute;
-      top: 0;
-    }
+@import "./assets/css/main.css";
+@import "./assets/css/color-dark.css"; /*深色主题*/
+#app {
+  position: absolute;
+  top: 0;
+}
 </style>

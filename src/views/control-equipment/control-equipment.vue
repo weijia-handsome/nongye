@@ -153,6 +153,7 @@ export default {
       });
       if (response.status === 200) {
         this.tableData = response.data.data;
+        console.log(this.tableData);
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

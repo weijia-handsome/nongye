@@ -136,8 +136,7 @@ export default {
       this.getList();
     },
     handleCheck(imei) {
-      this.imei = imei;
-      this.$refs.videoRef.handleOpen();
+      this.$refs.videoRef.handleOpen(imei);
     },
     handleCreate() {
       this.$refs.editRef.handleOpen();

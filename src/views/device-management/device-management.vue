@@ -81,29 +81,67 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column fixed prop="gname" label="管网名称" width="180">
+        <el-table-column
+          fixed
+          prop="gname"
+          label="管网名称"
+          width="180"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column prop="adss" label="管网地址" width="450">
+        <el-table-column
+          prop="adss"
+          label="管网地址"
+          width="450"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column prop="device_name" label="设备名称" width="250">
+        <el-table-column
+          prop="device_name"
+          label="设备名称"
+          width="250"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column prop="imei" label="设备编号" width="200">
+        <el-table-column
+          prop="imei"
+          label="设备编号"
+          width="200"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column label="控制设备自动检测控制" width="200">
+        <el-table-column
+          label="控制设备自动检测控制"
+          width="200"
+          align="center"
+        >
           <template slot-scope="scope">
             <el-switch
               :value="scope.row.state === 1"
               active-text="开"
               inactive-text="关"
+              active-color="#13ce66"
+              inactive-color="#C0CCDA"
               size="mini"
               @change="updateState(scope.row, scope.$index)"
+              v-if="scope.row.tid === '2'"
             >
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column prop="adss" label="设备安装地址" width="450">
+        <el-table-column
+          prop="adss"
+          label="设备安装地址"
+          width="450"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column prop="line" label="设备状态" width="120">
+        <el-table-column
+          prop="line"
+          label="设备状态"
+          width="120"
+          align="center"
+        >
           <template slot-scope="scope">
             <el-tag type="primary" v-if="scope.row.line === 'on'">
               在线
@@ -111,7 +149,7 @@
             <el-tag type="info" v-else> 离线 </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="tid" label="设备类型" width="250">
+        <el-table-column prop="tid" label="设备类型" width="250" align="center">
           <template slot-scope="scope">
             <span v-if="scope.row.tid === '0'">视频设备</span>
             <span v-if="scope.row.tid === '2'">四路智能控制器</span>
@@ -121,17 +159,34 @@
             <span v-if="scope.row.tid === '7'">重合闸漏电保护器</span>
           </template>
         </el-table-column>
-        <el-table-column prop="reg_time" label="报警时间" width="200">
+        <el-table-column
+          prop="reg_time"
+          label="报警时间"
+          width="200"
+          align="center"
+        >
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="250">
           <template slot-scope="scope">
-            <el-button @click="handleClick(scope.row)" type="text" size="small"
+            <el-button
+              @click="handleClick(scope.row)"
+              type="text"
+              size="small"
+              v-if="scope.row.tid === '4'"
               >查看</el-button
+            >
+            <el-button
+              @click="handleContral(scope.row.imei)"
+              type="text"
+              size="small"
+              v-if="scope.row.tid === '2'"
+              >控制</el-button
             >
             <el-button
               type="text"
               size="small"
               @click="handleThreshold(scope.row.imei)"
+              v-if="scope.row.tid === '4'"
               >阈值设置</el-button
             >
             <el-button
@@ -159,6 +214,7 @@
       </div>
       <threshold ref="thresholdRef"></threshold>
       <check ref="checkRef"></check>
+      <control ref="controlRef"></control>
     </el-card>
   </div>
 </template>
@@ -166,6 +222,7 @@
 <script>
 import Threshold from "./threshold/threshold.vue";
 import Check from "./check/check.vue";
+import Control from "./control/control.vue";
 import { reqDeviceManage, reqUpDetection, reqDelDevice } from "@/api/api.js";
 
 export default {
@@ -173,6 +230,7 @@ export default {
   components: {
     Threshold,
     Check,
+    Control,
   },
   data() {
     return {
@@ -208,6 +266,9 @@ export default {
     },
     handleThreshold(imei) {
       this.$refs.thresholdRef.handleOpen(imei);
+    },
+    handleContral(imei) {
+      this.$refs.controlRef.handleOpen(imei);
     },
     //更新状态
     async updateState(device, index) {
@@ -246,10 +307,8 @@ export default {
         this.loading = true;
         if (this.form.type === "on") {
           this.tableData = response.data.data.filter((i) => i.line === "on");
-          console.log(this.tableData, "在线");
         } else if (this.form.type === "off") {
           this.tableData = response.data.data.filter((i) => i.line === "off");
-          console.log(this.tableData, "离线");
         } else {
           this.tableData = response.data.data;
         }

@@ -89,7 +89,7 @@ export default {
         deviceAddress: "",
         deviceNumber: "",
         deviceType: "",
-        nid: "",
+        spid: "",
         lant_lat: "",
       },
     };
@@ -170,9 +170,9 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen(nid, lnt) {
+    handleOpen(spid, lnt) {
       this.dialogVisible = true;
-      this.form.nid = nid;
+      this.form.spid = spid;
       this.form.lant_lat = lnt;
       this.$nextTick(() => {
         this.$refs.formData.resetFields();
@@ -198,7 +198,7 @@ export default {
         imei: this.form.deviceNumber,
         tid: this.form.deviceType,
         adss: this.form.deviceAddress,
-        nid: this.form.nid,
+        nid: this.form.spid,
         lant_lat: this.form.lant_lat,
       });
       if (response.data.code === "200") {

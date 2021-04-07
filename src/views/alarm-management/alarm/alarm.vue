@@ -105,7 +105,7 @@
           </el-dialog> -->
         </div>
         <div class="m-button">
-          <el-button type="danger" size="mini">取消</el-button>
+          <el-button type="danger" size="mini" @click="handleCancel">取消</el-button>
           <el-button type="primary" size="mini" @click="handleConfirm"
             >确定</el-button
           >
@@ -241,6 +241,10 @@ export default {
               backgroundColor: "#6a7985",
             },
           },
+          formatter: function (params) {
+            console.log(params, "自定义提示框");
+            return params;
+          },
         },
         xAxis: {
           type: "category",
@@ -352,6 +356,9 @@ export default {
         ],
       };
       lineThird.setOption(option);
+    },
+    handleCancel() {
+      this.dialogVisible = false;
     },
     handleConfirm() {
       this.$refs.ruleForm.validate((valid) => {

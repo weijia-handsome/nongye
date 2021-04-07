@@ -109,7 +109,7 @@
               <div
                 class="m-min__mask"
                 @click="handleiIll(activity)"
-                :style="randomRgb(activity)"
+                :style="randomRgb(index)"
               >
                 <span class="m-min__task">任务名称：{{ activity.name }}</span>
                 <span v-if="activity.state === '0'"
@@ -138,6 +138,7 @@
                   size="mini"
                   type="text"
                   @click.stop="handleCheck(activity)"
+                  :style="randomRgb(index)"
                   >查看现场</el-button
                 >
               </div>
@@ -244,7 +245,9 @@ export default {
       getAverageArrT: [],
       getAverageArrH: [],
       getAverageTime: [],
+      flowResponse: '',
       flowTotal: [],
+      flowTime: [],
     };
   },
   methods: {
@@ -318,7 +321,6 @@ export default {
         });
       });
     },
-
     callFuncInThingJS(funcName, data) {
       // var iframe = $("#myIframe")[0];
 
@@ -346,7 +348,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
+          data: this.flowTime,
           axisLabel: {
             textStyle: {
               color: "#04E0F9", //坐标值得具体的颜色
@@ -356,6 +358,9 @@ export default {
         },
         yAxis: {
           type: "value",
+          min: 0,
+          max: 20,
+          interval: 4,
           axisLabel: {
             formatter: "{value} L",
             textStyle: {
@@ -371,7 +376,7 @@ export default {
         },
         series: [
           {
-            data: [120, 200, 150, 80, 70, 110, 130],
+            data: this.flowTime,
             type: "bar",
             barWidth: 15,
             itemStyle: {
@@ -691,14 +696,21 @@ export default {
     },
     //流量计
     async getFlowDevice() {
-      const response = await getFlowDevice({
+      this.flowResponse = await getFlowDevice({
         username: window.sessionStorage.getItem("username"),
       });
-      if (response.status === 200) {
-        this.flowTotal = response.data.data;
-        console.log(this.flowTotal, "流量计");
+      console.log(this.flowResponse, "流量计");
+      if (this.flowResponse.status === 200) {
+        const total = this.flowResponse.data.data.map((item) => {
+          return item.hourFlow;
+        });
+        this.flowTotal = total.slice(-7);
+        const time = this.flowResponse.data.data.map((itemTime) => {
+          return itemTime.HOUR;
+        });
+        this.flowTime = time.slice(-7);
       } else {
-        this.$message.error(response.data.mess || "服务错误!");
+        this.$message.error(this.flowResponse.data.mess || "服务错误!");
       }
     },
     //温湿度传感器
@@ -837,13 +849,9 @@ export default {
       this.$refs.videoRef.handleOpen(item.imei);
     },
     //随机颜色
-    randomRgb(item) {
-      let R = Math.floor(Math.random() * 255);
-      let G = Math.floor(Math.random() * 255);
-      let B = Math.floor(Math.random() * 255);
+    randomRgb(index) {
       return {
-        // width: (item.num / item.total) * 100 + "%", // 进度条
-        color: "rgb(" + R + "," + G + "," + B + ")",
+        color: index % 2 ? "#C8742D" : "#04E0F9",
       };
     },
   },
@@ -857,6 +865,9 @@ export default {
     getAverageResponse() {
       this.setlineChart();
     },
+    flowResponse() {
+      this.setRoundChart()
+    }
   },
   mounted() {
     this.setMap();
@@ -885,7 +896,7 @@ export default {
   created() {
     this.$nextTick(() => {
       setTimeout(() => {
-        this.setRoundChart();
+        // this.setRoundChart();
         this.setCrops();
       });
     });

@@ -37,6 +37,7 @@
               v-model="form.startTime"
               type="datetime"
               placeholder="选择日期时间"
+              value-format="yyyy-MM-dd HH:mm:ss"
               size="mini"
               :rules="[{ required: true, message: '请选择' }]"
             >
@@ -159,7 +160,9 @@ export default {
         this.form.time = irrInfo.time;
         this.form.startTime = irrInfo.start_time;
         this.form.endTime = irrInfo.end_time;
-        this.form.irrType = irrInfo.type;
+        this.form.irrType = irrInfo.type === "1" ? "分区" : "管网";
+        this.form.netType = irrInfo.o_name;
+        this.form.taskType = irrInfo.type === "1" ? "轮灌" : "直灌";
         this.id = irrInfo.id;
       } else {
         this.form.name = "";
@@ -167,6 +170,9 @@ export default {
         this.form.startTime = "";
         this.form.endTime = "";
         this.form.irrType = "";
+        this.form.netType = "";
+        this.form.taskType = "";
+        this.id = "";
       }
     },
     //新增滴灌任务
@@ -208,8 +214,15 @@ export default {
       const response = await editGridTask({
         username: window.sessionStorage.getItem("username"),
         start_time: this.form.startTime,
+        id: this.id,
+        time: this.form.time,
       });
       console.log(response, "================");
+      if (response.data.code === '500') {
+        this.$message.success(response.data.mess);
+      } else {
+        this.$message.error(response.data.mess || '服务错误!');
+      }
     },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {

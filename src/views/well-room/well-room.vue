@@ -18,9 +18,9 @@
           <el-col :span="5">
             <el-form-item label="设备部件">
               <el-select v-model="form.name" placeholder="请选择" size="mini">
-                <el-option label="0" value="总电源"></el-option>
-                <el-option label="1" value="除沙电磁阀"></el-option>
-                <el-option label="2" value="灌溉电磁阀"></el-option>
+                <el-option label="总电源" value="0"></el-option>
+                <el-option label="除沙电磁阀" value="1"></el-option>
+                <el-option label="灌溉电磁阀" value="2"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -44,22 +44,32 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" size="mini">查询</el-button>
-            <el-button type="primary" size="mini" @click="handleCreate(fid)"
+            <el-button type="primary" size="mini" @click="handleCreate"
               >新增</el-button
             >
           </el-col>
         </el-row>
       </el-form>
 
-      <el-table :data="tableData" style="width: 100%" align="center">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        align="center"
+        v-loading="loading"
+      >
         <el-table-column label="序号" type="index" width="80" align="center">
           <template slot-scope="scope">
             <span>{{
-              (param.current - 1) * param.size + scope.$index + 1
+              (param.pno - 1) * param.pageSize + scope.$index + 1
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="设备名称" width="180">
+        <el-table-column
+          prop="name"
+          label="设备名称"
+          width="200"
+          align="center"
+        >
         </el-table-column>
         <el-table-column prop="imei" label="设备imei" align="center">
         </el-table-column>
@@ -82,7 +92,7 @@
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="handleEdit(scope.row)" disabled
+            <el-button type="text" size="mini" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
             <el-button
@@ -108,7 +118,7 @@
         />
       </div>
     </el-card>
-    <edit ref="editRef" @refresh="getList"></edit>
+    <edit ref="editRef" @refresh="getList" :fid="fid"></edit>
   </div>
 </template>
 
@@ -128,10 +138,9 @@ export default {
         name: "",
         phone: "",
       },
-      loading: true,
       param: {
-        current: 1,
-        size: 10,
+        pno: 1,
+        pageSize: 10,
       },
       tableData: [],
     };
@@ -139,31 +148,38 @@ export default {
   methods: {
     goBack() {
       this.$router.go(-1);
+      // this.$route.query
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+    handleSizeChange(pageSize) {
+      this.param.pno = 1;
+      this.param.pageSize = pageSize;
+      this.getList();
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+    handleCurrentChange(currentPage) {
+      this.param.pno = currentPage;
+      this.getList();
     },
-    handleEdit() {
+    handleEdit(info) {
+      this.$refs.editRef.handleOpen(info);
+    },
+    handleCreate() {
       this.$refs.editRef.handleOpen();
-    },
-    handleCreate(fid) {
-      this.$refs.editRef.handleOpen(fid);
     },
     //获取列表
     async getList() {
+      this.fid = window.sessionStorage.getItem("fid");
       const response = await getReclosing({
         username: window.sessionStorage.getItem("username"),
-        fid: this.$route.query.id,
+        fid: this.fid,
       });
       if (response.data.code === "200") {
-        this.tableData = response.data.data;
-        this.fid = response.data.data[0].fid;
+        this.loading = true;
+        this.tableData = response.data.data || [];
+        console.log(this.tableData, "井房分区设备");
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
+      this.loading = false;
     },
     //删除井房设备
     async delReclosing(id) {
@@ -198,7 +214,7 @@ export default {
         });
     },
   },
-  mounted() {
+  activated() {
     this.getList();
   },
 };

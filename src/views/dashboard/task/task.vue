@@ -19,7 +19,7 @@
             prop="name"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.name" size="mini"></el-input>
+            <el-input v-model="form.name" size="mini" disabled></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -28,7 +28,7 @@
             prop="time"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.time" size="mini"></el-input>
+            <el-input v-model="form.time" size="mini" disabled></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -39,6 +39,7 @@
               placeholder="选择日期时间"
               size="mini"
               :rules="[{ required: true, message: '请选择' }]"
+              disabled
             >
             </el-date-picker>
           </el-form-item>
@@ -50,6 +51,7 @@
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
+              disabled
             >
               <el-option label="直灌" value="2"></el-option>
               <el-option label="轮灌" value="1"></el-option>
@@ -64,6 +66,7 @@
               size="mini"
               class="m-txt__text"
               @change="handleSelect"
+              disabled
             >
               <el-option label="管网" value="2"></el-option>
               <el-option label="分区" value="1"></el-option>
@@ -72,7 +75,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item
-            :label="form.irrType === '1' ? '分区' : '管网'"
+            :label="form.irrType == '分区' ? '分区' : '管网'"
             prop="time"
           >
             <el-select
@@ -80,6 +83,7 @@
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
+              disabled
             >
               <el-option
                 v-for="item in netArr"
@@ -97,6 +101,7 @@
               type="datetime"
               placeholder="选择日期时间"
               size="mini"
+              disabled
             >
             </el-date-picker>
           </el-form-item>
@@ -109,6 +114,7 @@
               :min="1"
               :max="10"
               size="mini"
+              disabled
             ></el-input-number>
           </el-form-item>
         </el-col>
@@ -122,7 +128,7 @@
 </template>
 
 <script>
-import { getTypeByGrid, addGridTask, editGridTask } from "@/api/api.js";
+import { getTypeByGrid } from "@/api/api.js";
 
 export default {
   name: "Edit",
@@ -159,8 +165,9 @@ export default {
         this.form.time = irrInfo.time;
         this.form.startTime = irrInfo.start_time;
         this.form.endTime = irrInfo.end_time;
-        this.form.irrType = irrInfo.cut;
-        this.form.taskType = irrInfo.type;
+        this.form.irrType = irrInfo.type === "1" ? "分区" : "管网";
+        this.form.netType = irrInfo.o_name;
+        this.form.taskType = irrInfo.type === "1" ? "轮灌" : "直灌";
         this.id = irrInfo.id;
       } else {
         this.form.name = "";
@@ -168,9 +175,12 @@ export default {
         this.form.startTime = "";
         this.form.endTime = "";
         this.form.irrType = "";
+        this.form.netType = "";
+        this.form.taskType = "";
+        this.id = "";
       }
     },
-     async handleSelect() {
+    async handleSelect() {
       const response = await getTypeByGrid({
         username: window.sessionStorage.getItem("username"),
         type: this.form.irrType,
@@ -184,42 +194,9 @@ export default {
         this.$message.error(response.statusText || "服务异常!");
       }
     },
-    //新增滴灌任务
-    // async addGridTask() {
-    //   const response = await addGridTask({
-    //     username: window.sessionStorage.getItem("username"),
-    //     name: this.form.name,
-    //     time: this.form.time,
-    //     start_time: this.form.startTime,
-    //     type: this.form.taskType,
-    //     cut: this.form.irrType,
-    //     cycle: this.form.num,
-    //     end_time: this.form.endTime,
-    //     object: this.netId,
-    //   });
-    //   if (response.data.code === "200") {
-    //     this.$message.success(response.data.mess);
-    //     this.$emit("refresh");
-    //   } else {
-    //     this.$message.error(response.data.mess || "服务错误!");
-    //   }
-    // },
-    //编辑
-    // async editGridTask() {
-    //   const response = await editGridTask({
-    //     username: window.sessionStorage.getItem("username"),
-    //     start_time: this.form.startTime,
-    //   });
-    //   console.log(response, "================");
-    // },
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          // if (this.id) {
-          //   this.editGridTask();
-          // } else {
-          //   this.addGridTask();
-          // }
           this.dialogVisible = false;
         } else {
           return false;
@@ -244,6 +221,7 @@ export default {
 
         & .el-input__inner {
           width: 350px;
+          color: #333;
         }
 
         & .el-input-number {

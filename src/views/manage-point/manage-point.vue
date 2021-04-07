@@ -134,7 +134,7 @@
           <el-table-column fixed="right" label="操作" width="180">
             <template slot-scope="scope">
               <el-button
-                @click="handleClick(scope.row.nid, scope.row.lnt)"
+                @click="handleClick(scope.row.spid, scope.row.lnt)"
                 type="text"
                 size="small"
                 >新增设备</el-button
@@ -219,12 +219,6 @@ export default {
       tableData: [],
     };
   },
-  watch: {
-    // points2(val) {
-    //   console.log(val, 'points2-------------');
-    //   this.setMap();
-    // }
-  },
   methods: {
     // 初始化
     setMap() {
@@ -250,7 +244,6 @@ export default {
           var cluster,
             markers = [];
           let data = res.data.data;
-          console.log(data, "管点信息");
 
           // const points2 = [];
           for (var i = 0; i < data.length; i++) {
@@ -461,8 +454,8 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    handleClick(nid, lnt) {
-      this.$refs.deviceRef.handleOpen(nid, lnt);
+    handleClick(spid, lnt) {
+      this.$refs.deviceRef.handleOpen(spid, lnt);
     },
     handleCreate() {
       this.$refs.createRef.handleOpen();
@@ -504,6 +497,7 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        console.log(this.tableData, '/////////////');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");

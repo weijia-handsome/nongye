@@ -470,7 +470,7 @@ export function editNetspot({ username, name, adss, lnt, fireman, person, firema
 }
 
 //新增管点
-export function adNetspot({ username, name, adss, lnt, fireman, person, firemanname, personname, tube, marker, nid }) {
+export function adNetspot({ username, name, adss, lnt, fireman, person, firemanname, personname, tube, marker, nid, spid }) {
     return request({
         url: `${API_NAME}/adNetspot`,
         method: 'GET',
@@ -499,6 +499,17 @@ export function delNetspot({ username, spid }) {
         params: {
             username,
             spid
+        },
+    })
+}
+
+//获取管网 
+export function usNetwork({ username }) {
+    return request({
+        url: `${API_NAME}/usNetwork`,
+        method: 'GET',
+        params: {
+            username,
         },
     })
 }
@@ -712,13 +723,15 @@ export function addGridTask({ username, name, time, type, start_time, object, cy
     })
 }
 //编辑滴灌任务
-export function editGridTask({ username, start_time }) {
+export function editGridTask({ username, start_time,id, time }) {
     return request({
         url: `${API_NAME}/editGridTask`,
         method: 'GET',
         params: {
             username,
             start_time,
+            id,
+            time,
         },
     })
 }
@@ -847,6 +860,61 @@ export function checkFlowDevice({ username, imei }) {
         params: {
             username,
             imei
+        },
+    })
+}
+
+//新增分区
+export function addPartition({ username, name, adss, lnt, fireman, person, firemanname, personname, neid, pid }) {
+    return request({
+        url: `${API_NAME}/addPartition`,
+        method: 'GET',
+        params: {
+            username,
+            name,
+            adss,
+            lnt,
+            fireman,
+            person,
+            firemanname,
+            personname,
+            neid,
+            pid,
+        },
+    })
+}
+
+// 编辑分区
+export function editPartition({ username, name, adss, fireman, person, firemanname, personname, neid, pid, id }) {
+    return request({
+        url: `${API_NAME}/editPartition`,
+        method: 'GET',
+        params: {
+            username,
+            name,
+            adss,
+            id,
+            fireman,
+            person,
+            firemanname,
+            personname,
+            neid,
+            pid,
+        },
+    })
+}
+
+//编辑井房设备 editReclosingInfo
+export function editReclosingInfo({ username, name, tid, position, id}) {
+    return request({
+        url: `${API_NAME}/editReclosingInfo`,
+        method: 'GET',
+        params: {
+            username,
+            name,
+            tid,
+            position,
+            id
         },
     })
 }

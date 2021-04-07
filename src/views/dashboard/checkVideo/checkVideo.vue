@@ -95,7 +95,7 @@ export default {
           autoplay: true,
           id: "ezuikitTalkData",
           accessToken:
-            "at.86lfccht53azlnghavsbdnj959n9stl1-1sdls1pyw3-0jn64re-qscxc7an6",
+            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5as",
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -118,7 +118,9 @@ export default {
         //   // this.GetMapDataList.mess
         // });
         this.$forceUpdate();
-      });
+      }).catch((rej) => {
+        return this.$message.error('暂无此设备视频');
+      });;
     },
   },
 };

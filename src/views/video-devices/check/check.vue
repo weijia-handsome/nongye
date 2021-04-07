@@ -24,6 +24,7 @@
 import { reqGetVideo } from "@/api/api.js";
 import "../../../../public/ezuikit.js";
 import EZUIKit from "ezuikit-js";
+
 export default {
   name: "CheckVideo",
   props: ["imei"],
@@ -63,8 +64,9 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen() {
+    handleOpen(imei) {
       this.dialogVisible = true;
+      this.videoImei = imei;
       this.getVideo();
     },
     //获取视频设备
@@ -78,9 +80,8 @@ export default {
           item.removeChild(item.firstChild);
         }
         // this.imei = "E48829946_NQACPR";
-        this.videoImei = this.imei;
-        const deviceSerial = this.imei.split("_")[0];
-        const deviceSerial2 = this.imei.split("_")[1];
+        const deviceSerial = this.videoImei.split("_")[0];
+        const deviceSerial2 = this.videoImei.split("_")[1];
 
         var ezuikitTalkData = {
           accessToken: global.accessToken, // 应用accessToken
@@ -92,11 +93,12 @@ export default {
             "/1.hd.live", // 包含设备信息的ezopen协议
           decoderPath: "./", // 当前页面与插件主文件ezuiit-talk相对路径
         };
+
         new EZUIKit.EZUIKitPlayer({
           autoplay: true,
           id: "ezuikitTalkData",
           accessToken:
-            "at.86lfccht53azlnghavsbdnj959n9stl1-1sdls1pyw3-0jn64re-qscxc7an6",
+            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5a",
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -105,20 +107,22 @@ export default {
           // 视频下方底部控件
           footer: ["talk", "broadcast", "hd", "fullScreen"], // 如果template参数不为simple,该字段将被覆盖
           audio: 1, // 是否默认开启声音 0 - 关闭 1 - 开启
-          openSoundCallBack: data => console.log("开启声音回调", data),
-          closeSoundCallBack: data => console.log("关闭声音回调", data),
-          startSaveCallBack: data => console.log("开始录像回调", data),
-          stopSaveCallBack: data => console.log("录像回调", data),
-          capturePictureCallBack: data => console.log("截图成功回调", data),
-          fullScreenCallBack: data => console.log("全屏回调", data),
-          getOSDTimeCallBack: data => console.log("获取OSDTime回调", data),
+          openSoundCallBack: (data) => console.log("开启声音回调", data),
+          closeSoundCallBack: (data) => console.log("关闭声音回调", data),
+          startSaveCallBack: (data) => console.log("开始录像回调", data),
+          stopSaveCallBack: (data) => console.log("录像回调", data),
+          capturePictureCallBack: (data) => console.log("截图成功回调", data),
+          fullScreenCallBack: (data) => console.log("全屏回调", data),
+          getOSDTimeCallBack: (data) => console.log("获取OSDTime回调", data),
           // width: 100, //如果指定了width、height则以这里为准
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
-        // getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
-        //   // this.GetMapDataList.mess
-        // });
+        getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
+          // this.GetMapDataList.mess
+        });
         this.$forceUpdate();
+      }).catch((rej) => {
+        return this.$message.error('暂无此设备视频');
       });
     },
   },

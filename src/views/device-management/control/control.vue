@@ -110,21 +110,22 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen(info) {
+    handleOpen(imei) {
       this.dialogVisible = true;
-      this.imei = info.imei;
-      // this.$nextTick(() => {
-      //   this.$refs.formData.clearValidate();
-      // });
+      this.imei = imei;
     },
     handleComfirm() {
       this.dialogVisible = false;
     },
     //全开
     async handleAllOpen() {
-      if (this.param.time !== "") {
+      if (this.param.time == "") {
+        return this.$message.error("请输入时间");
+      } else {
         this.tableData.forEach((i) => {
-          i.state = 1;
+          if (i.state === 0) {
+            i.state = 1;
+          }
         });
         const response = await reqCheckDevice({
           username: window.sessionStorage.getItem("username"),
@@ -139,17 +140,19 @@ export default {
           return;
         }
         this.tableData.forEach((i) => {
-          i.state = 0;
+          if (i.state === 1) {
+            i.state = 0;
+          }
         });
         this.$message.error(response.data.mess || "请重试");
-      } else {
-        this.$message.error("请输入灌溉时间");
       }
     },
     //全关
     async handleAllClose() {
       this.tableData.forEach((i) => {
-        i.state = 0;
+        if (i.state === 1) {
+          i.state = 0;
+        }
       });
       const response = await reqCheckDevice({
         username: window.sessionStorage.getItem("username"),
@@ -161,11 +164,12 @@ export default {
 
       if (response.data.code == 200) {
         this.$message.success(response.data.mess);
+        this.param.time = "";
         return;
       }
       this.tableData.forEach((i) => {
         if (i.state === 1) {
-          i.state = 1;
+          i.state = 0;
         }
       });
       this.$message.error(response.data.mess || "请重试");
@@ -175,6 +179,9 @@ export default {
         return this.$message.error("请输入灌溉时间");
       } else {
         this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
+        if (this.tableData[index].state === 0) {
+          data.time = "";
+        }
         const response = await reqCheckDevice({
           username: window.sessionStorage.getItem("username"),
           type: data.state,
@@ -186,8 +193,8 @@ export default {
           this.$message.success(response.data.mess);
           return;
         }
-
         this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
+        // data.time = "";
         this.$message.error(response.data.mess || "请重试");
       }
     },

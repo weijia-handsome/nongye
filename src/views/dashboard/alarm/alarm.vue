@@ -87,6 +87,7 @@
                 type="textarea"
                 placeholder="请输入"
                 v-model="ruleForm.content"
+                disabled
               ></el-input>
             </el-form-item>
           </el-form>
@@ -97,6 +98,7 @@
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
+            :disabled="true"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
@@ -186,7 +188,6 @@ export default {
         username: window.sessionStorage.getItem("username"),
         imei: this.deviceInfo.imei,
       });
-      console.log(this.response, "//////////");
       if (this.response.status === 200) {
         this.loading = true;
         this.deviceInfo.heartTime = this.response.data.device.h_ime;
@@ -246,6 +247,9 @@ export default {
               backgroundColor: "#6a7985",
             },
           },
+          formatter: function (params) {
+            console.log(params, "自定义提示框");
+          },
         },
         xAxis: {
           type: "category",
@@ -287,6 +291,23 @@ export default {
             label: {
               backgroundColor: "#6a7985",
             },
+          },
+          formatter: function (param) {
+            //自定义tooltip内容
+            var text = "";
+            text +=
+              '<div style="display:flex;flex-direction:row;">' +
+              '<div style="background-color:#03D16D;height:auto;width:10px;margin-right:5px;"></div>' +
+              '<div style="display:flex;flex-direction:column;">' +
+              "<span>" +
+              param[0].value +
+              "</span>" +
+              "<span>" +
+              param[0].axisValue +
+              "</span>";
+            ("</div>");
+            ("</div>");
+            return text;
           },
         },
         xAxis: {
@@ -359,15 +380,16 @@ export default {
       lineThird.setOption(option);
     },
     handleConfirm() {
-      this.$refs.ruleForm.validate((valid) => {
-        if (valid) {
-          this.delDelAlarm();
-          this.dialogVisible = false;
-        } else {
-          console.log("失败");
-          return false;
-        }
-      });
+      this.dialogVisible = false;
+      // this.$refs.ruleForm.validate((valid) => {
+      //   if (valid) {
+      //     this.delDelAlarm();
+      //     this.dialogVisible = false;
+      //   } else {
+      //     console.log("失败");
+      //     return false;
+      //   }
+      // });
     },
     handleCancel() {
       this.dialogVisible = false;

@@ -63,7 +63,6 @@ export default {
       this.dialogVisible = false;
     },
     handleOpen(imei) {
-      console.log(imei);
       this.dialogVisible = true;
       this.imei = imei;
       this.getVideo();
@@ -78,7 +77,7 @@ export default {
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        this.imei = "E48829946_NQACPR";
+        // this.imei = "E48829946_NQACPR";
         // this.imei = imei;
         const deviceSerial = this.imei.split("_")[0];
         const deviceSerial2 = this.imei.split("_")[1];
@@ -93,12 +92,13 @@ export default {
             "/1.hd.live", // 包含设备信息的ezopen协议
           decoderPath: "./", // 当前页面与插件主文件ezuiit-talk相对路径
         };
+        
         new EZUIKit.EZUIKitPlayer({
           autoplay: true,
           id: "ezuikitTalkData",
-          // accessToken:
-          //   "at.86lfccht53azlnghavsbdnj959n9stl1-1sdls1pyw3-0jn64re-qscxc7an6",
-          accessToken: res.data.accessToken,
+          accessToken:
+            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5as",
+          // accessToken: res.data.accessToken,
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -122,7 +122,9 @@ export default {
           this.GetMapDataList.mess;
         });
         this.$forceUpdate();
-      });
+      }).catch((rej) => {
+        return this.$message.error('暂无此设备视频');
+      });;
     },
   },
 };

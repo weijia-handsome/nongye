@@ -48,7 +48,7 @@
           </el-form-item>
         </el-form>
         <div class="m-content__bottom--button">
-          <el-button size="mini" type="primary" @click="handleCommit"
+          <el-button size="mini" type="primary" @click="handleCommit" @click.prevent="handleCommit()"
             >登录</el-button
           >
         </div>
@@ -101,8 +101,9 @@ export default {
           if (response.data.list[0].status) {
             this.$router.push({ path: "/dashboard" });
             window.sessionStorage.setItem("username", this.ruleForm.userName);
+            // this.$message.success(response.data.list[0].mess)
           } else {
-            this.$message(response.data.list[0].mess);
+            this.$message(response.data.list[0].mess || '服务错误!');
           }
         }
       });

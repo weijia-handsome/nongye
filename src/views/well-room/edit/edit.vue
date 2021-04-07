@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="m-dialog"
-    title="新增井房设备"
+    :title="id ? '编辑井房设备' : '新增井房设备'"
     :visible.sync="dialogVisible"
     width="50%"
     :before-close="handleClose"
@@ -51,7 +51,17 @@
             :rules="[{ required: true, message: '请选择' }]"
           >
             <el-select placeholder="请选择" v-model="form.other">
-              <el-option label="总电源" value="0"></el-option>
+              <el-option
+                label="除沙电磁阀"
+                value="1"
+                v-if="form.deviceType === '7'"
+              ></el-option>
+              <el-option
+                label="灌溉电磁阀"
+                value="2"
+                v-if="form.deviceType === '7'"
+              ></el-option>
+              <el-option label="总电源" value="0" v-else></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -65,14 +75,17 @@
 </template>
 
 <script>
-import { saveReclosing } from "@/api/api.js";
+import { saveReclosing, editReclosingInfo } from "@/api/api.js";
+
 export default {
   name: "Edit",
+  props: ["fid"],
   data() {
     return {
       dialogVisible: false,
       value: "0",
-      fid: "",
+      fidd: "",
+      id: "",
       form: {
         name: "",
         imei: "",
@@ -85,12 +98,41 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen(fid) {
+    handleOpen(info) {
       this.dialogVisible = true;
-      this.fid = fid;
+      this.fidd = this.fid;
       this.$nextTick(() => {
-        this.$refs.formData.resetFields();
+        this.$refs.formData.clearValidate();
       });
+      if (info) {
+        this.id = info.id;
+        this.form.name = info.name;
+        this.form.imei = info.imei;
+        this.form.deviceType = info.tid;
+        this.form.other = info.position;
+      } else {
+        this.id = "";
+        this.form.name = "";
+        this.form.imei = "";
+        this.form.deviceType = "";
+        this.form.other = "";
+      }
+    },
+    //编辑
+    async editReclosingInfo() {
+      const response = await editReclosingInfo({
+        username: window.sessionStorage.getItem("username"),
+        name: this.form.name,
+        tid: this.form.deviceType,
+        position: this.form.other,
+        id: this.id,
+      });
+      if (response.data.code === 200) {
+        this.$message.success("编辑成功!");
+        this.$emit("refresh");
+      } else {
+        this.$message.error("请重试!");
+      }
     },
     //新增
     async saveReclosing() {
@@ -100,7 +142,7 @@ export default {
         position: this.form.other,
         imei: this.form.imei,
         name: this.form.name,
-        fid: this.fid,
+        fid: this.fidd,
       });
       if (response.data.code === "200") {
         this.$message.success(response.data.mess);
@@ -112,7 +154,11 @@ export default {
     handleComfirm() {
       this.$refs.formData.validate((valid) => {
         if (valid) {
-          this.saveReclosing();
+          if (this.id) {
+            this.editReclosingInfo();
+          } else {
+            this.saveReclosing();
+          }
           this.dialogVisible = false;
         } else {
           console.log("失败");
@@ -139,6 +185,10 @@ export default {
       /deep/ {
         & .el-form-item__label {
           padding: 0;
+        }
+
+        & .el-form-item__content {
+          line-height: 0;
         }
       }
     }

@@ -32,6 +32,18 @@ Vue.use(AMap);
 // });
 Vue.prototype.$echarts = echarts;
 Vue.prototype.$moment = moment;
+router.beforeEach((to, from, next) => {
+    const userName = window.sessionStorage.getItem('username');
+    if (userName) {
+        next();
+    } else {
+        if (to.path == '/login') {
+            next()
+        } else {
+            next('/login');
+        }
+    }
+})
 // //使用钩子函数对路由进行权限跳转
 // router.beforeEach((to, from, next) => {
 //     document.title = `${to.meta.title} | vue-manage-system`;
