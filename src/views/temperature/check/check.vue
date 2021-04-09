@@ -47,7 +47,7 @@
           </ul>
         </div>
       </div>
-      <div class="m-right" v-loading="loading">
+      <div class="m-right" id="right" v-loading="loading">
         <el-scrollbar>
           <div class="m-top">
             <p class="m-top__text">温度统计图</p>
@@ -154,6 +154,8 @@ export default {
           this.soilTArr.push(i.soilT);
           this.soilHArr.push(i.soilH);
         }
+        // console.log(this.soilTArr, "温度");
+        // console.log(this.soilHArr, "湿度");
         // const dataTimeArr = this.response.data.data.map((item) => {
         //   return item.s_time;
         // });
@@ -175,6 +177,9 @@ export default {
       let option = {
         tooltip: {
           trigger: "axis",
+          position: function (p) {
+            return [p[0] + 10, p[1] - 10];
+          },
           axisPointer: {
             type: "cross",
             label: {
@@ -223,6 +228,9 @@ export default {
             label: {
               backgroundColor: "#6a7985",
             },
+          },
+          position: function (p) {
+            return [p[0] + 10, p[1] - 10];
           },
         },
         xAxis: {

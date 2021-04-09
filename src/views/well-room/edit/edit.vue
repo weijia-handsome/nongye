@@ -54,12 +54,12 @@
               <el-option
                 label="除沙电磁阀"
                 value="1"
-                v-if="form.deviceType === '7'"
+                v-if="form.deviceType == '7'"
               ></el-option>
               <el-option
                 label="灌溉电磁阀"
                 value="2"
-                v-if="form.deviceType === '7'"
+                v-if="form.deviceType == '7'"
               ></el-option>
               <el-option label="总电源" value="0" v-else></el-option>
             </el-select>

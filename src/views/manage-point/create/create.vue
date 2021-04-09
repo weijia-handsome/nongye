@@ -185,7 +185,7 @@ export default {
         AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
           // console.log(e.data.location.lng, e.data.location.lat); // 经纬度
           // // console.log(e, 654);
-          this.lnt = e.data.location.lng + "," + e.data.location.lat;
+          this.form.lnt = e.data.location.lng + "," + e.data.location.lat;
 
           // this.mapInfo.lnglat = this.lanlat;
           this.form.projectAddress = `${e.data.cityname}${e.data.adname}${e.data.address}`;
@@ -194,7 +194,7 @@ export default {
         clickListener = AMap.event.addListener(map, "click", function (e) {
           _that.form.projectAddress = e.lnglat.toString();
           // console.log(e.count);
-          _that.lnt = e.lnglat.toString();
+          _that.form.lnt = e.lnglat.toString();
           // markers
           map.clearMap();
           var markers = new AMap.Marker({
@@ -322,7 +322,6 @@ export default {
       const response = await usNetwork({
         username: window.sessionStorage.getItem("username"),
       });
-      console.log(response, "/././,/.,/");
       if (response.data.code === "200") {
         this.guanwangArr = response.data.mess;
       } else {

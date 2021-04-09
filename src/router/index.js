@@ -103,6 +103,11 @@ export default new Router({
           meta: { title: '流量计' }
         },
         {
+          path: '/channel-flowmeter',
+          component: () => import(/* webpackChunkName: "dashboard" */ '../views/channel-flowmeter/channel-flowmeter.vue'),
+          meta: { title: '流量计' }
+        },
+        {
           path: '/well-room',
           component: () => import(/* webpackChunkName: "dashboard" */ '../views/well-room/well-room.vue'),
           meta: { title: '井房分区管理' }

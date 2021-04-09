@@ -207,6 +207,7 @@ import {
   pushGrid,
   reqGetNetspot,
   getFlowDevice,
+  get3dSoilDate,
 } from "@/api/api.js";
 import Task from "./task/task.vue";
 import Alarm from "./alarm/alarm.vue";
@@ -245,9 +246,8 @@ export default {
       getAverageArrT: [],
       getAverageArrH: [],
       getAverageTime: [],
-      flowResponse: '',
+      flowResponse: "",
       flowTotal: [],
-      flowTime: [],
     };
   },
   methods: {
@@ -272,14 +272,23 @@ export default {
           for (var i = 0; i < data.length; i++) {
             var pp = data[i].lnt;
             var name = data[i].name;
+            // var nid = data[i].nid;
             if (lat > 54) {
               var lng = pp.split(",")[1];
               var lat = pp.split(",")[0];
-              points2.push({ lnglat: [lng, lat], name: name });
+              points2.push({
+                lnglat: [lng, lat],
+                name: name,
+                nid: data[i].nid,
+              });
             } else {
               var lng = pp.split(",")[0];
               var lat = pp.split(",")[1];
-              points2.push({ lnglat: [lng, lat], name: name });
+              points2.push({
+                lnglat: [lng, lat],
+                name: name,
+                nid: data[i].nid,
+              });
             }
           }
           var style = [
@@ -314,19 +323,33 @@ export default {
           mass.setMap(this.map);
 
           const _that = this;
+          const username = sessionStorage.getItem("username");
           mass.on("click", (e) => {
-            _that.$refs.myIframe.style.display = "block";
-            _that.callFuncInThingJS("changeLevel", 1);
+            console.log(e);
+            // _that.$refs.myIframe.style.display = "block";
+            // _that.callFuncInThingJS("changeLevel", 1);
+            get3dSoilDate({ username, nid: e.data.nid }).then((res) => {
+              if (res.data.code == 200) {
+                console.log(username);
+                _that.$refs.myIframe.style.display = "block";
+                _that.callFuncInThingJS("changeLevel", e.data.nid, username);
+                this.$nextTick(() => {
+                  const item = document.getElementById("widget_root"); //动态删除多出的子元素
+                  console.log(item, 9999); // while (item.firstChild) { //   item.removeChild(item.firstChild); // }
+                });
+              }
+            });
           });
         });
       });
     },
-    callFuncInThingJS(funcName, data) {
+    callFuncInThingJS(funcName, data, username) {
       // var iframe = $("#myIframe")[0];
 
       var message = {
         funcName: funcName, // 所要调用ThingJS页面里的函数名
-        param: data,
+        nid: data,
+        username: username,
       };
       this.$refs.myIframe.contentWindow.postMessage(message, "*");
     },
@@ -346,9 +369,13 @@ export default {
             },
           },
         },
+        dataset: {
+          dimensions: ["product", "实时流量"],
+          source: this.flowTotal,
+        },
         xAxis: {
           type: "category",
-          data: this.flowTime,
+          // data: this.flowTime,
           axisLabel: {
             textStyle: {
               color: "#04E0F9", //坐标值得具体的颜色
@@ -359,10 +386,10 @@ export default {
         yAxis: {
           type: "value",
           min: 0,
-          max: 20,
-          interval: 4,
+          max: 10,
+          interval: 2,
           axisLabel: {
-            formatter: "{value} L",
+            formatter: "{value} m³",
             textStyle: {
               color: "#04E0F9", //坐标值得具体的颜色
             },
@@ -376,7 +403,7 @@ export default {
         },
         series: [
           {
-            data: this.flowTime,
+            // data: this.flowTime,
             type: "bar",
             barWidth: 15,
             itemStyle: {
@@ -390,6 +417,7 @@ export default {
           },
         ],
       };
+      console.log(option.dataset, "=============");
       roundChart.setOption(option);
     },
     //温湿度折线图
@@ -701,14 +729,9 @@ export default {
       });
       console.log(this.flowResponse, "流量计");
       if (this.flowResponse.status === 200) {
-        const total = this.flowResponse.data.data.map((item) => {
-          return item.hourFlow;
+        this.flowResponse.data.data.forEach((i) => {
+          this.flowTotal.push({ product: i.device_name, 实时流量: i.hourFlow });
         });
-        this.flowTotal = total.slice(-7);
-        const time = this.flowResponse.data.data.map((itemTime) => {
-          return itemTime.HOUR;
-        });
-        this.flowTime = time.slice(-7);
       } else {
         this.$message.error(this.flowResponse.data.mess || "服务错误!");
       }
@@ -719,7 +742,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pid: this.pid,
       });
-      console.log(this.getAverageResponse);
+      console.log(this.getAverageResponse, '温湿度传感器');
       if (this.getAverageResponse.status === 200) {
         this.pageLoading = true;
         const arrT = this.getAverageResponse.data.mess.map((item) => {
@@ -866,8 +889,8 @@ export default {
       this.setlineChart();
     },
     flowResponse() {
-      this.setRoundChart()
-    }
+      this.setRoundChart();
+    },
   },
   mounted() {
     this.setMap();

@@ -108,6 +108,10 @@ export default {
               index: "flow-equipment",
               title: "流量设备",
             },
+            {
+              index: "channel-flowmeter",
+              title: "明渠流量计",
+            },
           ],
         },
         {

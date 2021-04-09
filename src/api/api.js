@@ -307,6 +307,7 @@ export function reqcontorlDeviceInfo({ username, tid, pno, pageSize, object }) {
     })
 }
 
+
 ///checkDevice 开关控制器
 export function reqCheckDevice({ username, type, port, imei, time }) {
     return request({
@@ -395,6 +396,17 @@ export function reqDelDevice({ username, imei }) {
         params: {
             username,
             imei
+        },
+    })
+}
+//删除设备
+export function get3dSoilDate({ username, nid }) {
+    return request({
+        url: `${API_NAME}/get3dSoilDate`,
+        method: 'GET',
+        params: {
+            username,
+            nid
         },
     })
 }

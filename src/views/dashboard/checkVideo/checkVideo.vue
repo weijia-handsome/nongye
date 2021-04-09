@@ -77,7 +77,7 @@ export default {
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        this.videoImei = "E48829946_NQACPR";
+        // this.videoImei = "E48829946_NQACPR";
         const deviceSerial = this.videoImei.split("_")[0];
         const deviceSerial2 = this.videoImei.split("_")[1];
 
@@ -114,13 +114,13 @@ export default {
           // width: 100, //如果指定了width、height则以这里为准
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
-        // getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
-        //   // this.GetMapDataList.mess
-        // });
+        getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
+          // this.GetMapDataList.mess
+        });
         this.$forceUpdate();
       }).catch((rej) => {
         return this.$message.error('暂无此设备视频');
-      });;
+      });
     },
   },
 };

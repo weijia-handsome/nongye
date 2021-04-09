@@ -79,29 +79,33 @@ export default {
       param: {
         current: 1,
         size: 10,
-        port: 1,
         time: "",
+        singleTime: "",
       },
       tableData: [
         {
           name: "阀门1",
           state: 0,
           time: "",
+          port: 1,
         },
         {
           name: "阀门2",
           state: 0,
           time: "",
+          port: 2,
         },
         {
           name: "阀门3",
           state: 0,
           time: "",
+          port: 3,
         },
         {
           name: "阀门4",
           state: 0,
           time: "",
+          port: 4,
         },
       ],
     };
@@ -112,10 +116,10 @@ export default {
     },
     handleOpen(info) {
       this.dialogVisible = true;
+      for (let i of this.tableData) {
+        i.time = "";
+      }
       this.imei = info.imei;
-      // this.$nextTick(() => {
-      //   this.$refs.formData.clearValidate();
-      // });
     },
     handleComfirm() {
       this.dialogVisible = false;
@@ -178,7 +182,7 @@ export default {
         const response = await reqCheckDevice({
           username: window.sessionStorage.getItem("username"),
           type: data.state,
-          port: 1,
+          port: data.port,
           imei: this.imei,
           time: data.time,
         });

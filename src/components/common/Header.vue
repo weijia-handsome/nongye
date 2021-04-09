@@ -40,9 +40,19 @@ export default {
       bus.$emit("collapse", this.collapse);
     },
     handleBack() {
-      this.$router.push({
-        path: '/login',
-      });
+      this.$confirm("是否确定退出登录", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$router.push({
+            path: "/login",
+          });
+        })
+        .catch(() => {
+          console.log('取消');
+        });
     },
     getTime() {
       this.currentTime = this.$moment().format("hh:mm:ss");

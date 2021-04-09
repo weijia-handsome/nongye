@@ -41,7 +41,12 @@
             prop="imei"
             :rules="[{ required: true, message: '设备编号不能为空' }]"
           >
-            <el-input v-model="form.imei" size="mini" clearable></el-input>
+            <el-input
+              v-model="form.imei"
+              size="mini"
+              placeholder="请输入"
+              clearable
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -50,7 +55,13 @@
             prop="address"
             :rules="[{ required: true, message: '安装地址不能为空' }]"
           >
-            <el-input v-model="form.address" size="mini" clearable></el-input>
+            <el-input
+              id="tipinput"
+              v-model="form.address"
+              size="mini"
+              placeholder="请输入"
+              clearable
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12" class="m-txt">
@@ -69,6 +80,7 @@
             </el-date-picker>
           </el-form-item>
         </el-col>
+        <el-col class="m-map" id="map2"></el-col>
       </el-form>
     </el-row>
     <span slot="footer" class="dialog-footer">
@@ -86,6 +98,7 @@ export default {
   props: ["videoInfo"],
   data() {
     return {
+      map: null, //地图实例
       dialogVisible: false,
       value: "0",
       id: "",
@@ -95,11 +108,81 @@ export default {
         imei: "",
         address: "",
         createTime: "",
+        lnt: "",
       },
       guanwang: [],
     };
   },
+  watch: {
+    "form.lnt"(val) {
+      let newVal = val.split(",");
+      // 经度
+      const longreg = /^(\-|\+)?(((\d|[1-9]\d|1[0-7]\d|0{1,3})\.\d{0,6})|(\d|[1-9]\d|1[0-7]\d|0{1,3})|180\.0{0,6}|180)$/;
+      //纬度
+      var latreg = /^(\-|\+)?([0-8]?\d{1}\.\d{0,6}|90\.0{0,6}|[0-8]?\d{1}|90)$/;
+      if (longreg.test(newVal[0]) && latreg.test(newVal[1])) {
+        let marker = new AMap.Marker({
+          position: [newVal[0], newVal[1]],
+          offset: new AMap.Pixel(-13, -30),
+        });
+        this.map.clearMap();
+        marker.setMap(this.map);
+      }
+    },
+  },
   methods: {
+    // // 初始化
+    setMap() {
+      this.$nextTick(() => {
+        var clickListener,
+          map = new AMap.Map("map2", {
+            resizeEnable: true,
+            keyboardEnable: false,
+            zoom: 15,
+            mapStyle: "amap://styles/normal",
+          });
+
+        this.map = map;
+
+        // this.map2 = this.map;
+        var autoOptions = {
+          input: "tipinput",
+        };
+        var auto = new AMap.Autocomplete(autoOptions);
+        this.placeSearch = new AMap.PlaceSearch({
+          map: map,
+        }); //构造地点查询类
+        AMap.event.addListener(auto, "select", this.select); //注册监听，当选中某条记录时会触发
+        AMap.event.addListener(this.placeSearch, "markerClick", (e) => {
+          // console.log(e.data.location.lng, e.data.location.lat); // 经纬度
+          // // console.log(e, 654);
+          this.form.lnt = e.data.location.lng + "," + e.data.location.lat;
+          // this.mapInfo.lnglat = this.lanlat;
+          this.form.address = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+          console.log(this.form.address, "/////////////");
+        });
+        let _that = this;
+        clickListener = AMap.event.addListener(map, "click", function (e) {
+          _that.form.address = e.lnglat.toString();
+          // console.log(e.count);
+          _that.form.lnt = e.lnglat.toString();
+          // markers
+          map.clearMap();
+          var markers = new AMap.Marker({
+            position: e.lnglat,
+            map: map,
+          });
+          // if()
+          console.log(markers);
+        });
+      });
+    },
+    select(e) {
+      this.placeSearch.setCity(e.poi.adcode);
+      this.placeSearch.search(e.poi.name); //关键字查询查询
+      this.form.address = e.poi.district + "" + e.poi.address + "" + e.poi.name;
+      this.form.lnt = e.poi.location.lng + "," + e.poi.location.lat;
+    },
     handleClose() {
       this.dialogVisible = false;
     },
@@ -109,6 +192,7 @@ export default {
     handleOpen(info) {
       this.dialogVisible = true;
       this.handleSelect();
+      this.setMap();
       this.$nextTick(() => {
         this.$refs.formData.clearValidate();
       });
@@ -177,7 +261,7 @@ export default {
         device_name: this.videoInfo[0].device_name,
         imei: this.form.imei,
         tid: "0",
-        lant_lat: this.videoInfo[0].lant_lat,
+        lant_lat: this.form.lnt,
         netid: this.form.name,
         adss: this.form.address,
       };
@@ -196,6 +280,13 @@ export default {
 <style lang="scss" scoped>
 .m-dialog {
   .m {
+    &-map {
+      position: relative;
+      width: 600px;
+      height: 215px;
+      margin: 20px 0 0 10px;
+    }
+
     &-txt {
       & .el-select {
         width: 100%;
