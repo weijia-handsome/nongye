@@ -27,7 +27,7 @@ import EZUIKit from "ezuikit-js";
 
 export default {
   name: "CheckVideo",
-  props: ["imei"],
+  // props: ["imei"],
   data() {
     return {
       dialogVisible: false,
@@ -71,20 +71,23 @@ export default {
     },
     //获取视频设备
     async getVideo() {
-      const username = sessionStorage.getItem("username");
-      reqGetVideo(username).then((res) => {
+      const response = await reqGetVideo({
+        username: window.sessionStorage.getItem("username"),
+      });
+
+      if (response.status === 200) {
         const item = document.getElementById("ezuikitTalkData");
 
         //动态删除多出的子元素
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        // this.imei = "E48829946_NQACPR";
+        // this.videoImei = "E48829946_NQACPR";
         const deviceSerial = this.videoImei.split("_")[0];
         const deviceSerial2 = this.videoImei.split("_")[1];
 
         var ezuikitTalkData = {
-          accessToken: global.accessToken, // 应用accessToken
+          accessToken: response.data.accessToken, // 应用accessToken
           ezopen:
             "ezopen://" +
             deviceSerial2 +
@@ -97,8 +100,7 @@ export default {
         new EZUIKit.EZUIKitPlayer({
           autoplay: true,
           id: "ezuikitTalkData",
-          accessToken:
-            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5a",
+          accessToken: ezuikitTalkData.accessToken,
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -118,12 +120,12 @@ export default {
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
         getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
-          // this.GetMapDataList.mess
+          this.GetMapDataList.mess;
         });
         this.$forceUpdate();
-      }).catch((rej) => {
-        return this.$message.error('暂无此设备视频');
-      });
+      } else {
+        this.$message.error(response.data.msg);
+      }
     },
   },
 };

@@ -26,11 +26,17 @@
         </template>
       </el-table-column>
       <el-table-column prop="name" label="名称" width="180" align="center">
+        <template slot-scope="scope">
+          <span v-if="scope.row.name === 'L1'">阀门1</span>
+          <span v-if="scope.row.name === 'L2'">阀门2</span>
+          <span v-if="scope.row.name === 'L3'">阀门3</span>
+          <span v-if="scope.row.name === 'L4'">阀门4</span>
+        </template>
       </el-table-column>
       <el-table-column prop="state" label="状态" align="center">
         <template slot-scope="scope">
-          <span v-if="scope.row.state === 0">关</span>
-          <span v-if="scope.row.state === 1">开</span>
+          <span v-if="scope.row.state === '0'">关</span>
+          <span v-if="scope.row.state === '1'">开</span>
         </template>
       </el-table-column>
       <el-table-column prop="time" label="时间" align="center">
@@ -65,7 +71,7 @@
 
 <script>
 import temperture from "../../temperature/temperture.vue";
-import { reqCheckDevice } from "@/api/api.js";
+import { reqCheckDevice, getFourState } from "@/api/api.js";
 
 export default {
   components: { temperture },
@@ -75,39 +81,13 @@ export default {
       value: true,
       dialogVisible: false,
       imei: "",
-      state: 0,
       param: {
         current: 1,
         size: 10,
         time: "",
         singleTime: "",
       },
-      tableData: [
-        {
-          name: "阀门1",
-          state: 0,
-          time: "",
-          port: 1,
-        },
-        {
-          name: "阀门2",
-          state: 0,
-          time: "",
-          port: 2,
-        },
-        {
-          name: "阀门3",
-          state: 0,
-          time: "",
-          port: 3,
-        },
-        {
-          name: "阀门4",
-          state: 0,
-          time: "",
-          port: 4,
-        },
-      ],
+      tableData: [],
     };
   },
   methods: {
@@ -116,6 +96,8 @@ export default {
     },
     handleOpen(info) {
       this.dialogVisible = true;
+      this.tableData = [];
+      this.getFourState();
       for (let i of this.tableData) {
         i.time = "";
       }
@@ -124,11 +106,34 @@ export default {
     handleComfirm() {
       this.dialogVisible = false;
     },
+    async getFourState() {
+      const response = await getFourState({
+        username: window.sessionStorage.getItem("username"),
+        imei: this.imei,
+      });
+      if (response.data.code === 200) {
+        const str = response.data.data.toString();
+        const famen = JSON.parse(str);
+        for (let i in famen) {
+          const port = i;
+          const state = famen[i];
+
+          this.tableData.push({
+            name: port,
+            time: "",
+            port: port,
+            state: state,
+          });
+        }
+      } else {
+        this.$message.error("服务错误!");
+      }
+    },
     //全开
     async handleAllOpen() {
       if (this.param.time !== "") {
         this.tableData.forEach((i) => {
-          i.state = 1;
+          i.state = '1';
         });
         const response = await reqCheckDevice({
           username: window.sessionStorage.getItem("username"),
@@ -143,7 +148,7 @@ export default {
           return;
         }
         this.tableData.forEach((i) => {
-          i.state = 0;
+          i.state = '0';
         });
         this.$message.error(response.data.mess || "请重试");
       } else {
@@ -153,7 +158,7 @@ export default {
     //全关
     async handleAllClose() {
       this.tableData.forEach((i) => {
-        i.state = 0;
+        i.state = '0';
       });
       const response = await reqCheckDevice({
         username: window.sessionStorage.getItem("username"),
@@ -168,8 +173,8 @@ export default {
         return;
       }
       this.tableData.forEach((i) => {
-        if (i.state === 1) {
-          i.state = 1;
+        if (i.state === '1') {
+          i.state = '1';
         }
       });
       this.$message.error(response.data.mess || "请重试");
@@ -178,7 +183,7 @@ export default {
       if (data.time == "") {
         return this.$message.error("请输入灌溉时间");
       } else {
-        this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
+        this.tableData[index].state = this.tableData[index].state === '1' ? '0' : '1';
         const response = await reqCheckDevice({
           username: window.sessionStorage.getItem("username"),
           type: data.state,
@@ -191,7 +196,7 @@ export default {
           return;
         }
 
-        this.tableData[index].state = this.tableData[index].state === 1 ? 0 : 1;
+        this.tableData[index].state = this.tableData[index].state === '1' ? '0' : '1';
         this.$message.error(response.data.mess || "请重试");
       }
     },

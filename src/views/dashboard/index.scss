@@ -59,7 +59,7 @@
       left: 12px;
       display: flex;
       width: 24%;
-      height: 93%;
+      height: 92.5%;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
@@ -79,7 +79,7 @@
 
       &__third {
         width: 100%;
-        height: 31.8%;
+        height: 31.5%;
         border: 2px solid #2773e6;
       }
 
@@ -108,6 +108,7 @@
       }
 
       &__round {
+        
         height: 87%;
         background-color: #173155;
       }
@@ -129,9 +130,9 @@
     &-min {
       position: absolute;
       width: 49%;
-      height: 29.54%;
+      height: 29%;
       left: 50%;
-      bottom: 7px;
+      bottom: 12px;
       transform: translate(-50%, 0);
       z-index: 333;
       border: 2px solid #2773e6;
@@ -295,7 +296,7 @@
       }
 
       &__round {
-        width: 100%;
+        width: 98.5%;
         height: 36%;
         background-color: #173155;
         border: 2px solid #2773e6;

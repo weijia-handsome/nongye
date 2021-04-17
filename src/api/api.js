@@ -222,7 +222,11 @@ export function adDevice({ username, nid, device_name, imei, tid, lant_lat, neti
         params: {
             username,
             nid,
-            device_name, imei, tid, lant_lat, netid,
+            device_name, 
+            imei, 
+            tid, 
+            lant_lat, 
+            netid,
             adss
         },
     })
@@ -254,12 +258,13 @@ export function getGW({ username }) {
 }
 
 //获取视频  getvideo
-export function reqGetVideo({ username }) {
+export function reqGetVideo({ username, imei }) {
     return request({
         url: `${API_NAME}/getvideo`,
         method: 'GET',
         params: {
             username,
+            imei
         },
     })
 }
@@ -288,6 +293,20 @@ export function reqGetTuRangDeviceInfo({ username, imei }) {
         params: {
             username,
             imei
+        },
+    })
+}
+
+// 详情
+export function getDeviceInfoAll({ username, imei, startTime, endTime }) {
+    return request({
+        url: `${API_NAME}/getDeviceInfoAll`,
+        method: 'GET',
+        params: {
+            username,
+            imei,
+            startTime,
+            endTime
         },
     })
 }
@@ -399,7 +418,22 @@ export function reqDelDevice({ username, imei }) {
         },
     })
 }
-//删除设备
+
+//编辑设备
+export function editDevice({ username, device_name, adss, id }) {
+    return request({
+        url: `${API_NAME}/editDevice`,
+        method: 'GET',
+        params: {
+            username,
+            device_name,
+            adss,
+            id
+        },
+    })
+}
+
+//3D设备
 export function get3dSoilDate({ username, nid }) {
     return request({
         url: `${API_NAME}/get3dSoilDate`,
@@ -927,6 +961,45 @@ export function editReclosingInfo({ username, name, tid, position, id}) {
             tid,
             position,
             id
+        },
+    })
+}
+
+//时间查询
+export function getHistDevice({ username, imei, time_zone}) {
+    return request({
+        url: `${API_NAME}/getHistDevice`,
+        method: 'GET',
+        params: {
+            username,
+            imei,
+            time_zone,
+        },
+    })
+}
+
+// 阀门控制器
+export function getFourState({ username, imei}) {
+    return request({
+        url: `${API_NAME}/getFourState`,
+        method: 'GET',
+        params: {
+            username,
+            imei,
+        },
+    })
+}
+
+//统计日记详情
+export function getDeviceInfoAll2({ username, imei, startTime, endTime }) {
+    return request({
+        url: `${API_NAME}/getDeviceInfoAll2`,
+        method: 'GET',
+        params: {
+            username,
+            imei,
+            startTime,
+            endTime,
         },
     })
 }

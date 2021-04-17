@@ -79,7 +79,7 @@
           <el-form-item
             label="管网"
             prop="nid"
-            :rules="[{ required: true, message: '角色不能为空' }]"
+            :rules="[{ required: true, message: '请选择' }]"
           >
             <el-select placeholder="请选择" v-model="form.nid" size="mini" clearable>
               <el-option
@@ -192,6 +192,7 @@ export default {
         });
         let _that = this;
         clickListener = AMap.event.addListener(map, "click", function (e) {
+          console.log(e, '/////////////');
           _that.form.projectAddress = e.lnglat.toString();
           // console.log(e.count);
           _that.form.lnt = e.lnglat.toString();

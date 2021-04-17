@@ -6,7 +6,7 @@
     width="40%"
     :before-close="handleClose"
   >
-    <el-row :gutter="24">
+    <el-row :gutter="24" height="600px">
       <el-form
         ref="formData"
         :model="form"
@@ -37,6 +37,22 @@
         </el-col>
         <el-col :span="12">
           <el-form-item
+            label="设备名称"
+            prop="deviceName"
+            clearadle
+            :rules="[{ required: true, message: '设备名称不能为空' }]"
+          >
+            <el-input
+              v-model="form.deviceName"
+              size="mini"
+              placeholder="请输入设备名称"
+              :disabled="id ? true : false"
+              clearable
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item
             label="设备编号"
             prop="imei"
             :rules="[{ required: true, message: '设备编号不能为空' }]"
@@ -45,6 +61,7 @@
               v-model="form.imei"
               size="mini"
               placeholder="请输入"
+              :disabled="id ? true : false"
               clearable
             ></el-input>
           </el-form-item>
@@ -75,6 +92,7 @@
               v-model="form.createTime"
               type="datetime"
               placeholder="选择日期时间"
+              value-format="yyyy-MM-dd HH:mm:ss"
               size="mini"
             >
             </el-date-picker>
@@ -109,6 +127,7 @@ export default {
         address: "",
         createTime: "",
         lnt: "",
+        deviceName: "",
       },
       guanwang: [],
     };
@@ -203,12 +222,14 @@ export default {
         this.form.imei = info.imei;
         this.form.address = info.adss;
         this.form.createTime = info.reg_time;
+        this.form.deviceName = info.device_name;
       } else {
         this.id = "";
         this.form.name = "";
         this.form.imei = "";
         this.form.address = "";
         this.form.createTime = "";
+        this.form.deviceName = "";
       }
     },
     handleComfirm() {
@@ -258,7 +279,7 @@ export default {
       const params = {
         username: window.sessionStorage.getItem("username"),
         nid: "",
-        device_name: this.videoInfo[0].device_name,
+        device_name: this.form.deviceName,
         imei: this.form.imei,
         tid: "0",
         lant_lat: this.form.lnt,

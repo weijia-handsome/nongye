@@ -120,7 +120,11 @@ export default {
       this.getList();
     },
     handleCheck(imei) {
-      this.$refs.editRef.handleOpen(imei);
+      if (imei) {
+        this.$refs.editRef.handleOpen(imei);
+      } else {
+        this.$message.error('暂无此设备视频！')
+      }    
     },
     handleSearch() {
       this.total = 0;

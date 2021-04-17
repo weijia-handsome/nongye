@@ -8,24 +8,49 @@
         <el-row :gutter="24">
           <el-col :span="6">
             <el-form-item label="设备名称">
-              <el-input v-model="form.name" size="mini"></el-input>
+              <el-input
+                v-model="form.name"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="设备编号">
-              <el-input v-model="form.number" size="mini"></el-input>
+              <el-input
+                v-model="form.number"
+                size="mini"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter.native="handleSearch"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-button type="primary" size="mini" @click="handleSearch"
               >查询</el-button
             >
+            <el-button type="primary" size="mini" @click="handleCreate"
+              >新增</el-button
+            >
           </el-col>
         </el-row>
       </el-form>
 
-      <el-table :data="tableData" style="width: 100%" align="center">
-        <el-table-column label="序号" type="index" width="80" align="center">
+      <el-table
+        :data="tableData"
+        style="width: 100%, height: 600px"
+        align="center"
+      >
+        <el-table-column
+          label="序号"
+          type="index"
+          width="80"
+          align="center"
+          fixed="left"
+        >
           <template slot-scope="scope">
             <span>{{
               (param.pno - 1) * param.pageSize + scope.$index + 1
@@ -37,24 +62,101 @@
           label="设备名称"
           width="180"
           align="center"
+          fixed="left"
         >
         </el-table-column>
-        <el-table-column prop="imei" label="设备编号" align="center">
+        <el-table-column
+          prop="imei"
+          label="设备编号"
+          align="center"
+          width="160px"
+          fixed="left"
+        >
         </el-table-column>
-        <el-table-column prop="adss" label="安装地址" align="center">
+        <el-table-column
+          prop="adss"
+          label="安装地址"
+          align="center"
+          width="300px"
+        >
         </el-table-column>
-        <el-table-column prop="instantFlow" label="实时流量" align="center">
+        <el-table-column
+          label="流速(m³/s)"
+          prop="speedFlow"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ (scope.row.speedFlow / 100) | rounding }}</span>
+          </template>
         </el-table-column>
-        <el-table-column prop="totalFlow" label="累计流量" align="center">
+        <el-table-column
+          label="液位(m)"
+          prop="flowLevel"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ (scope.row.flowLevel / 100) | rounding }}</span>
+          </template>
         </el-table-column>
-        <el-table-column prop="reg_time" label="创建时间" align="center">
+        <el-table-column
+          label="每秒流量(m³/s)"
+          prop="secondFlow"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ (scope.row.secondFlow / 100) | rounding }}</span>
+          </template>
         </el-table-column>
-        <el-table-column label="操作" align="center">
-          <template slot-scope="scope"
-            ><el-button type="text" size="mini" @click="handleCheck(scope.row)"
+        <el-table-column
+          label="每小时流量(m³/h)"
+          prop="hourFlow"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.hourFlow | rounding }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="正累计流量(m³)"
+          prop="lowPositiveFlow"
+          align="center"
+          width="200px"
+        >
+        </el-table-column>
+        <el-table-column
+          prop="reg_time"
+          label="创建时间"
+          align="center"
+          width="300px"
+        >
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          width="200px"
+          fixed="right"
+        >
+          <template slot-scope="scope">
+            <el-button type="text" size="mini" @click="handleEdit(scope.row)"
+              >编辑</el-button
+            >
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleCheck(scope.row.imei)"
               >查看</el-button
-            ></template
-          >
+            >
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleDelete(scope.row.imei)"
+              >删除</el-button
+            >
+          </template>
         </el-table-column>
       </el-table>
       <div class="m-pagination">
@@ -71,16 +173,22 @@
         />
       </div>
     </el-card>
-    <!-- <flow ref="flowRef"></flow> -->
+    <edit ref="editRef" :info="tableData" @refresh="getList"></edit>
+    <check ref="checkRef"></check>
   </div>
 </template>
 
 <script>
-// import Flow from "./flow/flow.vue";
-import { reqcontorlDeviceInfo } from "@/api/api.js";
+import Edit from "./edit/edit.vue";
+import Check from "./check/check.vue";
+import { reqcontorlDeviceInfo, reqDelDevice } from "@/api/api.js";
 
 export default {
   name: "FlowEquipment",
+  components: {
+    Edit,
+    Check,
+  },
   data() {
     return {
       total: 0,
@@ -97,6 +205,11 @@ export default {
       tableData: [],
     };
   },
+  filters: {
+    rounding(value) {
+      return Number(value).toFixed(2);
+    },
+  },
   methods: {
     handleSizeChange(pageSize) {
       this.param.pno = 1;
@@ -107,8 +220,14 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    handleCheck(listInfo) {
-      this.$refs.flowRef.handleOpen(listInfo);
+    handleEdit(listInfo) {
+      this.$refs.editRef.handleOpen(listInfo);
+    },
+    handleCreate() {
+      this.$refs.editRef.handleOpen();
+    },
+    handleCheck(imei) {
+      this.$refs.checkRef.handleOpen(imei);
     },
     handleSearch() {
       this.total = 0;
@@ -135,11 +254,40 @@ export default {
       });
       if (response.status === 200) {
         this.tableData = response.data.data;
-        console.log(this.tableData, "=========");
+        console.log(this.tableData);
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
+    },
+    // 删除
+    async reqDelDevice(imei) {
+      const response = await reqDelDevice({
+        username: window.sessionStorage.getItem("username"),
+        imei: imei,
+      });
+      if (response.data.code === "200") {
+        this.$message.success(response.data.mess);
+        this.getList();
+      } else {
+        this.$message.error(response.data.mess || "服务错误!");
+      }
+    },
+    handleDelete(imei) {
+      this.$confirm("此操作将删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.reqDelDevice(imei);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
   },
   mounted() {

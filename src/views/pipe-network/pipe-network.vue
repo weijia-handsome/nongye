@@ -384,13 +384,13 @@ export default {
         username: window.sessionStorage.getItem("username"),
         nid: id,
       });
-      if (response.status === 200) {
+      if (response.data.code === "200") {
         this.$message({
           type: "success",
           message: "删除成功!",
         });
       } else {
-        this.$message.error(response.statusText);
+        this.$message.error(response.data.mess);
       }
     },
   },

@@ -54,6 +54,8 @@
           align="center"
         >
         </el-table-column>
+        <el-table-column prop="device_name" label="设备名称" align="center">
+        </el-table-column>
         <el-table-column prop="imei" label="设备编号" align="center">
         </el-table-column>
         <el-table-column prop="adss" label="安装地址" align="center">
@@ -90,7 +92,7 @@
           :total="total"
         />
       </div>
-      <check-video ref="videoRef" :imei="imei"></check-video>
+      <check-video ref="videoRef"></check-video>
       <edit ref="editRef" :videoInfo="tableData" @refresh="getList"></edit>
     </el-card>
   </div>
@@ -136,7 +138,11 @@ export default {
       this.getList();
     },
     handleCheck(imei) {
-      this.$refs.videoRef.handleOpen(imei);
+      if (imei) {
+        this.$refs.videoRef.handleOpen(imei);
+      } else {
+        this.$message.error('暂无此设备视频！');
+      }     
     },
     handleCreate() {
       this.$refs.editRef.handleOpen();

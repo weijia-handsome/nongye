@@ -83,7 +83,7 @@
           ></el-input>
         </el-col>
 
-        <div class="m-content__c">地址:</div>
+        <!-- <div class="m-content__c">地址:</div>
         <el-col>
           <el-input
             size="mini"
@@ -91,7 +91,7 @@
             class="m-content__inp"
             id="tipinput"
           ></el-input>
-        </el-col>
+        </el-col> -->
         <div class="m-content__button">
           <el-button type="primary" size="mini" @click="handleSumit"
             >确定</el-button
@@ -300,7 +300,7 @@ export default {
             {
               url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
               anchor: new AMap.Pixel(6, 6),
-              size: new AMap.Size(30, 30),
+              size: new AMap.Size(20, 20),
             },
             // {
             //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
@@ -324,7 +324,7 @@ export default {
             this.$refs.massRefs.style.display = "block";
             this.mapParams.address = e.data.address;
             this.mapParams.name = e.data.name;
-            this.mapParams.lnglat = e.data.lnt;
+            // this.mapParams.lnglat = e.data.lnt;
             this.mapParams.fireman = e.data.fireman;
             this.mapParams.firemanname = e.data.firemanname;
             this.mapParams.person = e.data.person;
@@ -358,20 +358,21 @@ export default {
               e.data.location.lng + "," + e.data.location.lat;
             // this.mapInfo.lnglat = this.lanlat;
             this.mapParams.address = `${e.data.cityname}${e.data.adname}${e.data.address}`;
+            
           });
           let _that = this;
           clickListener = AMap.event.addListener(map, "click", function (e) {
-            // _that.mapParams.address = e.lnglat.toString();
+            _that.mapParams.address = e.lnglat.toString();
             // console.log(e.count);
-            _that.lnt = e.lnglat.toString();
+            _that.mapParams.lnglat = e.lnglat.toString();
             // markers
             map.clearMap();
-            // var markers = new AMap.Marker({
-            //   position: e.lnglat,
-            //   map: map,
-            // });
-            // // if()
-            // console.log(markers);
+            var markers = new AMap.Marker({
+              position: e.lnglat,
+              map: map,
+            });
+            // if()
+            // console.log(markers); 
           });
         });
       });
@@ -497,7 +498,6 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
-        console.log(this.tableData, '/////////////');
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.statusText || "服务错误!");
@@ -584,7 +584,7 @@ export default {
       position: absolute;
       right: 25px;
       width: 250px;
-      height: 180px;
+      height: 130px;
       margin-top: 10px;
       padding: 10px;
       background-color: #fff;

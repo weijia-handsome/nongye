@@ -14,9 +14,12 @@ import 'lib-flexible';
 import axios from 'axios';
 import './assets/iconfont/iconfont.css';
 import './utils/rem';
+import qs from 'qs';
+
 
 Vue.prototype.axios = axios;
 Vue.config.productionTip = false;
+Vue.prototype.$qs = qs;
 Vue.use(VideoPlayer);
 Vue.use(ElementUI, {
     size: 'small'
@@ -43,6 +46,11 @@ router.beforeEach((to, from, next) => {
             next('/login');
         }
     }
+
+    // if (to.meta.title) {
+    //     document.title = to.meta.title
+    // }
+    // next();
 })
 // //使用钩子函数对路由进行权限跳转
 // router.beforeEach((to, from, next) => {

@@ -88,6 +88,15 @@ export default {
         return (this.tagVisible = true);
       },
     },
+    // tagsGo: {
+    //   get: function () {
+    //     if (this.tagsList === []) {
+    //       return this.$route.path({
+    //         path: "/dashboard",
+    //       });
+    //     }
+    //   },
+    // },
   },
   watch: {
     $route(newValue, oldValue) {

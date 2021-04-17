@@ -19,7 +19,11 @@
             prop="name"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.name" size="mini" disabled></el-input>
+            <el-input
+              v-model="form.name"
+              size="mini"
+              :disabled="this.id ? true : false"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -28,30 +32,34 @@
             prop="time"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.time" size="mini" disabled></el-input>
+            <el-input
+              v-model="form.time"
+              size="mini"
+              :disabled="this.id ? true : false"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="开始时间" prop="time" class="m-dialog__time">
+          <el-form-item label="开始时间" class="m-dialog__time">
             <el-date-picker
               v-model="form.startTime"
               type="datetime"
               placeholder="选择日期时间"
               size="mini"
               :rules="[{ required: true, message: '请选择' }]"
-              disabled
+              :disabled="this.id ? true : false"
             >
             </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="任务类型" prop="time">
+          <el-form-item label="任务类型">
             <el-select
               v-model="form.taskType"
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
-              disabled
+              :disabled="this.id ? true : false"
             >
               <el-option label="直灌" value="2"></el-option>
               <el-option label="轮灌" value="1"></el-option>
@@ -59,17 +67,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="滴灌类型" prop="time">
+          <el-form-item label="滴灌类型">
             <el-select
               v-model="form.irrType"
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
               @change="handleSelect"
-              disabled
+              :disabled="this.id ? true : false"
             >
-              <el-option label="管网" value="2"></el-option>
-              <el-option label="分区" value="1"></el-option>
+              <el-option label="管网" value="2" v-if="form.taskType === '2'"></el-option>
+              <el-option label="分区" value="1" v-if="form.taskType === '1'"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -83,7 +91,7 @@
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
-              disabled
+              :disabled="this.id ? true : false"
             >
               <el-option
                 v-for="item in netArr"
@@ -95,18 +103,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="12" v-if="form.taskType === '1'">
-          <el-form-item label="轮灌结束时间" prop="time" class="m-dialog__time">
-            <el-date-picker
-              v-model="form.endTime"
-              type="datetime"
-              placeholder="选择日期时间"
-              size="mini"
-              disabled
-            >
-            </el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12" v-if="form.taskType === '1'">
           <el-form-item label="轮灌周期(天数)" prop="num">
             <el-input-number
               v-model="form.num"
@@ -114,7 +110,7 @@
               :min="1"
               :max="10"
               size="mini"
-              disabled
+              :disabled="this.id ? true : false"
             ></el-input-number>
           </el-form-item>
         </el-col>

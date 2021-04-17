@@ -21,7 +21,7 @@
               v-text="deviceInfo.status === '1' ? '状态：报警' : '状态：未报警'"
             ></p>
             <p class="m-left__text">设备类型：土壤温湿度传感器</p>
-            <p class="m-left__text">心跳时间：{{ deviceInfo.heartTime }}</p>
+            <p class="m-left__text">心跳时间：{{ deviceInfo.h_ime }}</p>
             <p class="m-left__text">创建时间：{{ deviceInfo.createTime }}</p>
           </div>
         </div>
@@ -89,9 +89,9 @@ export default {
     return {
       dialogVisible: false,
       loading: false,
-      // dataTime: [],
       soilTArr: [],
       soilHArr: [],
+      dataTime: [],
       alarms: [],
       alarmsValue: "",
       response: "",
@@ -101,7 +101,6 @@ export default {
         address: "",
         status: "",
         type: "",
-        heartTime: "",
         createTime: "",
         soilT: "",
         soilH: "",
@@ -146,20 +145,15 @@ export default {
         username: window.sessionStorage.getItem("username"),
         imei: this.deviceInfo.imei,
       });
+      console.log(this.response, '设备信息');
       if (this.response.status === 200) {
         this.loading = true;
         this.deviceInfo.h_ime = this.response.data.device.h_ime;
         for (let i of this.response.data.data) {
-          this.deviceInfo.heartTime = i.s_time;
+          this.dataTime.push(i.s_time);
           this.soilTArr.push(i.soilT);
           this.soilHArr.push(i.soilH);
         }
-        // console.log(this.soilTArr, "温度");
-        // console.log(this.soilHArr, "湿度");
-        // const dataTimeArr = this.response.data.data.map((item) => {
-        //   return item.s_time;
-        // });
-        // this.dataTime = dataTimeArr.slice(0, 6);
         for (let j of this.response.data.alarms) {
           this.alarmsValue = j.value;
         }
@@ -177,25 +171,28 @@ export default {
       let option = {
         tooltip: {
           trigger: "axis",
-          position: function (p) {
-            return [p[0] + 10, p[1] - 10];
-          },
-          axisPointer: {
-            type: "cross",
-            label: {
-              backgroundColor: "#6a7985",
-            },
-          },
+          // axisPointer: {
+          //   type: "cross",
+          //   label: {
+          //     backgroundColor: "#6a7985",
+          //   },
+          // },
         },
         xAxis: {
           type: "category",
-          // data: this.dataTime,
+          data: this.dataTime,
           axisLabel: {
-            interval: 0,
+            // interval: 0,
           },
         },
         yAxis: {
           type: "value",
+          axisLabel: {
+            formatter: "{value} ℃",
+            // textStyle: {
+            //   color: "#04E0F9", //坐标值得具体的颜色
+            // },
+          },
         },
         series: [
           {
@@ -223,25 +220,28 @@ export default {
       let option = {
         tooltip: {
           trigger: "axis",
-          axisPointer: {
-            type: "cross",
-            label: {
-              backgroundColor: "#6a7985",
-            },
-          },
-          position: function (p) {
-            return [p[0] + 10, p[1] - 10];
-          },
+          // axisPointer: {
+          //   type: "cross",
+          //   label: {
+          //     backgroundColor: "#6a7985",
+          //   },
+          // },
         },
         xAxis: {
           type: "category",
-          // data: this.dataTime,
+          data: this.dataTime,
           axisLabel: {
-            interval: 0,
+            // interval: 0,
           },
         },
         yAxis: {
           type: "value",
+          axisLabel: {
+            formatter: "{value} %",
+            // textStyle: {
+            //   color: "#04E0F9", //坐标值得具体的颜色
+            // },
+          },
         },
         series: [
           {

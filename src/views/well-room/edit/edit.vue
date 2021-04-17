@@ -38,6 +38,7 @@
               v-model="form.deviceType"
               size="mini"
             >
+              <el-option label="管道流量计" value="5"></el-option>
               <el-option label="重合闸断路器" value="6"></el-option>
               <el-option label="重合闸漏电保护器" value="7"></el-option>
             </el-select>
@@ -48,9 +49,17 @@
             label="设备部件"
             prop="other"
             class="m-txt__text"
-            :rules="[{ required: true, message: '请选择' }]"
+            :rules="
+              form.deviceType === '5'
+                ? false
+                : [{ required: true, message: '请选择' }]
+            "
           >
-            <el-select placeholder="请选择" v-model="form.other">
+            <el-select
+              placeholder="请选择"
+              v-model="form.other"
+              :disabled="form.deviceType === '5' ? true : false"
+            >
               <el-option
                 label="除沙电磁阀"
                 value="1"
@@ -61,7 +70,11 @@
                 value="2"
                 v-if="form.deviceType == '7'"
               ></el-option>
-              <el-option label="总电源" value="0" v-else></el-option>
+              <el-option
+                label="总电源"
+                value="0"
+                v-if="form.deviceType == '6'"
+              ></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -86,6 +99,7 @@ export default {
       value: "0",
       fidd: "",
       id: "",
+      disabled: false,
       form: {
         name: "",
         imei: "",
@@ -124,7 +138,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         name: this.form.name,
         tid: this.form.deviceType,
-        position: this.form.other,
+        position: this.form.other || "3",
         id: this.id,
       });
       if (response.data.code === 200) {
@@ -139,7 +153,7 @@ export default {
       const response = await saveReclosing({
         username: window.sessionStorage.getItem("username"),
         tid: this.form.deviceType,
-        position: this.form.other,
+        position: this.form.other || "3",
         imei: this.form.imei,
         name: this.form.name,
         fid: this.fidd,

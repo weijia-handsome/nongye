@@ -40,7 +40,7 @@
         <div
           class="m-left__round"
           id="roundChart"
-          style="width: 100%; height: 87%"
+          style="width: 100%; height: 88.5%"
         ></div>
       </div>
       <div class="m-left__second">
@@ -49,7 +49,7 @@
         <div
           class="m-left__round1"
           id="lineChart"
-          style="width: 100%; height: 81%"
+          style="width: 100%; height: 81.5%"
           v-loading="pageLoading"
         ></div>
       </div>
@@ -279,7 +279,7 @@ export default {
               points2.push({
                 lnglat: [lng, lat],
                 name: name,
-                nid: data[i].nid,
+                nid: data[i].spid,
               });
             } else {
               var lng = pp.split(",")[0];
@@ -287,7 +287,7 @@ export default {
               points2.push({
                 lnglat: [lng, lat],
                 name: name,
-                nid: data[i].nid,
+                nid: data[i].spid,
               });
             }
           }
@@ -295,7 +295,7 @@ export default {
             {
               url: "https://a.amap.com/jsapi_demos/static/images/mass0.png",
               anchor: new AMap.Pixel(6, 6),
-              size: new AMap.Size(30, 30),
+              size: new AMap.Size(20, 20),
             },
             // {
             //   url: "https://a.amap.com/jsapi_demos/static/images/mass1.png",
@@ -385,9 +385,9 @@ export default {
         },
         yAxis: {
           type: "value",
-          min: 0,
-          max: 10,
-          interval: 2,
+          // min: 8000,
+          // max: 15000 ,
+          // interval: 2000,
           axisLabel: {
             formatter: "{value} m³",
             textStyle: {
@@ -417,7 +417,6 @@ export default {
           },
         ],
       };
-      console.log(option.dataset, "=============");
       roundChart.setOption(option);
     },
     //温湿度折线图
@@ -468,9 +467,6 @@ export default {
             nameTextStyle: {
               color: "#C8742D",
             },
-            min: 0,
-            max: 25,
-            interval: 5,
             axisLabel: {
               formatter: "{value} ℃",
               textStyle: {
@@ -484,9 +480,6 @@ export default {
             nameTextStyle: {
               color: "#C8742D",
             },
-            min: 0,
-            max: 25,
-            interval: 5,
             axisLabel: {
               formatter: "{value} %",
               textStyle: {
@@ -730,7 +723,10 @@ export default {
       console.log(this.flowResponse, "流量计");
       if (this.flowResponse.status === 200) {
         this.flowResponse.data.data.forEach((i) => {
-          this.flowTotal.push({ product: i.device_name, 实时流量: i.hourFlow });
+          this.flowTotal.push({
+            product: i.device_name,
+            实时流量: Number(i.secondFlow).toFixed(2),
+          });
         });
       } else {
         this.$message.error(this.flowResponse.data.mess || "服务错误!");
@@ -742,7 +738,7 @@ export default {
         username: window.sessionStorage.getItem("username"),
         pid: this.pid,
       });
-      console.log(this.getAverageResponse, '温湿度传感器');
+      console.log(this.getAverageResponse, "温湿度传感器");
       if (this.getAverageResponse.status === 200) {
         this.pageLoading = true;
         const arrT = this.getAverageResponse.data.mess.map((item) => {
@@ -864,12 +860,13 @@ export default {
       });
       if (response.status === 200) {
         this.activities = response.data.data;
+        console.log(this.activities, "直灌");
       } else {
         this.$message.error(response.statusText || "服务错误!");
       }
     },
-    handleCheck(item) {
-      this.$refs.videoRef.handleOpen(item.imei);
+    handleCheck(irrInfo) {
+      this.$refs.videoRef.handleOpen(irrInfo);
     },
     //随机颜色
     randomRgb(index) {

@@ -32,7 +32,7 @@
             <el-button type="primary" size="mini" @click="handleSearch"
               >查询</el-button
             >
-            <el-button type="primary" size="mini" @click="handleSearch"
+            <el-button type="primary" size="mini" @click="handleExport"
               >导出</el-button
             >
           </el-col>
@@ -81,17 +81,50 @@
         >
         </el-table-column>
         <el-table-column
-          prop="soilT"
-          label="实时温度(℃)"
+          label="流速(m³/s)"
+          prop="speedFlow"
           align="center"
-          width="180"
+          width="150px"
         >
+          <template slot-scope="scope">
+            <span>{{ scope.row.speedFlow | rounding }}</span>
+          </template>
         </el-table-column>
         <el-table-column
-          prop="soilH"
-          label="实时湿度(%)"
+          label="液位(m)"
+          prop="flowLevel"
           align="center"
-          width="180"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.flowLevel | rounding }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="每秒流量(m³/s)"
+          prop="secondFlow"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.secondFlow | rounding }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="每小时流量(m³/h)"
+          prop="hourFlow"
+          align="center"
+          width="150px"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.hourFlow | rounding }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="正累计流量(m³)"
+          prop="lowPositiveFlow"
+          align="center"
+          width="200px"
         >
         </el-table-column>
         <el-table-column
@@ -106,14 +139,18 @@
           label="最后上传时间"
           align="center"
           width="180"
+          fixed="right"
         >
         </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" width="180">
-          <!-- <template slot-scope="scope"
-            ><el-button type="text" size="mini" 
-              >导出</el-button
+          <template slot-scope="scope"
+            ><el-button
+              type="text"
+              size="mini"
+              @click="handleCheck(scope.row.imei)"
+              >查看</el-button
             ></template
-          > -->
+          >
         </el-table-column>
       </el-table>
       <div class="m-pagination">
@@ -129,19 +166,20 @@
           :total="total"
         />
       </div>
-      <!-- <check ref="checkRef"></check> -->
+      <check ref="checkRef"></check>
     </el-card>
   </div>
 </template>
 
 <script>
-import { reqGetTuRangDevice } from "@/api/api.js";
+import { reqcontorlDeviceInfo } from "@/api/api.js";
+import Check from "./check/check.vue";
 
 export default {
   name: "Temperture",
-  // components: {
-  //   Check,
-  // },
+  components: {
+    Check,
+  },
   data() {
     return {
       total: 0,
@@ -153,10 +191,15 @@ export default {
       param: {
         pno: 1,
         pageSize: 10,
-        tid: 4,
+        tid: 8,
       },
       tableData: [],
     };
+  },
+  filters: {
+    rounding(value) {
+      return Number(value).toFixed(2);
+    },
   },
   methods: {
     handleSizeChange(pageSize) {
@@ -168,9 +211,21 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    // handleCheck(info) {
-    //   this.$refs.checkRef.handleOpen(info);
-    // },
+    handleCheck(imei) {
+      this.$refs.checkRef.handleOpen(imei);
+    },
+    handleExport() {
+      const username = window.sessionStorage.getItem("username");
+      const url =
+        `${this.baseUrl}/uploadDeviceData?` +
+        qs.stringify({
+          username: username,
+          imei: this.imeis,
+          tid: this.param.tid,
+        });
+
+      window.open(url);
+    },
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
@@ -188,7 +243,7 @@ export default {
     },
     //获取列表
     async getList(object) {
-      const response = await reqGetTuRangDevice({
+      const response = await reqcontorlDeviceInfo({
         username: window.sessionStorage.getItem("username"),
         pno: this.param.pno,
         tid: this.param.tid,

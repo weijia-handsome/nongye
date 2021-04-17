@@ -32,13 +32,13 @@
             <el-button type="primary" size="mini" @click="handleSearch"
               >查询</el-button
             >
-            <el-button type="primary" size="mini" @click="handleSearch"
+            <el-button type="primary" size="mini" @click="handleExport"
               >导出</el-button
             >
           </el-col>
         </el-row>
       </el-form>
- 
+
       <el-table
         :data="tableData"
         style="width: 100%"
@@ -106,14 +106,15 @@
           label="最后上传时间"
           align="center"
           width="180"
+          fixed="right"
         >
         </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" width="180">
-          <!-- <template slot-scope="scope"
-            ><el-button type="text" size="mini" 
-              >导出</el-button
+          <template slot-scope="scope"
+            ><el-button type="text" size="mini" @click="handleCheck(scope.row)"
+              >查看</el-button
             ></template
-          > -->
+          >
         </el-table-column>
       </el-table>
       <div class="m-pagination">
@@ -123,25 +124,27 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="param.pno"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="[10, 20, 50, 150]"
           :page-size="param.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
         />
       </div>
-      <!-- <check ref="checkRef"></check> -->
+      <check ref="checkRef"></check>
     </el-card>
   </div>
 </template>
 
 <script>
 import { reqGetTuRangDevice } from "@/api/api.js";
+import Check from "./check/check.vue";
+import qs from "qs";
 
 export default {
   name: "Temperture",
-  // components: {
-  //   Check,
-  // },
+  components: {
+    Check,
+  },
   data() {
     return {
       total: 0,
@@ -156,7 +159,15 @@ export default {
         tid: 4,
       },
       tableData: [],
+      imeis: "",
     };
+  },
+  computed: {
+    baseUrl: {
+      get: function () {
+        return "/Agriculture";
+      },
+    },
   },
   methods: {
     handleSizeChange(pageSize) {
@@ -168,9 +179,9 @@ export default {
       this.param.pno = currentPage;
       this.getList();
     },
-    // handleCheck(info) {
-    //   this.$refs.checkRef.handleOpen(info);
-    // },
+    handleCheck(info) {
+      this.$refs.checkRef.handleOpen(info);
+    },
     handleSearch() {
       this.total = 0;
       this.param.pno = 1;
@@ -186,6 +197,18 @@ export default {
       }
       this.getList(object);
     },
+    handleExport() {
+      const username = window.sessionStorage.getItem("username");
+      const url =
+        `${this.baseUrl}/uploadDeviceData?` +
+        qs.stringify({
+          username: username,
+          imei: this.imeis,
+          tid: this.param.tid,
+        });
+      window.open(url);
+    },
+
     //获取列表
     async getList(object) {
       const response = await reqGetTuRangDevice({
@@ -198,6 +221,10 @@ export default {
       if (response.status === 200) {
         this.loading = true;
         this.tableData = response.data.data;
+        const imeis = this.tableData.map((item) => {
+          return item.imei;
+        });
+        this.imeis = imeis.toString();
         this.total = response.data.recordCount;
       } else {
         this.$message.error(response.data.mess || "服务错误！");

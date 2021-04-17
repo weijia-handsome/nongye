@@ -1,14 +1,6 @@
 // var path = require('path');
 const path = require('path')
 const resolve = dir => path.join(__dirname, dir);
-// 引入等比适配插件
-// const px2rem = require('postcss-px2rem')
- 
-// // 配置基本大小
-// const postcss = px2rem({
-//   // 基准大小 baseSize，需要和rem.js中相同
-//   remUnit: 16
-// })
 
 module.exports = {
 
@@ -32,6 +24,15 @@ module.exports = {
         //   '^/Agriculture': '' // 在请求的时候 凡是/api开头的地址都可以跨域
         // }
       },
+    }
+  },
+  pwa: {
+    iconPaths: {
+      favicon32: 'favicon.ico',
+      favicon16: 'favicon.ico',
+      appleTouchIcon: 'favicon.ico',
+      maskIcon: 'favicon.ico',
+      msTileImage: 'favicon.ico'
     }
   },
   chainWebpack: config => {

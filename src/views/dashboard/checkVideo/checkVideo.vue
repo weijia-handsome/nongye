@@ -6,31 +6,64 @@
     width="50%"
     :before-close="handleClose"
   >
-    <el-row :gutter="24">
-      <el-col :span="12">
-        <!-- <video-player
-          class="m-video"
-          ref="videoPlayer"
-          :playsinline="true"
-          :options="playerOptions"
-        ></video-player> -->
-        <div id="ezuikitTalkData"></div>
-      </el-col>
-    </el-row>
+    <el-table :data="gridData">
+      <el-table-column
+        prop="device_name"
+        label="设备名称"
+        width="200"
+        align="center"
+      ></el-table-column>
+      <el-table-column
+        prop="imei"
+        label="设备号"
+        width="200"
+        align="center"
+      ></el-table-column>
+      <el-table-column
+        prop="adss"
+        label="地址"
+        align="center"
+      ></el-table-column>
+      <el-table-column label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="mini"
+            @click="handleVideo(scope.row.imei)"
+            >查看现场</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-dialog
+      width="40%"
+      :visible.sync="dialogFormVisible"
+      append-to-body
+      :before-close="handleCloseVideo"
+    >
+      <el-row :gutter="24">
+        <el-col :span="24">
+          <div id="ezuikitTalkData"></div>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </el-dialog>
 </template>
 
 <script>
-import { reqGetVideo } from "@/api/api.js";
+import { reqGetVideo, getScene } from "@/api/api.js";
 import "../../../../public/ezuikit.js";
 import EZUIKit from "ezuikit-js";
+
 export default {
   name: "CheckVideo",
   data() {
     return {
       dialogVisible: false,
-      video: "",
-      videoImei: "",
+      dialogFormVisible: false,
+      gridData: [],
+      cut: "",
+      object: "",
       playerOptions: {
         playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
         autoplay: false, //如果true,浏览器准备好时开始回放。
@@ -62,15 +95,31 @@ export default {
     handleClose() {
       this.dialogVisible = false;
     },
-    handleOpen(imei) {
+    handleCloseVideo() {
+      this.dialogFormVisible = false;
+    },
+    handleOpen(irrInfo) {
       this.dialogVisible = true;
-      this.videoImei = imei;
-      this.getVideo();
+      this.cut = irrInfo.cut;
+      this.object = irrInfo.object;
+      this.getScene();
+    },
+    handleVideo(imei) {
+      console.log(imei);
+      if (imei) {
+        this.dialogFormVisible = true;
+        this.getVideo(imei);
+      } else {
+        this.$message.error("暂无此视频设备！");
+      }
     },
     //获取视频设备
-    async getVideo() {
-      const username = sessionStorage.getItem("username");
-      reqGetVideo(username).then((res) => {
+    async getVideo(imei) {
+      const response = await reqGetVideo({
+        username: window.sessionStorage.getItem("username"),
+      });
+
+      if (response.status === 200) {
         const item = document.getElementById("ezuikitTalkData");
 
         //动态删除多出的子元素
@@ -78,11 +127,11 @@ export default {
           item.removeChild(item.firstChild);
         }
         // this.videoImei = "E48829946_NQACPR";
-        const deviceSerial = this.videoImei.split("_")[0];
-        const deviceSerial2 = this.videoImei.split("_")[1];
+        const deviceSerial = imei.split("_")[0];
+        const deviceSerial2 = imei.split("_")[1];
 
         var ezuikitTalkData = {
-          accessToken: global.accessToken, // 应用accessToken
+          accessToken: response.data.accessToken, // 应用accessToken
           ezopen:
             "ezopen://" +
             deviceSerial2 +
@@ -94,8 +143,7 @@ export default {
         new EZUIKit.EZUIKitPlayer({
           autoplay: true,
           id: "ezuikitTalkData",
-          accessToken:
-            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5as",
+          accessToken: ezuikitTalkData.accessToken,
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -115,12 +163,24 @@ export default {
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
         getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
-          // this.GetMapDataList.mess
+          this.GetMapDataList.mess;
         });
         this.$forceUpdate();
-      }).catch((rej) => {
-        return this.$message.error('暂无此设备视频');
+      } else {
+        this.$message.error(response.data.msg || "服务错误！");
+      }
+    },
+    async getScene() {
+      const response = await getScene({
+        username: window.sessionStorage.getItem("username"),
+        cut: this.cut,
+        object: this.object,
       });
+      if (response.data.code === 200) {
+        this.gridData = response.data.data;
+      } else {
+        this.$message.error(response.statusText || "服务错误!");
+      }
     },
   },
 };

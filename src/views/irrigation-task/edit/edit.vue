@@ -19,7 +19,7 @@
             prop="name"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.name" size="mini"></el-input>
+            <el-input v-model="form.name" size="mini" clearable></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -28,11 +28,16 @@
             prop="time"
             :rules="[{ required: true, message: '请输入' }]"
           >
-            <el-input v-model="form.time" size="mini"></el-input>
+            <el-input
+              v-model="form.time"
+              size="mini"
+              placeholder="请输入滴灌时长(小时)"
+              clearable
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="开始时间" prop="time" class="m-dialog__time">
+          <el-form-item label="开始时间" class="m-dialog__time">
             <el-date-picker
               v-model="form.startTime"
               type="datetime"
@@ -40,34 +45,51 @@
               value-format="yyyy-MM-dd HH:mm:ss"
               size="mini"
               :rules="[{ required: true, message: '请选择' }]"
+              clearable
             >
             </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="任务类型" prop="time">
+          <el-form-item label="任务类型">
             <el-select
               v-model="form.taskType"
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
+              clearable
             >
-              <el-option label="直灌" value="2"></el-option>
-              <el-option label="轮灌" value="1"></el-option>
+              <el-option
+                v-for="(item, index) in taskType"
+                :key="index"
+                :label="item.label"
+                :value="item.id"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="滴灌类型" prop="time">
+          <el-form-item label="滴灌类型">
             <el-select
               v-model="form.irrType"
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
               @change="handleSelect"
+              clearable
             >
-              <el-option label="管网" value="2"></el-option>
-              <el-option label="分区" value="1"></el-option>
+              <!-- <el-option v-if="taskVisible"></el-option> -->
+              <el-option
+                label="管网"
+                value="2"
+                v-if="form.taskType === '2'"
+              ></el-option>
+              <el-option
+                label="分区"
+                value="1"
+                v-if="form.taskType === '1'"
+              ></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -81,6 +103,7 @@
               placeholder="请选择"
               size="mini"
               class="m-txt__text"
+              clearable
             >
               <el-option
                 v-for="item in netArr"
@@ -89,17 +112,6 @@
                 :value="item.id"
               ></el-option>
             </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12" v-if="form.taskType === '1'">
-          <el-form-item label="轮灌结束时间" prop="time" class="m-dialog__time">
-            <el-date-picker
-              v-model="form.endTime"
-              type="datetime"
-              placeholder="选择日期时间"
-              size="mini"
-            >
-            </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :span="12" v-if="form.taskType === '1'">
@@ -132,6 +144,26 @@ export default {
       dialogVisible: false,
       netId: "",
       id: "",
+      taskType: [
+        {
+          label: "直灌",
+          id: "2",
+        },
+        {
+          label: "轮灌",
+          id: "1",
+        },
+      ],
+      irrType: [
+        {
+          label: "管网",
+          id: "2",
+        },
+        {
+          label: "分区",
+          id: "1",
+        },
+      ],
       form: {
         name: "",
         time: "",
@@ -144,6 +176,17 @@ export default {
       },
       netArr: [],
     };
+  },
+  computed: {
+    taskVisible: {
+      get: function () {
+        if (this.form.taskType === this.taskType[0].id) {
+          return this.form.irrType === this.irrType[0].id;
+        } else if (this.form.taskType === this.taskType[1].id) {
+          return this.form.irrType === this.irrType[1].id;
+        }
+      },
+    },
   },
   methods: {
     handleClose() {
@@ -186,7 +229,7 @@ export default {
         cut: this.form.irrType,
         cycle: this.form.num,
         end_time: this.form.endTime,
-        object: this.netId,
+        object: this.form.netType,
       });
       if (response.data.code === "200") {
         this.$message.success(response.data.mess);
@@ -217,10 +260,10 @@ export default {
         id: this.id,
         time: this.form.time,
       });
-      if (response.data.code === '500') {
+      if (response.data.code === "500") {
         this.$message.success(response.data.mess);
       } else {
-        this.$message.error(response.data.mess || '服务错误!');
+        this.$message.error(response.data.mess || "服务错误!");
       }
     },
     handleComfirm() {

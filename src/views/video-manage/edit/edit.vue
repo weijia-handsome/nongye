@@ -69,21 +69,23 @@ export default {
     },
     //获取视频设备
     async getVideo() {
-      const username = sessionStorage.getItem("username");
-      reqGetVideo(username).then((res) => {
+      const response = await reqGetVideo({
+        username: window.sessionStorage.getItem("username"),
+      });
+
+      if (response.status === 200) {
         const item = document.getElementById("ezuikitTalkData");
 
         //动态删除多出的子元素
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        // this.imei = "E48829946_NQACPR";
-        // this.imei = imei;
+        // this.videoImei = "E48829946_NQACPR";
         const deviceSerial = this.imei.split("_")[0];
         const deviceSerial2 = this.imei.split("_")[1];
 
         var ezuikitTalkData = {
-          accessToken: global.accessToken, // 应用accessToken
+          accessToken: response.data.accessToken, // 应用accessToken
           ezopen:
             "ezopen://" +
             deviceSerial2 +
@@ -92,13 +94,11 @@ export default {
             "/1.hd.live", // 包含设备信息的ezopen协议
           decoderPath: "./", // 当前页面与插件主文件ezuiit-talk相对路径
         };
-        
+
         new EZUIKit.EZUIKitPlayer({
           autoplay: true,
           id: "ezuikitTalkData",
-          accessToken:
-            "at.5jvxxpoh4ljpl5oh3dh2y4x1c4a4vohx-6ez9bfr8b0-0gelf6a-drtefp5as",
-          // accessToken: res.data.accessToken,
+          accessToken: ezuikitTalkData.accessToken,
           url: ezuikitTalkData.ezopen, // 这里的url可以是直播地址.live  ，也可以是回放地址.rec 或 .cloud.rec
           template: "simple", // simple - 极简版;standard-标准版;security - 安防版(预览回放);voice-语音版；
           // 视频上方头部控件
@@ -114,17 +114,16 @@ export default {
           capturePictureCallBack: (data) => console.log("截图成功回调", data),
           fullScreenCallBack: (data) => console.log("全屏回调", data),
           getOSDTimeCallBack: (data) => console.log("获取OSDTime回调", data),
-          // width: 1200, //如果指定了width、height则以这里为准
+          // width: 100, //如果指定了width、height则以这里为准
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
-
         getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
           this.GetMapDataList.mess;
         });
         this.$forceUpdate();
-      }).catch((rej) => {
-        return this.$message.error('暂无此设备视频');
-      });;
+      } else {
+        this.$message.error(response.data.mess || "服务错误");
+      }
     },
   },
 };

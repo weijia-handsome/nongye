@@ -10,13 +10,13 @@
       <el-table-column
         prop="device_name"
         label="设备名称"
-        width="150"
+        width="200"
         align="center"
       ></el-table-column>
       <el-table-column
         prop="imei"
         label="设备号"
-        width="150"
+        width="200"
         align="center"
       ></el-table-column>
       <el-table-column
@@ -50,6 +50,7 @@
 import { reqGetVideo, getScene } from "@/api/api.js";
 import "../../../../public/ezuikit.js";
 import EZUIKit from "ezuikit-js";
+
 export default {
   name: "CheckVideo",
   data() {
@@ -101,7 +102,11 @@ export default {
       this.getScene();
     },
     handleVideo(imei) {
-      this.getVideo(imei);
+      if (imei) {
+        this.getVideo(imei);
+      } else {
+        this.$message.error('暂无此视频设备！');
+      }
     },
     async getScene() {
       const response = await getScene({
@@ -117,6 +122,7 @@ export default {
     },
     //获取视频设备
     async getVideo(imei) {
+      console.log(imei);
       this.dialogFormVisible = true;
       const username = sessionStorage.getItem("username");
       reqGetVideo(username).then((res) => {
@@ -126,10 +132,8 @@ export default {
         while (item.firstChild) {
           item.removeChild(item.firstChild);
         }
-        this.imei = "E48830018_YDCFZL";
-        // this.imei = imei;
-        const deviceSerial = this.imei.split("_")[0];
-        const deviceSerial2 = this.imei.split("_")[1];
+        const deviceSerial = imei.split("_")[0];
+        const deviceSerial2 = imei.split("_")[1];
 
         var ezuikitTalkData = {
           accessToken: global.accessToken, // 应用accessToken
@@ -164,9 +168,9 @@ export default {
           // width: 100, //如果指定了width、height则以这里为准
           height: 600, //如果没指定宽高，则以容器video-container为准
         });
-        // getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
-        //   // this.GetMapDataList.mess
-        // });
+        getvideo_ycy(res.data.accessToken, deviceSerial).then((red) => {
+          this.GetMapDataList.mess
+        });
         this.$forceUpdate();
       });
     },

@@ -18,6 +18,11 @@ export default new Router({
       meta: { title: '登录' },
     },
     {
+      path: '/nav',
+      component: () => import(/* webpackChunkName: "home" */ '../views/nav/nav.vue'),
+      meta: { title: '导航' },
+    },
+    {
       path: '/',
       component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
       meta: { title: '首页' },
